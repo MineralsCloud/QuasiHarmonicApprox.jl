@@ -20,7 +20,7 @@ function sample_brillouin_zone(q_weights::Vector{Float64}, quantity::Matrix{Floa
     all(q_weights .>= 0) || throw(DomainError("All the values of the weights should be greater than 0!"))
 
     q_weights /= sum(q_weights)
-    return quantity * q_weights
+    return sum(quantity * q_weights)
 end
 
 end
