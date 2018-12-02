@@ -16,7 +16,7 @@ module Sampling
 export sample_brillouin_zone
 
 function sample_brillouin_zone(q_weights::Vector{Float64}, quantity::Matrix{Float64})
-    length(q_weights) == size(quantity, 2) && throw(DimensionMismatch)
+    length(q_weights) != size(quantity, 2) && throw(DimensionMismatch)
     all(q_weights .>= 0) || throw(DomainError("All the values of the weights should be greater than 0!"))
 
     q_weights /= sum(q_weights)
