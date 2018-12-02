@@ -13,6 +13,13 @@ julia>
 """
 module StatMech
 
+export bose_einstein_distribution,
+    subsystem_partition_function,
+    subsystem_free_energy,
+    subsystem_internal_energy,
+    subsystem_entropy,
+    subsystem_volumetric_specific_heat
+
 const HBAR = 1
 const BOLTZMANN = 2
 
@@ -20,7 +27,7 @@ validate_frequency(frequency) = frequency < 0 && throw(DomainError("Negative fre
 
 bose_einstein_distribution(temperature, frequency) = 1 / (exp(HBAR * frequency / (BOLTZMANN * temperature)) - 1)
 
-function  subsystem_partition_function(temperature, frequency)
+function subsystem_partition_function(temperature, frequency)
     frequency == 0 && return 1
 
     x = HBAR * frequency / (BOLTZMANN * temperature)
