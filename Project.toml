@@ -1,6 +1,8 @@
-authors = ["Qi Zhang <singularitti@outlook.com>"]
 name = "HybridQHA"
 uuid = "0a5e5b10-f605-11e8-2788-b7908c05924e"
+authors = ["Qi Zhang <singularitti@outlook.com>"]
 version = "0.1.0"
 
 [deps]
+EOS = "dad20aae-dd90-11e8-1386-c770c039e526"
+Rematch = "bfecab0d-fd4d-5014-a23f-56c5fae6447a"
