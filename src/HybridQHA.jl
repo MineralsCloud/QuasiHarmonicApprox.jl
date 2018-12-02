@@ -1,5 +1,6 @@
 module HybridQHA
 
-greet() = print("Hello World!")
+include("StatMech.jl")
+include("Sampling.jl")
 
 end # module
