@@ -13,11 +13,11 @@ module Thermo
 
 using ArgCheck: @argcheck
 
-import Base: length, ==, size
+import Base: length, ==
 
 export NaturalVariable,
     ThermodynamicField,
-    length, ==, size
+    length, ==
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
 
@@ -35,7 +35,7 @@ length(x::NaturalVariable) = length(x.values)
 
 ==(x::T, y::T) where {T <: NaturalVariable} = x.values == y.values
 
-struct ThermodynamicField{A, B} <: BivariateField{A, B}
+struct ThermodynamicField{A, B}
     first::NaturalVariable{A}
     second::NaturalVariable{B}
     values::Matrix
@@ -49,7 +49,5 @@ end
 
 ThermodynamicField(first::NaturalVariable{A}, second::NaturalVariable{B}, values::Matrix) where {A, B} = ThermodynamicField{A, B}(first, second, values)
 ThermodynamicField{A, B}(first::Vector, second::Vector, values::Matrix) where {A, B} = ThermodynamicField(NaturalVariable{A}(first), NaturalVariable{B}(second), values)
-
-size(f::ThermodynamicField) = size(f.values)
 
 end
