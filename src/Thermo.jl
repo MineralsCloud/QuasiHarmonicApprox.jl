@@ -13,17 +13,16 @@ module Thermo
 
 using ArgCheck: @argcheck
 
-import Base: length, ==
+using QuasiHarmonicApproximation.AbstractField: AbstractVariable, BivariateField
 
 export NaturalVariable,
-    ThermodynamicField,
-    length, ==
+    ThermodynamicField
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
 
 const CONJUGATE_PAIRS = (Set([:T, :S]), Set([:P, :V]))
 
-struct NaturalVariable{T}
+struct NaturalVariable{T} <: AbstractVariable{T}
     values::Vector
     function NaturalVariable{T}(values) where {T}
         @argcheck T in NATURAL_VARIABLE_LABELS
@@ -31,11 +30,7 @@ struct NaturalVariable{T}
     end
 end
 
-length(x::NaturalVariable) = length(x.values)
-
-==(x::T, y::T) where {T <: NaturalVariable} = x.values == y.values
-
-struct ThermodynamicField{A, B}
+struct ThermodynamicField{A, B} <: BivariateField{A, B}
     first::NaturalVariable{A}
     second::NaturalVariable{B}
     values::Matrix
@@ -47,7 +42,6 @@ struct ThermodynamicField{A, B}
     end
 end
 
-ThermodynamicField(first::NaturalVariable{A}, second::NaturalVariable{B}, values::Matrix) where {A, B} = ThermodynamicField{A, B}(first, second, values)
 ThermodynamicField{A, B}(first::Vector, second::Vector, values::Matrix) where {A, B} = ThermodynamicField(NaturalVariable{A}(first), NaturalVariable{B}(second), values)
 
 end
