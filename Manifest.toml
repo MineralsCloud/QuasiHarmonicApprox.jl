@@ -12,6 +12,12 @@ git-tree-sha1 = "1ce1ce9984683f0b6a587d5bdbc688ecb480096f"
 uuid = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
 version = "0.3.0"
 
+[[AxisAlgorithms]]
+deps = ["Compat", "WoodburyMatrices"]
+git-tree-sha1 = "99dabbe853e4f641ab21a676131f2cf9fb29937e"
+uuid = "13072b0f-2c55-5437-9ae7-d433b7a33950"
+version = "0.3.0"
+
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
@@ -111,6 +117,12 @@ version = "0.4.0"
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
+[[Interpolations]]
+deps = ["AxisAlgorithms", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "SharedArrays", "SparseArrays", "StaticArrays", "Test", "WoodburyMatrices"]
+git-tree-sha1 = "1ec5b78dbfb5ae2b3d7a4987a9287fed4cc31ded"
+uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+version = "0.11.1"
+
 [[LibGit2]]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 
@@ -161,6 +173,12 @@ git-tree-sha1 = "ce3b85e484a5d4c71dd5316215069311135fa9f2"
 uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 version = "0.3.2"
 
+[[OffsetArrays]]
+deps = ["DelimitedFiles", "Test"]
+git-tree-sha1 = "7d1442cb06fbfbc4fea936c3c56b38daffd22d3b"
+uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
+version = "0.9.1"
+
 [[OptimBase]]
 deps = ["Compat", "NLSolversBase", "Printf", "Reexport", "Test"]
 git-tree-sha1 = "92667ab46a66ad502ec3044f65c41ea68b2e0e9c"
@@ -206,6 +224,12 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 [[Random]]
 deps = ["Serialization"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[Ratios]]
+deps = ["Compat"]
+git-tree-sha1 = "fd159bead0a24e6270fd0573a340312bd4645cc2"
+uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
+version = "0.3.0"
 
 [[Reexport]]
 deps = ["Pkg"]
@@ -296,3 +320,9 @@ uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
 
 [[Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[WoodburyMatrices]]
+deps = ["LinearAlgebra", "Random", "SparseArrays", "Test"]
+git-tree-sha1 = "21772c33b447757ec7d3e61fcdfb9ea5c47eedcf"
+uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
+version = "0.4.1"
