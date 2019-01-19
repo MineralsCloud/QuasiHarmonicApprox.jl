@@ -1,1 +1,1 @@
-# HybridQHA.jl
+# QuasiHarmonicApproximation.jl

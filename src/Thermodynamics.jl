@@ -13,7 +13,7 @@ module Thermodynamics
 
 using ArgCheck: @argcheck
 
-using HybridQHA.Thermo
+using QuasiHarmonicApproximation.Thermo
 
 export legendre_transformation
 

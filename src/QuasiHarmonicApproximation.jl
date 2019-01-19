@@ -1,4 +1,4 @@
-module HybridQHA
+module QuasiHarmonicApproximation
 
 include("StatMech.jl")
 include("Sampling.jl")

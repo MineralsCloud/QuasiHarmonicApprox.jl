@@ -13,7 +13,7 @@ julia>
 """
 module Sampling
 
-using HybridQHA.QSpace: QSpaceField
+using QuasiHarmonicApproximation.QSpace: QSpaceField
 
 export sample_brillouin_zone
 

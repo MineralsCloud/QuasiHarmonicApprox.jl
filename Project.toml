@@ -1,4 +1,4 @@
-name = "HybridQHA"
+name = "QuasiHarmonicApproximation"
 uuid = "0a5e5b10-f605-11e8-2788-b7908c05924e"
 authors = ["Qi Zhang <singularitti@outlook.com>"]
 version = "0.1.0"
