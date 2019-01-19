@@ -13,14 +13,17 @@ julia>
 """
 module Sampling
 
+using HybridQHA.QSpace: QSpaceField
+
 export sample_brillouin_zone
 
-function sample_brillouin_zone(q_weights::Vector{Float64}, quantity::Matrix{Float64})
-    length(q_weights) != size(quantity, 2) && throw(DimensionMismatch)
+function sample_brillouin_zone(q_weights::Vector{Float64}, quantity::QSpaceField{:q, T}) where {T}
+    length(q_weights) != size(quantity.values, 2) && throw(DimensionMismatch)
     all(q_weights .>= 0) || throw(DomainError("All the values of the weights should be greater than 0!"))
 
     q_weights /= sum(q_weights)
     return sum(quantity * q_weights)
 end
+sample_brillouin_zone(q_weights::Vector{Float64}, quantity::QSpaceField{T, :q}) where {T} = sample_brillouin_zone(q_weights, quantity)
 
 end
