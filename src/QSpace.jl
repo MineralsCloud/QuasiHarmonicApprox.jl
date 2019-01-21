@@ -42,6 +42,7 @@ struct QSpaceField{A, B} <: BivariateField{A, B}
     end
 end
 
+QSpaceField(first::T{A}, second::T{B}, values::Matrix) where {T <: NormalMode, A, B} = QSpaceField{A, B}(first, second, values)
 QSpaceField{A, B}(first::Vector, second::Vector, values::Matrix) where {A, B} = QSpaceField(NormalMode{A}(first), NormalMode{B}(second), values)
 
 end

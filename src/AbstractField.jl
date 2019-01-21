@@ -24,8 +24,6 @@ abstract type AbstractVariable{T} end
 
 abstract type BivariateField{A, B} end
 
-(T::BivariateField)(first::V{A}, second::V{B}, values::Matrix) where {V <: AbstractVariable, A, B} = T{A, B}(first, second, values)
-
 function whichdimension(::BivariateField{A, B}, T::Symbol)::Int where {A, B}
     @argcheck T in (A, B)
     T == A ? 1 : 2
