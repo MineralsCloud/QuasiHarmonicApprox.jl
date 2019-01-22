@@ -12,21 +12,23 @@ julia>
 module Thermodynamics
 
 using ArgCheck: @argcheck
+using Setfield: @set
 
+using QuasiHarmonicApproximation.AbstractField
 using QuasiHarmonicApproximation.Thermo
 using QuasiHarmonicApproximation.Interpolation: Interpolator, interpolate
 
 export legendre_transformation
 
 function legendre_transformation(f::ThermodynamicField, s::Symbol)
-    conjugate_variable = differentiate(f, s)
+    conjugate_variable::NaturalVariable{T} = differentiate(f, s)
 
     function (interpolator::Interpolator, to_variable::NaturalVariable{T}) where {T}
         @argcheck Set([S, T]) in QuasiHarmonicApproximation.Thermo.CONJUGATE_PAIRS
 
-        x = interpolate(conjugate_variable, f + conjugate_variable * f.second, interpolator)
+        x = interpolate(conjugate_variable, f + *(conjugate_variable, getvariable(conjugate_variable, T)), interpolator)
         y = x(to_variable)
-        ThermodynamicField(f.first, to_variable, y)
+        setvariable(@set f.values = y, to_variable)
     end
 end
 

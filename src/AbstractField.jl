@@ -37,6 +37,15 @@ function getvariable(f::T, dim::Int) where {T <: BivariateField}
 end
 getvariable(f::BivariateField, s::Symbol) = (dim = whichdimension(f, s); getvariable(f, dim))
 
+function setvariable(f::BivariateField, var::AbstractVariable{T}) where {T}
+    dim = whichdimension(f, T)
+    if dim == 1
+        @set f.first = var
+    else
+        @set f.second = var
+    end
+end
+
 length(x::AbstractVariable) = length(x.values)
 
 ==(x::T, y::T) where {T <: AbstractVariable} = x.values == y.values
