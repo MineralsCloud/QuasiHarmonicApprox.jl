@@ -45,6 +45,8 @@ function setvariable(f::BivariateField, var::AbstractVariable{T}) where {T}
         @set f.second = var
     end
 end
+setvariable(f::BivariateField, dim::Int, var::Vector) = setvariable(f, @set getvariable(f, dim).values = var)
+setvariable(f::BivariateField, s::Symbol, var::Vector) = setvariable(f, whichdimension(f, s), var)
 
 length(x::AbstractVariable) = length(x.values)
 
