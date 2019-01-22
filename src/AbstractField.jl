@@ -12,6 +12,7 @@ julia>
 module AbstractField
 
 using ArgCheck: @argcheck
+using Setfield: @set
 
 import Base: size, length, ==, *, +, -
 
@@ -52,9 +53,14 @@ size(f::BivariateField) = size(f.values)
 size(f::BivariateField, dim::Int) = size(f.values, dim)
 size(f::BivariateField, T::Symbol) = size(f, whichdimension(f, T))
 
-function *(f::BivariateField, v::AbstractVariable)
+function *(f::T, v::AbstractVariable)::T where {T <: BivariateField}
     dim = whichdimension_iscompatible(f, v)
-    dim == 1 ? f.values .* v.values : f.values .* transpose(v.values)
+    if dim == 1
+        ret = f.values .* v.values
+    else
+        ret = f.values .* transpose(v.values)
+    end
+    @set f.values = ret
 end
 *(v::AbstractVariable, f::BivariateField) = *(f, v)
 
