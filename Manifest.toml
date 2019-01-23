@@ -243,6 +243,12 @@ git-tree-sha1 = "3abde2b1c5d0f942b40700bebdc6c8cfa60c8b37"
 uuid = "bfecab0d-fd4d-5014-a23f-56c5fae6447a"
 version = "0.2.0"
 
+[[ResultTypes]]
+deps = ["Test"]
+git-tree-sha1 = "b073e5565568f1735da33ffc58fbf23c594cc4ee"
+uuid = "08a2b407-ddc3-586a-afd6-c784ad1fffe2"
+version = "3.0.0"
+
 [[Rmath]]
 deps = ["BinaryProvider", "Libdl", "Random", "Statistics", "Test"]
 git-tree-sha1 = "9a6c758cdf73036c3239b0afbea790def1dabff9"
