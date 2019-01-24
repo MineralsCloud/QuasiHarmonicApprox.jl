@@ -13,8 +13,8 @@ module CoreDataStructures
 
 using Reexport
 
-include("AbstractField.jl")
-@reexport using .AbstractField
+include("Abstractions.jl")
+@reexport using .Abstractions
 
 include("QSpace.jl")
 @reexport using .QSpace

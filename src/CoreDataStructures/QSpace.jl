@@ -13,7 +13,7 @@ module QSpace
 
 using ArgCheck: @argcheck
 
-using QuasiHarmonicApproximation.CoreDataStructures.AbstractField: AbstractVariable, BivariateField
+using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractVariable, BivariateField
 
 import Base: length, ==
 
