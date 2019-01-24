@@ -13,7 +13,7 @@ module Interpolation
 
 using Interpolations
 
-using QuasiHarmonicApproximation.CoreDataStructures.AbstractField: AbstractVariable, BivariateField, whichdimension, getvariable
+using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractVariable, BivariateField, whichdimension, getvariable
 using QuasiHarmonicApproximation.Loggers
 
 export Interpolator,
