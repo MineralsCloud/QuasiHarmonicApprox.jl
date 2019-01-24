@@ -14,13 +14,13 @@ module AbstractField
 using ArgCheck: @argcheck
 using Setfield: @set
 
-import Base: size, length, ==, *, +, -
+import Base: length, ==, *, +, -
 
 export AbstractVariable,
     BivariateField,
     whichdimension,
     getvariable,
-    size, length, ==, *, +, -,
+    length, ==, *, +, -,
     iscompatible, whichdimension_iscompatible
 
 abstract type AbstractVariable{T} end
@@ -59,10 +59,6 @@ iscompatible(f::BivariateField{A, B}, v::AbstractVariable{B}) where {A, B} = f.s
 
 whichdimension_iscompatible(f::BivariateField{A, B}, v::AbstractVariable{A}) where {A, B} = iscompatible(f, g) ? 1 : error()
 whichdimension_iscompatible(f::BivariateField{A, B}, v::AbstractVariable{B}) where {A, B} = iscompatible(f, g) ? 2 : error()
-
-size(f::BivariateField) = size(f.values)
-size(f::BivariateField, dim::Int) = size(f.values, dim)
-size(f::BivariateField, T::Symbol) = size(f, whichdimension(f, T))
 
 function *(f::T, v::AbstractVariable)::T where {T <: BivariateField}
     dim = whichdimension_iscompatible(f, v)
