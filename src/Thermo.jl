@@ -42,8 +42,8 @@ struct ThermodynamicField{A, B} <: BivariateField{A, B}
     end
 end
 
-ThermodynamicField(first::T{A}, second::T{B}, values::Matrix) where {T <: NaturalVariable, A, B} = ThermodynamicField{A, B}(first, second, values)
+ThermodynamicField(first::NaturalVariable{A}, second::NaturalVariable{B}, values::Matrix) where {A, B} = ThermodynamicField{A, B}(first, second, values)
 ThermodynamicField{A, B}(first::Vector, second::Vector, values::Matrix) where {A, B} = ThermodynamicField(NaturalVariable{A}(first), NaturalVariable{B}(second), values)
-ThermodynamicField{B, A}(f::ThermodynamicField{A, B}) = ThermodynamicField(f.second, f.first, (collect ∘ transpose)(f.values))
+ThermodynamicField{B, A}(f::ThermodynamicField{A, B}) where {A, B} = ThermodynamicField(f.second, f.first, (collect ∘ transpose)(f.values))
 
 end
