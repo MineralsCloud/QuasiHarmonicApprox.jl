@@ -15,7 +15,7 @@ using Setfield: set
 
 export differentiate
 
-function differentiate(x::Vector, f::Vector)::Vector
+function differentiate(x::T, f::T)::T where {T <: AbstractVector}
     length(x) == length(f) ? n = length(x) : throw(DimensionMismatch("The two arguments must have the same length!"))
 
     derivative = zeros(n)
@@ -27,7 +27,7 @@ function differentiate(x::Vector, f::Vector)::Vector
     derivative
 end
 
-function differentiate(x::Matrix, f::Matrix, dim::Int)::Matrix
+function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
     m, n = size(f)
     derivative = zeros(m, n)
 
