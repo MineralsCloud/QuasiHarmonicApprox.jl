@@ -11,6 +11,8 @@ julia>
 """
 module Tools
 
+using Setfield: set
+
 export differentiate
 
 function differentiate(x::Vector, f::Vector)::Vector
@@ -41,6 +43,17 @@ function differentiate(x::Matrix, f::Matrix, dim::Int)::Matrix
         throw(DomainError(dim, "The `dim` variable must be `1` or `2`!"))
     end
     derivative
+end
+
+function differentiate(f::T, s::Symbol)::T where {T <: ThermodynamicField}
+    dim = whichdimension(f, s)
+    x, y = f.first, f.second
+    var = if dim == 1
+        repeat(x.values, 1, length(y))
+    else
+        repeat(transpose(y.values), length(x))
+    end
+    @set f.values = differentiate(var, f, dim)
 end
 
 end
