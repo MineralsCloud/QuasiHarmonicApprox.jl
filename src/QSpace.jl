@@ -44,5 +44,6 @@ end
 
 QSpaceField(first::NormalMode{A}, second::NormalMode{B}, values::Matrix) where {A, B} = QSpaceField{A, B}(first, second, values)
 QSpaceField{A, B}(first::Vector, second::Vector, values::Matrix) where {A, B} = QSpaceField(NormalMode{A}(first), NormalMode{B}(second), values)
+QSpaceField{B, A}(f::QSpaceField{A, B}) where {A, B} = QSpaceField(f.second, f.first, (collect ∘ transpose)(f.values))
 
 end
