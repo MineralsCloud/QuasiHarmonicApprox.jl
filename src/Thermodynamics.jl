@@ -14,8 +14,8 @@ module Thermodynamics
 using ArgCheck: @argcheck
 using Setfield: @set
 
-using QuasiHarmonicApproximation.AbstractField
-using QuasiHarmonicApproximation.Thermo
+using QuasiHarmonicApproximation.CoreDataStructures.AbstractField
+using QuasiHarmonicApproximation.CoreDataStructures.Thermo
 using QuasiHarmonicApproximation.Interpolation: Interpolator, interpolate
 
 export legendre_transformation

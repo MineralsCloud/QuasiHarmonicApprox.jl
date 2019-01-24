@@ -13,8 +13,8 @@ julia>
 """
 module Sampling
 
-using QuasiHarmonicApproximation.AbstractField: whichdimension
-using QuasiHarmonicApproximation.QSpace: QSpaceField
+using QuasiHarmonicApproximation.CoreDataStructures.AbstractField: whichdimension
+using QuasiHarmonicApproximation.CoreDataStructures.QSpace: QSpaceField
 
 export sample_brillouin_zone
 

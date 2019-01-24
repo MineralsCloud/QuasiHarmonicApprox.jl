@@ -13,7 +13,7 @@ module Thermo
 
 using ArgCheck: @argcheck
 
-using QuasiHarmonicApproximation.AbstractField: AbstractVariable, BivariateField
+using QuasiHarmonicApproximation.CoreDataStructures.AbstractField: AbstractVariable, BivariateField
 
 export NaturalVariable,
     ThermodynamicField

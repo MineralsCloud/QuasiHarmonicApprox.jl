@@ -13,7 +13,7 @@ module Tools
 
 using Setfield: @set
 
-using QuasiHarmonicApproximation.Thermo: ThermodynamicField
+using QuasiHarmonicApproximation.CoreDataStructures.Thermo: ThermodynamicField
 
 export differentiate
 

@@ -11,6 +11,7 @@ julia>
 """
 module CoreDataStructures
 
+include("AbstractField.jl")
 include("QSpace.jl")
 include("Thermo.jl")
 
