@@ -27,7 +27,7 @@ end
 function interpolate(x::BivariateField, y::BivariateField, interpolator::Interpolator)::Function
     func = interpolator(x.values, y.values)
 
-    function (to_variable::NaturalVariable)
+    function (to_variable::AbstractVariable)
         func(to_variable)
     end
 end
