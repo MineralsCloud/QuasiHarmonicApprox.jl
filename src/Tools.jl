@@ -11,7 +11,9 @@ julia>
 """
 module Tools
 
-using Setfield: set
+using Setfield: @set
+
+using QuasiHarmonicApproximation.Thermo: ThermodynamicField
 
 export differentiate
 
