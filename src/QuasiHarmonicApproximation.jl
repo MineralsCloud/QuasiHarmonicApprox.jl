@@ -1,9 +1,7 @@
 module QuasiHarmonicApproximation
 
 include("Loggers.jl")
-include("AbstractField.jl")
-include("QSpace.jl")
-include("Thermo.jl")
+include("CoreDataStructures/CoreDataStructures.jl")
 include("StatisticalMechanics.jl")
 include("Sampling.jl")
 include("Tools.jl")
