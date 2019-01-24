@@ -1,5 +1,5 @@
 """
-# module AbstractField
+# module Abstractions
 
 
 
@@ -9,7 +9,7 @@
 julia>
 ```
 """
-module AbstractField
+module Abstractions
 
 using ArgCheck: @argcheck
 using Setfield: @set
