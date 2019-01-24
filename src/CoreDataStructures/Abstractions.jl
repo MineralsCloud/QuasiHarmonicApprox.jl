@@ -62,12 +62,11 @@ whichdimension_iscompatible(f::BivariateField{A, B}, v::AbstractVariable{B}) whe
 
 function *(f::T, v::AbstractVariable)::T where {T <: BivariateField}
     dim = whichdimension_iscompatible(f, v)
-    if dim == 1
-        ret = f.values .* v.values
+    @set f.values = if dim == 1
+        f.values .* v.values
     else
-        ret = f.values .* transpose(v.values)
+        f.values .* transpose(v.values)
     end
-    @set f.values = ret
 end
 *(v::AbstractVariable, f::BivariateField) = *(f, v)
 
