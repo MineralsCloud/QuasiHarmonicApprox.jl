@@ -1,5 +1,5 @@
 """
-# module StatMech
+# module StatisticalMechanics
 
 - Julia version: 1.0.2
 - Author: qz
@@ -11,7 +11,7 @@
 julia>
 ```
 """
-module StatMech
+module StatisticalMechanics
 
 export bose_einstein_distribution,
     subsystem_partition_function,
