@@ -19,30 +19,30 @@ import Base: length, size,
 
 export AbstractAxis,
     BiaxialField,
-    whichdimension,
+    whichaxis,
     getproperty, setproperty!,
     length, size,
     ==, *, +, -,
-    iscompatible, whichdimension_iscompatible
+    iscompatible, whichaxis_iscompatible
 
 abstract type AbstractAxis{T} end
 
 abstract type BiaxialField{A, B} end
 
-function whichdimension(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
+function whichaxis(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
     T in (A, B) || return nothing
     T == A ? :first : :second
 end
-(whichdimension(f::BiaxialField, s::Symbol)::Union{Nothing, Symbol}) = whichdimension(f, Val(s))
+(whichaxis(f::BiaxialField, s::Symbol)::Union{Nothing, Symbol}) = whichaxis(f, Val(s))
 
 function getproperty(f::BiaxialField{A, B}, s::Symbol)::Union{Nothing, AbstractAxis} where {A, B}
-    s in (A, B) && return getfield(f, whichdimension(f, s))
+    s in (A, B) && return getfield(f, whichaxis(f, s))
     getfield(f, s)
 end
 getproperty(::BiaxialField, ::Nothing) = nothing
 
 function setproperty!(f::BiaxialField{A, B}, s::Symbol, x) where {A, B}
-    s in (A, B) && (s::Symbol = whichdimension(f, s))  # This is type-safe!
+    s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
     setfield!(f, s, x)  # Whether `s` is in `(A, B)` or not, it will be a valid property name.
 end
 
@@ -53,16 +53,16 @@ size(x::AbstractAxis) = size(x.values)
 ==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
 
 iscompatible(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
-iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = getproperty(f, whichdimension(f, T)) == v
+iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = getproperty(f, whichaxis(f, T)) == v
 
-function whichdimension_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Union{Nothing, Symbol} where {T}
-    iscompatible(f, v) ? whichdimension(f, T) : nothing
+function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Union{Nothing, Symbol} where {T}
+    iscompatible(f, v) ? whichaxis(f, T) : nothing
 end
 
 function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
-    dim = whichdimension_iscompatible(f, v)
-    isnothing(dim) && throw(ArgumentError("The axis and field are not compatible so they cannot multiply!"))
-    @set f.values = if dim == :first
+    axis = whichaxis_iscompatible(f, v)
+    isnothing(axis) && throw(ArgumentError("The axis and field are not compatible so they cannot multiply!"))
+    @set f.values = if axis == :first
         f.values .* v.values
     else
         f.values .* transpose(v.values)
