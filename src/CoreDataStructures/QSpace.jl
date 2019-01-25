@@ -15,11 +15,8 @@ using ArgCheck: @argcheck
 
 using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractVariable, BivariateField
 
-import Base: length, ==
-
 export NormalMode,
-    QSpaceField,
-    length, ==
+    QSpaceField
 
 const NORMAL_MODE_LABELS = (:q, :s)
 
