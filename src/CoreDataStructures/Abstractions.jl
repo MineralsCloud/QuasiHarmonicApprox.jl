@@ -11,58 +11,58 @@ julia>
 """
 module Abstractions
 
-using ArgCheck: @argcheck
 using Setfield: @set
 
-import Base: length, ==, *, +, -
+import Base: length, size,
+    ==, *, +, -,
+    getproperty, setproperty!
 
 export AbstractVariable,
     BivariateField,
     whichdimension,
-    getvariable,
-    length, ==, *, +, -,
+    getproperty, setproperty!,
+    length, size,
+    ==, *, +, -,
     iscompatible, whichdimension_iscompatible
 
 abstract type AbstractVariable{T} end
 
 abstract type BivariateField{A, B} end
 
-function whichdimension(::BivariateField{A, B}, s::Symbol)::Int where {A, B}
-    @argcheck s in (A, B)
-    s == A ? 1 : 2
+function whichdimension(::BivariateField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
+    T in (A, B) || return nothing
+    T == A ? :first : :second
 end
+(whichdimension(f::BivariateField, s::Symbol)::Union{Nothing, Symbol}) = whichdimension(f, Val(s))
 
-function getvariable(f::T, dim::Int) where {T <: BivariateField}
-    getfield(f, fieldname(T, dim))
+function getproperty(f::BivariateField{A, B}, s::Symbol)::Union{Nothing, AbstractVariable} where {A, B}
+    s in (A, B) && return getfield(f, whichdimension(f, s))
+    getfield(f, s)
 end
-getvariable(f::BivariateField, s::Symbol) = (dim = whichdimension(f, s); getvariable(f, dim))
+getproperty(::BivariateField, ::Nothing) = nothing
 
-function setvariable(f::BivariateField, var::AbstractVariable{T}) where {T}
-    dim = whichdimension(f, T)
-    if dim == 1
-        @set f.first = var
-    else
-        @set f.second = var
-    end
+function setproperty!(f::BivariateField{A, B}, s::Symbol, x) where {A, B}
+    s in (A, B) && (s::Symbol = whichdimension(f, s))  # This is type-safe!
+    setfield!(f, s, x)  # Whether `s` is in `(A, B)` or not, it will be a valid property name.
 end
-setvariable(f::BivariateField, dim::Int, var::Vector) = setvariable(f, @set getvariable(f, dim).values = var)
-setvariable(f::BivariateField, s::Symbol, var::Vector) = setvariable(f, whichdimension(f, s), var)
 
 length(x::AbstractVariable) = length(x.values)
+size(x::AbstractVariable) = size(x.values)
 
 ==(x::T, y::T) where {T <: AbstractVariable} = x.values == y.values
 ==(x::T, y::T) where {T <: BivariateField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
 
-iscompatible(x::T, y::T) where {T <: BivariateField} = x.first == y.first && x.second == y.second
-iscompatible(f::BivariateField{A, B}, v::AbstractVariable{A}) where {A, B} = f.first == v
-iscompatible(f::BivariateField{A, B}, v::AbstractVariable{B}) where {A, B} = f.second == v
+iscompatible(x::T, y::T) where {T <: BivariateField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
+iscompatible(f::BivariateField, v::AbstractVariable{T}) where {T} = getproperty(f, whichdimension(f, T)) == v
 
-whichdimension_iscompatible(f::BivariateField{A, B}, v::AbstractVariable{A}) where {A, B} = iscompatible(f, g) ? 1 : error()
-whichdimension_iscompatible(f::BivariateField{A, B}, v::AbstractVariable{B}) where {A, B} = iscompatible(f, g) ? 2 : error()
+function whichdimension_iscompatible(f::BivariateField, v::AbstractVariable{T})::Union{Nothing, Symbol} where {T}
+    iscompatible(f, v) ? whichdimension(f, T) : nothing
+end
 
 function *(f::T, v::AbstractVariable)::T where {T <: BivariateField}
     dim = whichdimension_iscompatible(f, v)
-    @set f.values = if dim == 1
+    isnothing(dim) && throw(ArgumentError("The variable and field are not compatible so they cannot multiply!"))
+    @set f.values = if dim == :first
         f.values .* v.values
     else
         f.values .* transpose(v.values)
@@ -70,7 +70,12 @@ function *(f::T, v::AbstractVariable)::T where {T <: BivariateField}
 end
 *(v::AbstractVariable, f::BivariateField) = *(f, v)
 
-+(f::T, g::T) where {T <: BivariateField} = iscompatible(f, g) ? f.values + g.values : error()
--(f::T, g::T) where {T <: BivariateField} = iscompatible(f, g) ? f.values - g.values : error()
+for op in (:+, :-)
+    eval(quote
+        function $op(f::T, g::T)::T where {T <: BivariateField}
+            iscompatible(f, g) ? $op(f.values, g.values) : throw(ArgumentError("The 2 fields are not compatible!"))
+        end
+    end)
+end
 
 end
