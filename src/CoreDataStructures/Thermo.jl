@@ -13,7 +13,7 @@ module Thermo
 
 using ArgCheck: @argcheck
 
-using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractVariable, BivariateField
+using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractAxis, BiaxialField
 
 export NaturalVariable,
     ThermodynamicField
@@ -22,7 +22,7 @@ const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
 
 const CONJUGATE_PAIRS = (Set([:T, :S]), Set([:P, :V]))
 
-struct NaturalVariable{T} <: AbstractVariable{T}
+struct NaturalVariable{T} <: AbstractAxis{T}
     values::Vector
     function NaturalVariable{T}(values) where {T}
         @argcheck T in NATURAL_VARIABLE_LABELS
@@ -30,7 +30,7 @@ struct NaturalVariable{T} <: AbstractVariable{T}
     end
 end
 
-struct ThermodynamicField{A, B} <: BivariateField{A, B}
+struct ThermodynamicField{A, B} <: BiaxialField{A, B}
     first::NaturalVariable{A}
     second::NaturalVariable{B}
     values::Matrix
