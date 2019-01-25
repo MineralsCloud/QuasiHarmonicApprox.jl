@@ -48,14 +48,15 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
 end
 
 function differentiate(f::T, s::Symbol)::T where {T <: ThermodynamicField}
-    dim = whichdimension(f, s)
+    axis = whichdimension(f, s)
+    isnothing(axis) && throw(ArgumentError(""))
     x, y = f.first, f.second
-    var = if dim == 1
+    var = if axis == :first
         repeat(x.values, 1, length(y))
     else
         repeat(transpose(y.values), length(x))
     end
-    @set f.values = differentiate(var, f, dim)
+    @set f.values = differentiate(var, f, axis)
 end
 
 end
