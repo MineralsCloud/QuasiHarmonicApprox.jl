@@ -25,9 +25,11 @@ export AbstractAxis,
     ==, *, +, -,
     iscompatible, whichaxis_iscompatible
 
+##======================= Types declaration =======================##
 abstract type AbstractAxis{T} end
 
 abstract type BiaxialField{A, B} end
+##======================= End =======================##
 
 function whichaxis(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
     T in (A, B) || return nothing
@@ -35,6 +37,7 @@ function whichaxis(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where
 end
 (whichaxis(f::BiaxialField, s::Symbol)::Union{Nothing, Symbol}) = whichaxis(f, Val(s))
 
+##======================= Getters and setters =======================##
 function getproperty(f::BiaxialField{A, B}, s::Symbol)::Union{Nothing, AbstractAxis} where {A, B}
     s in (A, B) && return getfield(f, whichaxis(f, s))
     getfield(f, s)
@@ -45,12 +48,15 @@ function setproperty!(f::BiaxialField{A, B}, s::Symbol, x) where {A, B}
     s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
     setfield!(f, s, x)  # Whether `s` is in `(A, B)` or not, it will be a valid property name.
 end
+##======================= End =======================##
 
+##======================= Basic operations =======================##
 length(x::AbstractAxis) = length(x.values)
 size(x::AbstractAxis) = size(x.values)
 
 ==(x::T, y::T) where {T <: AbstractAxis} = x.values == y.values
 ==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
+##======================= End =======================##
 
 iscompatible(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
 iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = getproperty(f, whichaxis(f, T)) == v
@@ -59,6 +65,7 @@ function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Union{Noth
     iscompatible(f, v) ? whichaxis(f, T) : nothing
 end
 
+##======================= Arithmetic operations =======================##
 function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
     axis = whichaxis_iscompatible(f, v)
     isnothing(axis) && throw(ArgumentError("The axis and field are not compatible so they cannot multiply!"))
@@ -68,8 +75,9 @@ function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
         f.values .* transpose(v.values)
     end
 end
-*(v::AbstractAxis, f::BiaxialField) = *(f, v)
+*(v::AbstractAxis, f::BiaxialField) = *(f, v)  # Make it valid on both direction
 
+# Use metaprogramming to forward operations
 for op in (:+, :-)
     eval(quote
         function $op(f::T, g::T)::T where {T <: BiaxialField}
@@ -77,5 +85,6 @@ for op in (:+, :-)
         end
     end)
 end
+##======================= End =======================##
 
 end
