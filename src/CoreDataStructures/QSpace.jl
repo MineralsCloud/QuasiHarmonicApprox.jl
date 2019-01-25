@@ -13,17 +13,14 @@ module QSpace
 
 using ArgCheck: @argcheck
 
-using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractVariable, BivariateField
-
-import Base: length, ==
+using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractAxis, BiaxialField
 
 export NormalMode,
-    QSpaceField,
-    length, ==
+    QSpaceField
 
 const NORMAL_MODE_LABELS = (:q, :s)
 
-struct NormalMode{T} <: AbstractVariable{T}
+struct NormalMode{T} <: AbstractAxis{T}
     values::Vector
     function NormalMode{T}(values) where {T}
         @argcheck T in NORMAL_MODE_LABELS
@@ -31,7 +28,7 @@ struct NormalMode{T} <: AbstractVariable{T}
     end
 end
 
-struct QSpaceField{A, B} <: BivariateField{A, B}
+struct QSpaceField{A, B} <: BiaxialField{A, B}
     first::NormalMode{A}
     second::NormalMode{B}
     values::Matrix

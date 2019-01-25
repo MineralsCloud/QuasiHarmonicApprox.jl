@@ -13,7 +13,7 @@ module Interpolation
 
 using Interpolations
 
-using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractVariable, BivariateField, whichdimension, getvariable
+using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractAxis, BiaxialField, whichaxis
 using QuasiHarmonicApproximation.Loggers
 
 export Interpolator,
@@ -24,10 +24,10 @@ struct Interpolator
     logger::Union{Logger, Nothing}
 end
 
-function interpolate(x::BivariateField, y::BivariateField, interpolator::Interpolator)::Function
+function interpolate(x::BiaxialField, y::BiaxialField, interpolator::Interpolator)::Function
     func = interpolator(x.values, y.values)
 
-    function (to_variable::AbstractVariable)
+    function (to_variable::AbstractAxis)
         func(to_variable)
     end
 end
