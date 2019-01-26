@@ -97,6 +97,7 @@ iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = isnothing(whichaxi
 function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
     axis = whichaxis_iscompatible(f, v)
     isnothing(axis) && throw(ArgumentError("The axis and field are not compatible so they cannot multiply!"))
+
     @set f.values = if axis == :first
         f.values .* v.values
     else
