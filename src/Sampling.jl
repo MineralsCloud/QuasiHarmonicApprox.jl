@@ -19,7 +19,8 @@ using QuasiHarmonicApproximation.CoreDataStructures.QSpace: NormalMode, QSpaceFi
 export sample_brillouin_zone
 
 function validate_brillouin_zone_sampling(q_weights::NormalMode{:q}, quantity::QSpaceField)
-    length(q_weights) != size(quantity, :q) && throw(DimensionMismatch)
+    m, n = length(q_weights), size(quantity, :q)
+    m != n && throw(DimensionMismatch("The number of q-points $m does not match $n!"))
     all(q_weights .>= 0) || throw(DomainError("All the values of the weights should be greater than 0!"))
 end
 
