@@ -59,7 +59,7 @@ end
 Based on multiple dispatch, actually only symbols in `(:first, :second, :values)` and the type parameters
 of `BiaxialField` will not raise an error. `getproperty` is more recommended to use instead of `getfield`.
 """
-function getproperty(f::BiaxialField{A, B}, s::Symbol)::AbstractAxis where {A, B}
+function getproperty(f::BiaxialField{A, B}, s::Symbol) where {A, B}
     s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
     getfield(f, s)
 end
@@ -78,7 +78,13 @@ end
 
 ##======================= Basic operations =======================##
 length(x::AbstractAxis) = length(x.values)
+
 size(x::AbstractAxis) = size(x.values)
+function size(x::BiaxialField, s::Symbol)
+    axis = whichaxis(x, s)
+    isnothing(axis) && error("Cannot find corresponding axis to `$s`!")
+    axis == :first ? length(x.first) : length(x.second)
+end
 
 ==(x::T, y::T) where {T <: AbstractAxis} = x.values == y.values
 ==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
