@@ -34,7 +34,7 @@ struct QSpaceField{A, B} <: BiaxialField{A, B}
     values::Matrix
     function QSpaceField{A, B}(first, second, values) where {A, B}
         @argcheck A != B
-        (length(first), length(second)) == size(values)
+        @argcheck (length(first), length(second)) == size(values)
         new(first, second, values)
     end
 end
