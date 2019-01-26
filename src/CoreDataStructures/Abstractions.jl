@@ -84,12 +84,14 @@ size(x::AbstractAxis) = size(x.values)
 ==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
 ##======================= End =======================##
 
-iscompatible(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
-iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = getproperty(f, whichaxis(f, T)) == v
-
 function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Union{Nothing, Symbol} where {T}
-    iscompatible(f, v) ? whichaxis(f, T) : nothing
+    axis = whichaxis(f, T)
+    getproperty(f, axis) == v && return axis
+    nothing  # If `axis` is `nothing`, or the axis is not equals to `v`.
 end
+
+iscompatible(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
+iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = isnothing(whichaxis_iscompatible(f, v)) ? false : true
 
 ##======================= Arithmetic operations =======================##
 function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
