@@ -16,6 +16,7 @@ using Setfield: @set
 
 using QuasiHarmonicApproximation.CoreDataStructures
 using QuasiHarmonicApproximation.Interpolation: Interpolator, interpolate
+using QuasiHarmonicApproximation.Tools: differentiate
 
 export legendre_transformation
 
