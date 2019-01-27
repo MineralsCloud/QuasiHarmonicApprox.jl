@@ -28,7 +28,6 @@ function differentiate(x::T, f::T)::T where {T <: AbstractVector}
     derivative[n] = (f[n] - f[n - 1]) / (x[n] - x[n - 1])
     derivative
 end
-
 function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
     m, n = size(f)
     derivative = zeros(m, n)
@@ -46,7 +45,6 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
     end
     derivative
 end
-
 function differentiate(f::T, s::Symbol)::T where {T <: ThermodynamicField}
     axis = whichaxis(f, s)
     isnothing(axis) && throw(ArgumentError(""))
