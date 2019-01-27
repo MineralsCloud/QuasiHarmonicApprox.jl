@@ -13,7 +13,7 @@ module Tools
 
 using Setfield: @set
 
-using QuasiHarmonicApproximation.CoreDataStructures.Thermo: ThermodynamicField
+using QuasiHarmonicApproximation.CoreDataStructures
 
 export differentiate
 
@@ -48,15 +48,16 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
 end
 
 function differentiate(f::T, s::Symbol)::T where {T <: ThermodynamicField}
-    axis = whichdimension(f, s)
+    axis = whichaxis(f, s)
     isnothing(axis) && throw(ArgumentError(""))
     x, y = f.first, f.second
-    var = if axis == :first
+    dim = Dict(:first => 1, :second => 2)[axis]
+    var = if dim == 1
         repeat(x.values, 1, length(y))
     else
         repeat(transpose(y.values), length(x))
     end
-    @set f.values = differentiate(var, f, axis)
+    @set f.values = differentiate(var, f.values, dim)
 end
 
 end
