@@ -21,13 +21,13 @@ export sample_brillouin_zone
 function validate_brillouin_zone_sampling(q_weights::NormalMode{:q}, quantity::QSpaceField)
     m, n = length(q_weights), size(quantity, :q)
     m != n && throw(DimensionMismatch("The number of q-points $m does not match $n!"))
-    all(q_weights .>= 0) || throw(DomainError("All the values of the weights should be greater than 0!"))
+    all(q_weights.values .>= 0) || throw(DomainError("All the values of the weights should be greater than 0!"))
 end
 
 function sample_brillouin_zone(q_weights::T, quantity::QSpaceField) where {T <: NormalMode{:q}}
     validate_brillouin_zone_sampling(q_weights, quantity)
     var = T(q_weights.values / sum(q_weights.values))
-    return sum(quantity * var)
+    return sum(*(quantity, var))
 end
 
 end

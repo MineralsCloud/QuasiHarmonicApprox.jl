@@ -11,11 +11,13 @@ julia>
 """
 module Abstractions
 
+using MacroTools: @forward
 using Setfield: @set
 
 import Base: length, size,
     ==, *, +, -,
-    getproperty, setproperty!
+    getproperty, setproperty!,
+    iterate
 
 export AbstractAxis,
     BiaxialField,
@@ -23,7 +25,8 @@ export AbstractAxis,
     getproperty, setproperty!,
     length, size,
     ==, *, +, -,
-    iscompatible, whichaxis_iscompatible
+    iscompatible, whichaxis_iscompatible,
+    iterate
 
 ##======================= Types declaration =======================##
 abstract type AbstractAxis{T} end
@@ -76,18 +79,18 @@ function setproperty!(f::BiaxialField{A, B}, s::Symbol, x) where {A, B}
 end
 ##======================= End =======================##
 
-##======================= Basic operations =======================##
-length(x::AbstractAxis) = length(x.values)
+##======================= Forward basic operations =======================##
+@forward AbstractAxis.values length, size, ==
 
-size(x::AbstractAxis) = size(x.values)
 function size(x::BiaxialField, s::Symbol)
     axis = whichaxis(x, s)
     isnothing(axis) && error("Cannot find corresponding axis to `$s`!")
     axis == :first ? length(x.first) : length(x.second)
 end
 
-==(x::T, y::T) where {T <: AbstractAxis} = x.values == y.values
 ==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
+
+@forward BiaxialField.values iterate
 ##======================= End =======================##
 
 function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Union{Nothing, Symbol} where {T}
