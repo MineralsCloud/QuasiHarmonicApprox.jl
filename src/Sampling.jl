@@ -13,8 +13,7 @@ julia>
 """
 module Sampling
 
-using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: whichaxis
-using QuasiHarmonicApproximation.CoreDataStructures.QSpace: NormalMode, QSpaceField
+using QuasiHarmonicApproximation.CoreDataStructures
 
 export sample_brillouin_zone
 

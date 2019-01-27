@@ -13,7 +13,7 @@ module Interpolation
 
 using Interpolations
 
-using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractAxis, BiaxialField, whichaxis
+using QuasiHarmonicApproximation.CoreDataStructures
 using QuasiHarmonicApproximation.Loggers
 
 export Interpolator,
