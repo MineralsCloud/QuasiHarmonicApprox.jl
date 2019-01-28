@@ -21,7 +21,7 @@ using QuasiHarmonicApproximation.Tools: differentiate
 export legendre_transformation
 
 function legendre_transformation(f::ThermodynamicField, s::Symbol)
-    conjugate_variable::NaturalVariable{T} = differentiate(f, s)
+    conjugate_variable = differentiate(f, s)
 
     function (interpolator::Interpolator, to_variable::NaturalVariable{T}) where {T}
         @argcheck Set([S, T]) in QuasiHarmonicApproximation.CoreDataStructures.Thermo.CONJUGATE_PAIRS
