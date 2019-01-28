@@ -26,7 +26,7 @@ function legendre_transformation(f::ThermodynamicField, s::Symbol)
     function (interpolator::Interpolator, to_variable::NaturalVariable{T}) where {T}
         @argcheck Set([S, T]) in Thermo.CONJUGATE_PAIRS
 
-        x = interpolate(conjugate_variable, conjugate_variable * getvariable(conjugate_variable, T) - f, interpolator)
+        x = interpolate(conjugate_variable, conjugate_variable * getvariable(conjugate_variable, T) - f, interpolator, s)
         y = x(to_variable)
         setvariable(@set f.values = y, to_variable)
     end

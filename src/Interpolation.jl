@@ -19,16 +19,37 @@ using QuasiHarmonicApproximation.Loggers
 export Interpolator,
     interpolate
 
-struct Interpolator
-    interpolating_function::Function
-    logger::Union{Logger, Nothing}
+abstract type AbstractInterpolator end
+
+struct Interpolator{T} <: AbstractInterpolator
+    interpolating_function
 end
 
-function interpolate(x::BiaxialField, y::BiaxialField, interpolator::Interpolator)::Function
-    func = interpolator(x.values, y.values)
+function (interpolator::Interpolator{1})(x, y, s::Symbol)
+    iscompatible(x, y) && error()
+    axis = whichaxis(x, s)
+    isnothing(axis) && error()
+    dim = (axis == :first ? 1 : 2)
+    m, n = size(x.values)
 
-    function (to_variable::AbstractAxis)
-        func(to_variable)
+    interps = []
+    if dim == 1
+        for i in 1:n
+            push!(interps, interpolator.interpolating_function(x[:, i], y[:, i]))
+        end
+    elseif dim == 2
+        for j in 1:m
+            push!(interps, interpolator.interpolating_function(x[j, :], y[j, :]))
+        end
+    end
+    interps
+end
+
+function interpolate(x::BiaxialField, y::BiaxialField, interpolator::Interpolator{1}, s::Symbol)::Function
+    interps = interpolator(x, y, s)
+
+    function (to_variable::AbstractAxis, dim::Int)
+        map(interps, to_variable.values)
     end
 end
 
