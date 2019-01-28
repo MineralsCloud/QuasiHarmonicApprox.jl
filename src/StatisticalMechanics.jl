@@ -20,8 +20,8 @@ export bose_einstein_distribution,
     subsystem_entropy,
     subsystem_volumetric_specific_heat
 
-const HBAR = 1.0
-const BOLTZMANN = 2.0
+const HBAR = 6.62607004e-34
+const BOLTZMANN = 1.380648e-23
 
 validate_frequency(frequency::AbstractFloat) = frequency < 0 && throw(DomainError("Negative frequency is not proper for QHA calculation!"))
 
