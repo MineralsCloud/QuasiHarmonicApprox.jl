@@ -1,6 +1,14 @@
-authors = ["Qi Zhang <singularitti@outlook.com>"]
-name = "HybridQHA"
+name = "QuasiHarmonicApproximation"
 uuid = "0a5e5b10-f605-11e8-2788-b7908c05924e"
+authors = ["Qi Zhang <singularitti@outlook.com>"]
 version = "0.1.0"
 
 [deps]
+ArgCheck = "dce04be8-c92d-5529-be00-80e4d2c0e197"
+Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
+EquationsOfState = "dad20aae-dd90-11e8-1386-c770c039e526"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+Rematch = "bfecab0d-fd4d-5014-a23f-56c5fae6447a"
+Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
