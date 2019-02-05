@@ -1,5 +1,9 @@
 module QuasiHarmonicApproximation
 
+using Reexport: @reexport
+
+include("Compat.jl")
+@reexport using .Compat
 include("StatisticalMechanics.jl")
 include("CoreDataStructures/CoreDataStructures.jl")
 include("Sampling.jl")

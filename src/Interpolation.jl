@@ -13,6 +13,7 @@ module Interpolation
 
 using Interpolations
 
+using QuasiHarmonicApproximation.Compat
 using QuasiHarmonicApproximation.CoreDataStructures
 
 export Interpolator,
