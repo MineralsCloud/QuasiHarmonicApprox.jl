@@ -14,7 +14,6 @@ module Interpolation
 using Interpolations
 
 using QuasiHarmonicApproximation.CoreDataStructures
-using QuasiHarmonicApproximation.Loggers
 
 export Interpolator,
     interpolate

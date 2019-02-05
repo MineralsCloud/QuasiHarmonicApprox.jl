@@ -1,6 +1,5 @@
 module QuasiHarmonicApproximation
 
-include("Loggers.jl")
 include("StatisticalMechanics.jl")
 include("CoreDataStructures/CoreDataStructures.jl")
 include("Sampling.jl")
