@@ -16,13 +16,13 @@ using Setfield: @set
 
 import Base: length, size,
     ==, *, +, -,
-    getproperty, setproperty!,
+    getproperty,
     iterate
 
 export AbstractAxis,
     BiaxialField,
     whichaxis,
-    getproperty, setproperty!,
+    getproperty,
     length, size,
     ==, *, +, -,
     iscompatible, whichaxis_iscompatible,
@@ -38,30 +38,16 @@ function whichaxis(::BiaxialField{a, b}, s::Symbol)::Symbol where {a, b}
     @assert s in (a, b)
     s == a ? :first : :second
 end
-function whichaxis(::BiaxialField, n::Int)::Symbol
-    @assert n in (1, 2)
-    n == 1 ? :first : :second
-end
 
 ##======================= Getters and setters =======================##
 function getproperty(field::BiaxialField{a, b}, s::Symbol) where {a, b}
-    s in (a, b) && (s::Symbol = whichaxis(field, s))  # This is type-safe!
+    if s ∈ (a, b); s = whichaxis(field, s) end  # This is type-safe!
     getfield(field, s)
-end
-
-function setproperty!(field::BiaxialField{a, b}, c::Symbol, x) where {a, b}
-    c in (a, b) && (c::Symbol = whichaxis(field, c))  # This is type-safe!
-    setfield!(field, c, x)
 end
 ##======================= End =======================##
 
 ##======================= Forward basic operations =======================##
 @forward AbstractAxis.values length, size, ==
-
-function size(field::BiaxialField, x)
-    axis = whichaxis(field, x)
-    axis == :first ? length(field.first) : length(field.second)
-end
 
 ==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
 
