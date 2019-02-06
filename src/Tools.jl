@@ -13,7 +13,6 @@ module Tools
 
 using Setfield: @set
 
-using QuasiHarmonicApproximation.Compat
 using QuasiHarmonicApproximation.CoreDataStructures
 
 export differentiate

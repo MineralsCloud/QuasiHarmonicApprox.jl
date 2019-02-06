@@ -14,8 +14,6 @@ module Abstractions
 using MacroTools: @forward
 using Setfield: @set
 
-using QuasiHarmonicApproximation.Compat
-
 import Base: length, size,
     ==, *, +, -,
     getproperty, setproperty!,
