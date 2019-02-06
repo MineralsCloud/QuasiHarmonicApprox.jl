@@ -11,8 +11,6 @@ julia>
 """
 module QSpace
 
-using ArgCheck: @argcheck
-
 using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractAxis, BiaxialField, whichaxis
 
 import QuasiHarmonicApproximation.CoreDataStructures.Abstractions: whichaxis_iscompatible
@@ -26,7 +24,7 @@ const NORMAL_MODE_LABELS = (:q, :s)
 struct NormalMode{T} <: AbstractAxis{T}
     values::Vector
     function NormalMode{T}(values) where {T}
-        @argcheck T in NORMAL_MODE_LABELS
+        @assert T in NORMAL_MODE_LABELS
         new(values)
     end
 end
@@ -36,8 +34,8 @@ struct QSpaceField{A, B} <: BiaxialField{A, B}
     second::NormalMode{B}
     values::Matrix
     function QSpaceField{A, B}(first, second, values) where {A, B}
-        @argcheck A != B
-        @argcheck (length(first), length(second)) == size(values)
+        @assert A != B
+        @assert (length(first), length(second)) == size(values)
         new(first, second, values)
     end
 end

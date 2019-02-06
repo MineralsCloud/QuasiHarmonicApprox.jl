@@ -11,8 +11,6 @@ julia>
 """
 module Thermo
 
-using ArgCheck: @argcheck
-
 using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractAxis, BiaxialField
 
 export NaturalVariable,
@@ -25,7 +23,7 @@ const CONJUGATE_PAIRS = (Set([:T, :S]), Set([:P, :V]))
 struct NaturalVariable{T} <: AbstractAxis{T}
     values::Vector
     function NaturalVariable{T}(values) where {T}
-        @argcheck T in NATURAL_VARIABLE_LABELS
+        @assert T in NATURAL_VARIABLE_LABELS
         new(values)
     end
 end
@@ -35,9 +33,9 @@ struct ThermodynamicField{A, B} <: BiaxialField{A, B}
     second::NaturalVariable{B}
     values::Matrix
     function ThermodynamicField{A, B}(first, second, values) where {A, B}
-        @argcheck A != B
-        @argcheck Set([A, B]) ∉ CONJUGATE_PAIRS
-        @argcheck (length(first), length(second)) == size(values)
+        @assert A != B
+        @assert Set([A, B]) ∉ CONJUGATE_PAIRS
+        @assert (length(first), length(second)) == size(values)
         new(first, second, values)
     end
 end
