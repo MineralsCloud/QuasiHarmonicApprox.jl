@@ -11,37 +11,46 @@ julia>
 """
 module Thermo
 
-using QuasiHarmonicApproximation.CoreDataStructures.Abstractions: AbstractAxis, BiaxialField
+using QuasiHarmonicApproximation.CoreDataStructures.Abstractions
 
 export NaturalVariable,
+    ThermodynamicAxes,
     ThermodynamicField
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
 
 const CONJUGATE_PAIRS = (Set([:T, :S]), Set([:P, :V]))
 
-struct NaturalVariable{T} <: AbstractAxis{T}
-    values::Vector
-    function NaturalVariable{T}(values) where {T}
-        @assert T ∈ NATURAL_VARIABLE_LABELS
+struct NaturalVariable{c, T} <: AbstractAxis{c, T}
+    values::AbstractVector{T}
+    function NaturalVariable{c, T}(values) where {c, T}
+        @assert c ∈ NATURAL_VARIABLE_LABELS
         new(values)
     end
 end
+NaturalVariable{c}(values::AbstractVector{T}) where {c, T} = NaturalVariable{c, T}(values)
 
-struct ThermodynamicField{A, B} <: BiaxialField{A, B}
-    first::NaturalVariable{A}
-    second::NaturalVariable{B}
-    values::Matrix
-    function ThermodynamicField{A, B}(first, second, values) where {A, B}
-        @assert A != B
-        @assert Set([A, B]) ∉ CONJUGATE_PAIRS
-        @assert (length(first), length(second)) == size(values)
-        new(first, second, values)
+struct ThermodynamicAxes{a, b, S, T} <: AbstractAxes{a, b, S, T}
+    first::NaturalVariable{a, S}
+    second::NaturalVariable{b, T}
+    function ThermodynamicAxes{a, b, S, T}(first, second) where {a, b, S, T}
+        @assert a != b
+        @assert Set([a, b]) ∉ CONJUGATE_PAIRS
+        new(first, second)
     end
 end
+ThermodynamicAxes(first::NaturalVariable{a, S}, second::NaturalVariable{b, T}) where {a, b, S, T} = ThermodynamicAxes{a, b, S, T}(first, second)
+ThermodynamicAxes{a, b}(first::AbstractVector{S}, second::AbstractVector{T}) where {a, b, S, T} = ThermodynamicAxes(NaturalVariable{a}(first), NaturalVariable{b}(second))
 
-ThermodynamicField(first::NaturalVariable{A}, second::NaturalVariable{B}, values::Matrix) where {A, B} = ThermodynamicField{A, B}(first, second, values)
-ThermodynamicField{A, B}(first::Vector, second::Vector, values::Matrix) where {A, B} = ThermodynamicField(NaturalVariable{A}(first), NaturalVariable{B}(second), values)
-ThermodynamicField{B, A}(f::ThermodynamicField{A, B}) where {A, B} = ThermodynamicField(f.second, f.first, (collect ∘ transpose)(f.values))
+struct ThermodynamicField{a, b, R, S, T} <: BiaxialField{a, b, R, S, T}
+    axes::ThermodynamicAxes{a, b}
+    values::AbstractMatrix{R}
+    function ThermodynamicField{a, b, R, S, T}(axes, values) where {a, b, R, S, T}
+        @assert size(axes) == size(values)
+        new(axes, values)
+    end
+end
+ThermodynamicField(axes::ThermodynamicAxes{a, b, S, T}, values::AbstractMatrix{R}) where {a, b, R, S, T} = ThermodynamicField{a, b, R, S, T}(axes, values)
+ThermodynamicField{b, a}(f::ThermodynamicField{a, b}) where {a, b} = ThermodynamicField(ThermodynamicAxes{b, a}(f.axes), transpose(f.values))
 
 end
