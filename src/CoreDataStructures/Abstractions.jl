@@ -31,34 +31,34 @@ export AbstractAxis,
     iterate
 
 ##======================= Types declaration =======================##
-abstract type AbstractAxis{T} end
+abstract type AbstractAxis{c} end
 
-abstract type BiaxialField{A, B} end
+abstract type BiaxialField{a, b} end
 ##======================= End =======================##
 
-function whichaxis(::BiaxialField{A, B}, ::Val{T})::Symbol where {A, B, T}
-    @assert T in (A, B)
-    T == A ? :first : :second
+function whichaxis(::BiaxialField{a, b}, ::Val{T})::Symbol where {a, b, c}
+    @assert c in (a, b)
+    c == a ? :first : :second
 end
 
 ##======================= Getters and setters =======================##
-function getproperty(f::BiaxialField{A, B}, s::Symbol) where {A, B}
-    s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
-    getfield(f, s)
+function getproperty(field::BiaxialField{a, b}, c::Symbol) where {a, b, c}
+    c in (a, b) && (s::Symbol = whichaxis(field, c))  # This is type-safe!
+    getfield(field, s)
 end
 
-function setproperty!(f::BiaxialField{A, B}, s::Symbol, x) where {A, B}
-    s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
-    setfield!(f, s, x)  # Whether `s` is in `(A, B)` or not, it will be a valid property name.
+function setproperty!(field::BiaxialField{a, b}, c::Symbol, x) where {a, b}
+    c in (a, b) && (c::Symbol = whichaxis(field, c))  # This is type-safe!
+    setfield!(field, c, x)  # Whether `c` is in `(a, b)` or not, it will be a valid property name.
 end
 ##======================= End =======================##
 
 ##======================= Forward basic operations =======================##
 @forward AbstractAxis.values length, size, ==
 
-function size(x::BiaxialField, s::Symbol)
-    axis = whichaxis(x, s)
-    axis == :first ? length(x.first) : length(x.second)
+function size(field::BiaxialField, s::Symbol)
+    axis = whichaxis(field, s)
+    axis == :first ? length(field.first) : length(field.second)
 end
 
 ==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
@@ -66,25 +66,25 @@ end
 @forward BiaxialField.values iterate
 ##======================= End =======================##
 
-function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Symbol where {T}
-    axis = whichaxis(f, T)
-    getproperty(f, axis) == v && return axis
+function whichaxis_iscompatible(field::BiaxialField, v::AbstractAxis{c})::Symbol where {c}
+    axis = whichaxis(field, c)
+    getproperty(field, axis) == v && return axis
 end
 
 iscompatible(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
-iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = whichaxis_iscompatible(f, v) ? false : true
+iscompatible(field::BiaxialField, v::AbstractAxis{c}) where {c} = whichaxis_iscompatible(field, c) ? false : true
 
 ##======================= Arithmetic operations =======================##
-function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
-    axis = whichaxis_iscompatible(f, v)
+function *(field::T, v::AbstractAxis)::T where {T <: BiaxialField}
+    axis = whichaxis_iscompatible(field, v)
 
-    @set f.values = if axis == :first
-        f.values .* v.values
+    @set field.values = if axis == :first
+        field.values .* v.values
     else
-        f.values .* transpose(v.values)
+        field.values .* transpose(v.values)
     end
 end
-*(v::AbstractAxis, f::BiaxialField) = *(f, v)  # Make it valid on both direction
+*(v::AbstractAxis, field::BiaxialField) = *(field, v)  # Make it valid on both direction
 
 # Use metaprogramming to forward operations
 for op in (:+, :-)
