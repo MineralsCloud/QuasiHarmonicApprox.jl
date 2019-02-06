@@ -11,7 +11,6 @@ julia>
 """
 module Thermodynamics
 
-using ArgCheck: @argcheck
 using Setfield: @set
 
 using QuasiHarmonicApproximation.CoreDataStructures
@@ -24,7 +23,7 @@ function legendre_transformation(f::ThermodynamicField, s::Symbol)
     conjugate_variable = differentiate(f, s)
 
     function (interpolator::Interpolator, to_variable::NaturalVariable{T}) where {T}
-        @argcheck Set([S, T]) in Thermo.CONJUGATE_PAIRS
+        @assert Set([S, T]) ∈ Thermo.CONJUGATE_PAIRS
 
         x = interpolate(conjugate_variable, conjugate_variable * getvariable(conjugate_variable, T) - f, interpolator, s)
         y = x(to_variable)
