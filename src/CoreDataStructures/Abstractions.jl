@@ -36,12 +36,9 @@ abstract type AbstractAxis{T} end
 abstract type BiaxialField{A, B} end
 ##======================= End =======================##
 
-function whichaxis(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
+function whichaxis(::BiaxialField{A, B}, ::Val{T})::Symbol where {A, B, T}
     @assert T in (A, B)
     T == A ? :first : :second
-end
-function whichaxis(f::BiaxialField, s::Symbol)::Union{Nothing, Symbol}
-    whichaxis(f, Val(s))
 end
 
 ##======================= Getters and setters =======================##
@@ -69,14 +66,13 @@ end
 @forward BiaxialField.values iterate
 ##======================= End =======================##
 
-function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Union{Nothing, Symbol} where {T}
+function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Symbol where {T}
     axis = whichaxis(f, T)
     getproperty(f, axis) == v && return axis
-    nothing  # If `axis` is `nothing`, or the axis is not equals to `v`.
 end
 
 iscompatible(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
-iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = isnothing(whichaxis_iscompatible(f, v)) ? false : true
+iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = whichaxis_iscompatible(f, v) ? false : true
 
 ##======================= Arithmetic operations =======================##
 function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
