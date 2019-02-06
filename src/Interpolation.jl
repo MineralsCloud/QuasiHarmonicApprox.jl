@@ -28,7 +28,6 @@ end
 function (interpolator::Interpolator{1})(x, y, s::Symbol)
     iscompatible(x, y) && error()
     axis = whichaxis(x, s)
-    isnothing(axis) && error()
     dim = (axis == :first ? 1 : 2)
     m, n = size(x.values)
 

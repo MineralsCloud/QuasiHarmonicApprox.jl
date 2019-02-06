@@ -43,7 +43,7 @@ If `T` is not a `Symbol`, it will definitely return `nothing`. If `T` is one of 
 `:first` or `:second` will be returned. Everything else (`Symbol` not in `(A, B)`) will return `nothing`.
 """
 function whichaxis(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
-    T in (A, B) || return nothing
+    @assert T in (A, B)
     T == A ? :first : :second
 end
 """
@@ -53,7 +53,6 @@ Based on multiple dispatch, actually only symbols in `(:first, :second)` and the
 `BiaxialField` will return non-`nothing` result.
 """
 function whichaxis(f::BiaxialField, s::Symbol)::Union{Nothing, Symbol}
-    s in (:first, :second) && return s
     whichaxis(f, Val(s))
 end
 
@@ -68,12 +67,6 @@ function getproperty(f::BiaxialField{A, B}, s::Symbol) where {A, B}
     s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
     getfield(f, s)
 end
-"""
-    getproperty(::BiaxialField, ::Nothing)
-
-This will just return `nothing`.
-"""
-getproperty(::BiaxialField, ::Nothing) = nothing
 
 function setproperty!(f::BiaxialField{A, B}, s::Symbol, x) where {A, B}
     s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
@@ -86,7 +79,6 @@ end
 
 function size(x::BiaxialField, s::Symbol)
     axis = whichaxis(x, s)
-    isnothing(axis) && error("Cannot find corresponding axis to `$s`!")
     axis == :first ? length(x.first) : length(x.second)
 end
 
@@ -107,7 +99,6 @@ iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = isnothing(whichaxi
 ##======================= Arithmetic operations =======================##
 function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
     axis = whichaxis_iscompatible(f, v)
-    isnothing(axis) && throw(ArgumentError("The axis and field are not compatible so they cannot multiply!"))
 
     @set f.values = if axis == :first
         f.values .* v.values

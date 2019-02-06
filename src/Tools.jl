@@ -48,7 +48,6 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
 end
 function differentiate(f::T, s::Symbol)::T where {T <: ThermodynamicField}
     axis = whichaxis(f, s)
-    isnothing(axis) && throw(ArgumentError(""))
     x, y = f.first, f.second
     dim = Dict(:first => 1, :second => 2)[axis]
     var = if dim == 1
