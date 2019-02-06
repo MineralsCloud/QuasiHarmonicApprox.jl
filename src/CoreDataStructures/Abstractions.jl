@@ -36,33 +36,15 @@ abstract type AbstractAxis{T} end
 abstract type BiaxialField{A, B} end
 ##======================= End =======================##
 
-"""
-    whichaxis(::BiaxialField{A, B}, ::Val{T})
-
-If `T` is not a `Symbol`, it will definitely return `nothing`. If `T` is one of `A` and `B`, then
-`:first` or `:second` will be returned. Everything else (`Symbol` not in `(A, B)`) will return `nothing`.
-"""
 function whichaxis(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
     @assert T in (A, B)
     T == A ? :first : :second
 end
-"""
-    whichaxis(f::BiaxialField, s::Symbol)
-
-Based on multiple dispatch, actually only symbols in `(:first, :second)` and the type parameters of
-`BiaxialField` will return non-`nothing` result.
-"""
 function whichaxis(f::BiaxialField, s::Symbol)::Union{Nothing, Symbol}
     whichaxis(f, Val(s))
 end
 
 ##======================= Getters and setters =======================##
-"""
-    getproperty(f::BiaxialField{A, B}, s::Symbol)
-
-Based on multiple dispatch, actually only symbols in `(:first, :second, :values)` and the type parameters
-of `BiaxialField` will not raise an error. `getproperty` is more recommended to use instead of `getfield`.
-"""
 function getproperty(f::BiaxialField{A, B}, s::Symbol) where {A, B}
     s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
     getfield(f, s)
