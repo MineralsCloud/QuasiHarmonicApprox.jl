@@ -24,7 +24,7 @@ const NORMAL_MODE_LABELS = (:q, :s)
 struct NormalMode{T} <: AbstractAxis{T}
     values::Vector
     function NormalMode{T}(values) where {T}
-        @assert T in NORMAL_MODE_LABELS
+        @assert T ∈ NORMAL_MODE_LABELS
         new(values)
     end
 end

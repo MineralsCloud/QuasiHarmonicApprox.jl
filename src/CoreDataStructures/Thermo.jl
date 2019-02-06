@@ -23,7 +23,7 @@ const CONJUGATE_PAIRS = (Set([:T, :S]), Set([:P, :V]))
 struct NaturalVariable{T} <: AbstractAxis{T}
     values::Vector
     function NaturalVariable{T}(values) where {T}
-        @assert T in NATURAL_VARIABLE_LABELS
+        @assert T ∈ NATURAL_VARIABLE_LABELS
         new(values)
     end
 end
