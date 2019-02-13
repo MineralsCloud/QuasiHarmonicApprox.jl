@@ -28,7 +28,7 @@ struct NaturalVariable{a, A <: AbstractVector} <: Axis{a, A}
 end
 NaturalVariable{a}(data::A) where {a, A} = NaturalVariable{a, A}(data)
 
-struct ThermodynamicField{a, b, A, B, T <: AbstractMatrix} <: BiaxialField{a, b, A, B, T}
+struct ThermodynamicField{a, b, A, B, T <: AbstractMatrix} <: Field{a, b, A, B, T}
     axes::Axes{a, b, A, B}
     data::T
     function ThermodynamicField{a, b, A, B, T}(axes, data) where {a, b, A, B, T}

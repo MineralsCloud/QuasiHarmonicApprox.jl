@@ -27,7 +27,7 @@ struct NormalMode{a, A <: AbstractVector} <: Axis{a, A}
 end
 NormalMode{a}(data::A) where {a, A} = NormalMode{a, A}(data)
 
-struct QSpaceField{a, b, A, B, T <: AbstractMatrix} <: BiaxialField{a, b, A, B, T}
+struct QSpaceField{a, b, A, B, T <: AbstractMatrix} <: Field{a, b, A, B, T}
     axes::Axes{a, b, A, B}
     data::T
     function QSpaceField{a, b, R, S, T}(axes, data) where {a, b, R, S, T}

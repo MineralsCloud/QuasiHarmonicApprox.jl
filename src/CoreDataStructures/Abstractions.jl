@@ -19,7 +19,7 @@ import Base: length, size,
 
 export Axis,
     Axes,
-    BiaxialField,
+    Field,
     length, size,
     ==, *
 
@@ -27,11 +27,11 @@ abstract type Axis{a, A} end
 
 const Axes{a, b, A, B} = Tuple{Axis{a, A}, Axis{b, B}}
 
-abstract type BiaxialField{a, b, A, B, T} end
+abstract type Field{a, b, A, B, T} end
 
 @forward Axis.data length, size, ==
 
-function *(field::T, axis::Axis)::T where {T <: BiaxialField}
+function *(field::T, axis::Axis)::T where {T <: Field}
     axisname = whichaxis_iscompatible(field, axis)
 
     @set field.data = if axisname == :first
@@ -40,6 +40,6 @@ function *(field::T, axis::Axis)::T where {T <: BiaxialField}
         field.data .* transpose(axis.data)
     end
 end
-*(v::Axis, field::BiaxialField) = *(field, v)  # Make it valid on both direction
+*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
 
 end
