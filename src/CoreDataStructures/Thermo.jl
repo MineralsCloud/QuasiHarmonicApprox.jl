@@ -14,43 +14,29 @@ module Thermo
 using QuasiHarmonicApproximation.CoreDataStructures.Abstractions
 
 export NaturalVariable,
-    ThermodynamicAxes,
     ThermodynamicField
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
-
 const CONJUGATE_PAIRS = (Set([:T, :S]), Set([:P, :V]))
 
-struct NaturalVariable{c, T} <: AbstractAxis{c, T}
-    values::AbstractVector{T}
-    function NaturalVariable{c, T}(values) where {c, T}
-        @assert c ∈ NATURAL_VARIABLE_LABELS
-        new(values)
+struct NaturalVariable{a, A <: AbstractVector} <: Axis{a, A}
+    data::A
+    function NaturalVariable{a, A}(data) where {A}
+        @assert a ∈ NATURAL_VARIABLE_LABELS
+        new(data)
     end
 end
-NaturalVariable{c}(values::AbstractVector{T}) where {c, T} = NaturalVariable{c, T}(values)
+NaturalVariable{a}(data::A) where {a, A} = NaturalVariable{a, A}(data)
 
-struct ThermodynamicAxes{a, b, S, T} <: AbstractAxes{a, b, S, T}
-    first::NaturalVariable{a, S}
-    second::NaturalVariable{b, T}
-    function ThermodynamicAxes{a, b, S, T}(first, second) where {a, b, S, T}
-        @assert a != b
-        @assert Set([a, b]) ∉ CONJUGATE_PAIRS
-        new(first, second)
+struct ThermodynamicField{a, b, A, B, T <: AbstractMatrix} <: BiaxialField{a, b, A, B, T}
+    axes::Axes{a, b, A, B}
+    data::T
+    function ThermodynamicField{a, b, A, B, T}(axes, data) where {a, b, A, B, T}
+        @assert map(length, axes) == size(data)
+        new(axes, data)
     end
 end
-ThermodynamicAxes(first::NaturalVariable{a, S}, second::NaturalVariable{b, T}) where {a, b, S, T} = ThermodynamicAxes{a, b, S, T}(first, second)
-ThermodynamicAxes{a, b}(first::AbstractVector{S}, second::AbstractVector{T}) where {a, b, S, T} = ThermodynamicAxes(NaturalVariable{a}(first), NaturalVariable{b}(second))
-
-struct ThermodynamicField{a, b, R, S, T} <: BiaxialField{a, b, R, S, T}
-    axes::ThermodynamicAxes{a, b}
-    values::AbstractMatrix{R}
-    function ThermodynamicField{a, b, R, S, T}(axes, values) where {a, b, R, S, T}
-        @assert size(axes) == size(values)
-        new(axes, values)
-    end
-end
-ThermodynamicField(axes::ThermodynamicAxes{a, b, S, T}, values::AbstractMatrix{R}) where {a, b, R, S, T} = ThermodynamicField{a, b, R, S, T}(axes, values)
-ThermodynamicField{b, a}(f::ThermodynamicField{a, b}) where {a, b} = ThermodynamicField(ThermodynamicAxes{b, a}(f.axes), transpose(f.values))
+ThermodynamicField(axes::Axes{a, b, A, B}, data::T) where {a, b, A, B, T} = ThermodynamicField{a, b, A, B, T}(axes, data)
+ThermodynamicField(first::NaturalVariable, second::NaturalVariable, data) = ThermodynamicField((first, second), data)
 
 end
