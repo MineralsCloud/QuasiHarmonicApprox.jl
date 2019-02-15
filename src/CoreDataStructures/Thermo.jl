@@ -17,7 +17,7 @@ export NaturalVariable,
     ThermodynamicField
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
-const CONJUGATE_PAIRS = (:T => :S, :P => :V, :S => :T, :V => :P)
+const CONJUGATE_PAIRS = Dict(:T => :S, :P => :V, :S => :T, :V => :P)
 
 struct NaturalVariable{a, A <: AbstractVector} <: Axis{a, A}
     data::A
