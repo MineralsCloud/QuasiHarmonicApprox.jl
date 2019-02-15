@@ -17,7 +17,7 @@ export NaturalVariable,
     ThermodynamicField
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
-const CONJUGATE_PAIRS = (Set([:T, :S]), Set([:P, :V]))
+const CONJUGATE_PAIRS = (:T => :S, :P => :V, :S => :T, :V => :P)
 
 struct NaturalVariable{a, A <: AbstractVector} <: Axis{a, A}
     data::A
@@ -33,6 +33,7 @@ struct ThermodynamicField{a, b, A, B, T <: AbstractMatrix} <: Field{a, b, A, B, 
     data::T
     function ThermodynamicField{a, b, A, B, T}(axes, data) where {a, b, A, B, T}
         @assert map(length, axes) == size(data)
+        @assert (a => b) ∉ CONJUGATE_PAIRS
         new(axes, data)
     end
 end
