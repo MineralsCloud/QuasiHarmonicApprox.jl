@@ -11,10 +11,15 @@ julia>
 """
 module Thermo
 
+using Setfield: @set
+
 using QuasiHarmonicApproximation.CoreDataStructures.Abstractions
+import QuasiHarmonicApproximation.Tools: differentiate
 
 export NaturalVariable,
-    ThermodynamicField
+    ThermodynamicField,
+    get_conjugate_variable_name,
+    get_conjugate_variable
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
 const CONJUGATE_PAIRS = Dict(:T => :S, :P => :V, :S => :T, :V => :P)
@@ -39,5 +44,17 @@ struct ThermodynamicField{a, b, A, B, T <: AbstractMatrix} <: Field{a, b, A, B, 
 end
 ThermodynamicField(axes::Axes{a, b, A, B}, data::T) where {a, b, A, B, T} = ThermodynamicField{a, b, A, B, T}(axes, data)
 ThermodynamicField(first::NaturalVariable, second::NaturalVariable, data) = ThermodynamicField((first, second), data)
+
+get_conjugate_variable_name(name::Symbol)::Symbol = CONJUGATE_PAIRS[name]
+
+get_conjugate_variable(field::ThermodynamicField, dim::Int) = differentiate(field, axes(field, dim))
+get_conjugate_variable(field::ThermodynamicField, name::Symbol) = get_conjugate_variable(field, axisdim(typeof(field)), NaturalVariable{name})
+
+function differentiate(field::T, axis::NaturalVariable)::T where {T <: ThermodynamicField}
+    dim = axisdim(field, axis)
+    a, b = field.axes
+    x = (dim == 1 ? repeat(a.data, 1, length(b)) : repeat(transpose(b.data), length(a)))
+    @set field.data = differentiate(x, field.data, dim)
+end
 
 end
