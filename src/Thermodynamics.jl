@@ -15,19 +15,16 @@ using Setfield: @set
 
 using QuasiHarmonicApproximation.CoreDataStructures
 using QuasiHarmonicApproximation.Interpolation: Interpolator, interpolate
-using QuasiHarmonicApproximation.Tools: differentiate
 
 export legendre_transformation
 
-function legendre_transformation(f::ThermodynamicField, s::Symbol)
-    conjugate_variable = differentiate(f, s)
+function legendre_transformation(field::ThermodynamicField, new_variable::NaturalVariable)
+    name = get_conjugate_variable_name(axisnames(new_variable))
+    conjugate_variable = get_conjugate_variable(field, name)
 
-    function (interpolator::Interpolator, to_variable::NaturalVariable{T}) where {T}
-        @assert Set([S, T]) ∈ Thermo.CONJUGATE_PAIRS
-
-        x = interpolate(conjugate_variable, conjugate_variable * getvariable(conjugate_variable, T) - f, interpolator, s)
-        y = x(to_variable)
-        setvariable(@set f.values = y, to_variable)
+    function (interpolator::Interpolator)
+        f = interpolate(conjugate_variable, conjugate_variable * new_variable - field, interpolator)
+        ThermodynamicField(replaceaxis(axes(field), new_variable), f(new_variable))
     end
 end
 
