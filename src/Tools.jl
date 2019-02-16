@@ -45,16 +45,11 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
     end
     derivative
 end
-function differentiate(f::T, s::Symbol)::T where {T <: ThermodynamicField}
-    axis = whichaxis(f, s)
-    x, y = f.first, f.second
-    dim = Dict(:first => 1, :second => 2)[axis]
-    var = if dim == 1
-        repeat(x.values, 1, length(y))
-    else
-        repeat(transpose(y.values), length(x))
-    end
-    @set f.values = differentiate(var, f.values, dim)
+function differentiate(field::T, axis::Axis)::T where {T <: ThermodynamicField}
+    dim = axisdim(field, axis)
+    a, b = field.axes
+    x = (dim == 1 ? repeat(a.data, 1, length(b)) : repeat(transpose(b.data), length(a)))
+    @set field.data = differentiate(x, field.data, dim)
 end
 
 end
