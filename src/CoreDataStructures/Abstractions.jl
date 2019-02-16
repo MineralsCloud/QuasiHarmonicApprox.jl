@@ -23,6 +23,7 @@ export Axis,
     axisnames,
     axisdim,
     axisvalues,
+    replaceaxis,
     length, size, ==, *
 
 abstract type Axis{a, A} end
@@ -33,6 +34,8 @@ abstract type Field{a, b, A, B, T} end
 
 axes(field::Field) = field.axes
 axes(field::Field, dim::Int) = axes(field)[dim]
+axes(field::Field, A::Type{<: Axis}) = axes(field, axisdim(A))
+axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
 axisnames(axis::Type{<: Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
@@ -52,6 +55,11 @@ end
 
 axisvalues(field::Field) = axisvalues(field.axes...)
 axisvalues(axis::Axis, axes::Axis...) = tuple(axis.data, axisvalues(axes...)...)
+
+function replaceaxis(axes::Axes{a, b}, new_axis::Axis)::Axes where {a, b}
+    @assert axisnames(new_axis) in (a, b)
+    axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
+end
 
 @forward Axis.data length, size, ==
 
