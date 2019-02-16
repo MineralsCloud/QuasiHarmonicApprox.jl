@@ -11,10 +11,6 @@ julia>
 """
 module Tools
 
-using Setfield: @set
-
-using QuasiHarmonicApproximation.CoreDataStructures
-
 export differentiate
 
 function differentiate(x::T, f::T)::T where {T <: AbstractVector}
@@ -44,12 +40,6 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
         throw(DomainError(dim, "The `dim` variable must be `1` or `2`!"))
     end
     derivative
-end
-function differentiate(field::T, axis::Axis)::T where {T <: ThermodynamicField}
-    dim = axisdim(field, axis)
-    a, b = field.axes
-    x = (dim == 1 ? repeat(a.data, 1, length(b)) : repeat(transpose(b.data), length(a)))
-    @set field.data = differentiate(x, field.data, dim)
 end
 
 end
