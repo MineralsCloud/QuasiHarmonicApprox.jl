@@ -50,7 +50,7 @@ function axisdim(field::Field, axis::Axis)::Int
     field.axes[index] == axis ? index : error()
 end
 
-axisvalues(field::Field) = axisvalues(field.axes...)
+axisvalues(field::Field) = axisvalues(axes(axes)...)
 axisvalues(axis::Axis, axes::Axis...) = tuple(axis.data, axisvalues(axes...)...)
 
 function replaceaxis(axes::Axes{a, b}, new_axis::Axis)::Axes where {a, b}
