@@ -34,11 +34,11 @@ Base.axes(field::Field, dim::Int) = axes(field)[dim]
 Base.axes(field::Field, A::Type{<: Axis}) = axes(field, axisdim(A))
 Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
-axisnames(axis::Type{<: Axis{a}}) where {a} = a
+axisnames(::Type{<: Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
-axisnames(axes::Type{<: Axes{a, b}}) where {a, b} = (a, b)
+axisnames(::Type{<: Axes{a, b}}) where {a, b} = (a, b)
 axisnames(axes::Axes) = axisnames(typeof(axes))
-axisnames(field::Type{<: Field{a, b}}) where {a, b} = (a, b)
+axisnames(::Type{<: Field{a, b}}) where {a, b} = (a, b)
 axisnames(field::Field) = axisnames(typeof(field))
 
 function axisdim(F::Type{<: Field}, A::Type{<: Axis})::Int
