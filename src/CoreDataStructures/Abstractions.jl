@@ -14,8 +14,6 @@ module Abstractions
 using MacroTools: @forward
 using Setfield: @set
 
-import Base: axes, length, size, transpose, ==, *
-
 export Axis,
     Axes,
     Field,
@@ -23,8 +21,7 @@ export Axis,
     axisnames,
     axisdim,
     axisvalues,
-    replaceaxis,
-    length, size, transpose, ==, *
+    replaceaxis
 
 abstract type Axis{a, A} end
 
@@ -32,10 +29,10 @@ const Axes{a, b, A, B} = Tuple{Axis{a, A}, Axis{b, B}}
 
 abstract type Field{a, b, A, B, T} end
 
-axes(field::Field) = field.axes
-axes(field::Field, dim::Int) = axes(field)[dim]
-axes(field::Field, A::Type{<: Axis}) = axes(field, axisdim(A))
-axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
+Base.axes(field::Field) = field.axes
+Base.axes(field::Field, dim::Int) = axes(field)[dim]
+Base.axes(field::Field, A::Type{<: Axis}) = axes(field, axisdim(A))
+Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
 axisnames(axis::Type{<: Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
@@ -63,12 +60,12 @@ end
 
 Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(field.data))
 
-@forward Axis.data length, size, ==
+@forward Axis.data Base.length, Base.size, Base.:(==)
 
-function *(field::T, axis::Axis)::T where {T <: Field}
+function Base.:*(field::T, axis::Axis)::T where {T <: Field}
     dim = axisdim(field, axis)
     @set field.data = (dim == 1 ? field.data .* axis.data : field.data .* transpose(axis.data))
 end
-*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
+Base.:*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
 
 end
