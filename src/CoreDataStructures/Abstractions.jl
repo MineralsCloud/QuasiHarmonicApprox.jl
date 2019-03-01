@@ -14,7 +14,7 @@ module Abstractions
 using MacroTools: @forward
 using Setfield: @set
 
-import Base: axes, length, size, ==, *
+import Base: axes, length, size, transpose, ==, *
 
 export Axis,
     Axes,
@@ -24,7 +24,7 @@ export Axis,
     axisdim,
     axisvalues,
     replaceaxis,
-    length, size, ==, *
+    length, size, transpose, ==, *
 
 abstract type Axis{a, A} end
 
@@ -60,6 +60,8 @@ function replaceaxis(axes::Axes{a, b}, new_axis::Axis)::Axes where {a, b}
     @assert axisnames(new_axis) in (a, b)
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
+
+Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(field.data))
 
 @forward Axis.data length, size, ==
 
