@@ -98,6 +98,6 @@ Base.iterate(::Axis, ::Any) = nothing
 Base.iterate(::Type{T}) where {T <: Axis} = (T, nothing)
 Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
-Base.map(f, axis::Axis) = map(f, axisvalues(axis))
+Base.map(f, axis::Axis) = typeof(axis).name.wrapper(axisnames(axis), map(f, axisvalues(axis)))
 
 end

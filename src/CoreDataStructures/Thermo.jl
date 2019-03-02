@@ -33,6 +33,7 @@ struct NaturalVariable{a,A <: AbstractVector} <: Axis{a,A}
     end
 end
 NaturalVariable{a}(data::A) where {a,A} = NaturalVariable{a,A}(data)
+NaturalVariable(a::Symbol, data) = NaturalVariable{a}(data)
 
 struct ThermodynamicField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
     axes::Axes{a,b,A,B}
