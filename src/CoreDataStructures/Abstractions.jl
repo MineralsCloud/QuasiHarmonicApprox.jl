@@ -57,8 +57,9 @@ function axisdim(field::Field, axis::Axis)::Int
     axes(field)[index] == axis ? index : error()
 end
 
-axisvalues() = ()
-axisvalues(axis::Axis, axes::Axis...) = tuple(axis.data, axisvalues(axes...)...)
+axisvalues(axis::Axis) = axis.data
+axisvalues(axes::Tuple) = map(axisvalues, axes)
+axisvalues(axes::Axis...) = axisvalues(tuple(axes...))
 axisvalues(field::Field) = axisvalues(axes(field)...)
 
 function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
@@ -66,11 +67,11 @@ function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
 
-Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(values(field)))
+Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(axisvalues(field)))
 
 function Base.:*(field::T, axis::Axis)::T where {T <: Field}
     dim = axisdim(field, axis)
-    @set values(field) = (dim == 1 ? values(field) .* values(axis) : values(field) .* transpose(values(axis)))
+    @set field.data = (dim == 1 ? axisvalues(field) .* axisvalues(axis) : axisvalues(field) .* transpose(axisvalues(axis)))
 end
 Base.:*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
 
@@ -79,21 +80,21 @@ Base.:(==)(A::Axis{a}, B::Axis{a}) where {a} = A.data == B.data
 Base.eltype(::Type{<:Axis{a,A}}) where {a,A} = eltype(A)
 Base.eltype(axis::Axis) = eltype(typeof(axis))
 
-Base.getindex(axis::Axis, i...) = getindex(values(axis), i...)
+Base.getindex(axis::Axis, i...) = getindex(axisvalues(axis), i...)
 
-Base.firstindex(axis::Axis) = firstindex(values(axis))
+Base.firstindex(axis::Axis) = firstindex(axisvalues(axis))
 
 Base.lastindex(axis::Axis) = length(axis)
 
-Base.size(axis::Axis) = size(values(axis))
+Base.size(axis::Axis) = size(axisvalues(axis))
 
-Base.length(axis::Axis) = length(values(axis))
+Base.length(axis::Axis) = length(axisvalues(axis))
 
 Base.iterate(axis::Axis) = (axis, nothing)
 Base.iterate(::Axis, ::Any) = nothing
 Base.iterate(::Type{T}) where {T <: Axis} = (T, nothing)
 Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
-Base.map(f, axis::Axis) = map(f, values(axis))
+Base.map(f, axis::Axis) = map(f, axisvalues(axis))
 
 end
