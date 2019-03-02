@@ -55,14 +55,14 @@ function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
 end
 function axisdim(field::Field, axis::Axis)::Int
     index = axisdim(typeof(field), typeof(axis))
-    field.axes[index] == axis ? index : error()
+    axes(field)[index] == axis ? index : error()
 end
 
 axisvalues(field::Field) = axisvalues(axes(axes)...)
 axisvalues(axis::Axis, axes::Axis...) = tuple(values(axis), axisvalues(axes...)...)
 
 function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
-    @assert axisnames(new_axis) in (a, b)
+    @assert axisnames(new_axis) ∈ (a, b)
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
 
