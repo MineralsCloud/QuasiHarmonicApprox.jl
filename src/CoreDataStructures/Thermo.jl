@@ -19,7 +19,8 @@ import QuasiHarmonicApproximation.Tools: differentiate
 export NaturalVariable,
     ThermodynamicField,
     get_conjugate_variable_name,
-    get_conjugate_variable
+    get_conjugate_variable,
+    differentiate
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
 const CONJUGATE_PAIRS = Dict(:T => :S, :P => :V, :S => :T, :V => :P)
@@ -53,8 +54,8 @@ get_conjugate_variable(field::ThermodynamicField, name::Symbol) = get_conjugate_
 function differentiate(field::T, axis::NaturalVariable)::T where {T <: ThermodynamicField}
     dim = axisdim(field, axis)
     a, b = axisvalues(field)
-    x = (dim == 1 ? repeat(axisvalues(a), 1, length(b)) : repeat(transpose(axisvalues(b)), length(a)))
-    @set field.data = differentiate(x, axisvalues(field), dim)
+    x = (dim == 1 ? repeat(a, 1, length(b)) : repeat(transpose(b), length(a)))
+    @set field.data = differentiate(x, field.data, dim)
 end
 
 end
