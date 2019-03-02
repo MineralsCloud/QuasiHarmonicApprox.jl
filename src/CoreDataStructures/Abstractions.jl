@@ -88,4 +88,6 @@ Base.iterate(::Axis, ::Any) = nothing
 Base.iterate(::Type{T}) where {T <: Axis} = (T, nothing)
 Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
+Base.map(f, axis::Axis) = map(f, axis.data)
+
 end
