@@ -48,13 +48,13 @@ ThermodynamicField(first::NaturalVariable, second::NaturalVariable, data) = Ther
 get_conjugate_variable_name(name::Symbol)::Symbol = CONJUGATE_PAIRS[name]
 
 get_conjugate_variable(field::ThermodynamicField, dim::Int) = differentiate(field, axes(field, dim))
-get_conjugate_variable(field::ThermodynamicField, name::Symbol) = get_conjugate_variable(field, axisdim(typeof(field)), NaturalVariable{name})
+get_conjugate_variable(field::ThermodynamicField, name::Symbol) = get_conjugate_variable(field, axisdim(typeof(field), NaturalVariable{name}))
 
 function differentiate(field::T, axis::NaturalVariable)::T where {T <: ThermodynamicField}
     dim = axisdim(field, axis)
-    a, b = field.axes
-    x = (dim == 1 ? repeat(a.data, 1, length(b)) : repeat(transpose(b.data), length(a)))
-    @set field.data = differentiate(x, field.data, dim)
+    a, b = axisvalues(field)
+    x = (dim == 1 ? repeat(axisvalues(a), 1, length(b)) : repeat(transpose(axisvalues(b)), length(a)))
+    @set field.data = differentiate(x, axisvalues(field), dim)
 end
 
 end
