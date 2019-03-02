@@ -33,8 +33,10 @@ Base.axes(field::Field, dim::Int) = axes(field)[dim]
 Base.axes(field::Field, A::Type{<:Axis}) = axes(field, axisdim(A))
 Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
-axistype(::Type{<:Axis{a,A}}) where {a,A} = A
-axistype(axis::Axis) = axistype(typeof(axis))
+axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
+axistypes(axis::Axis) = axistypes(typeof(axis))
+axistypes(axes::Axes) = map(axistypes, axes)
+axistypes(field::Field) = axistypes(axes(field))
 
 axisnames(::Type{<:Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
