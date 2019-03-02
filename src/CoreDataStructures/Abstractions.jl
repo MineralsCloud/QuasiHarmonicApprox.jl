@@ -34,11 +34,6 @@ Base.axes(field::Field, dim::Int) = axes(field)[dim]
 Base.axes(field::Field, A::Type{<:Axis}) = axes(field, axisdim(A))
 Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
-Base.values(axis::Axis) = axis.data
-Base.values(axes::Tuple) = map(values, axes)
-Base.values(axes::Axis...) = values(tuple(axes...))
-Base.values(field::Field) = field.data
-
 axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
 axistypes(axis::Axis) = axistypes(typeof(axis))
 axistypes(axes::Tuple) = map(axistypes, axes)
@@ -63,7 +58,7 @@ function axisdim(field::Field, axis::Axis)::Int
 end
 
 axisvalues() = ()
-axisvalues(axis::Axis, axes::Axis...) = tuple(values(axis), axisvalues(axes...)...)
+axisvalues(axis::Axis, axes::Axis...) = tuple(axis.data, axisvalues(axes...)...)
 axisvalues(field::Field) = axisvalues(axes(field)...)
 
 function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
