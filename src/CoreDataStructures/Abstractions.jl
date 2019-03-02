@@ -35,18 +35,21 @@ Base.axes(field::Field, A::Type{<:Axis}) = axes(field, axisdim(A))
 Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
 Base.values(axis::Axis) = axis.data
-Base.values(axes::Axis...) = map(values, axes)
+Base.values(axes::Tuple) = map(values, axes)
+Base.values(axes::Axis...) = values(tuple(axes...))
 Base.values(field::Field) = field.data
 
 axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
 axistypes(axis::Axis) = axistypes(typeof(axis))
-axistypes(axes::Axis...) = map(axistypes, axes)
+axistypes(axes::Tuple) = map(axistypes, axes)
+axistypes(axes::Axis...) = axistypes(tuple(axes...))
 axistypes(field::Field) = axistypes(axes(field))
 
 axisnames(::Type{<:Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
 axisnames(::Type{<:Axes{a,b}}) where {a,b} = (a, b)
-axisnames(axes::Axes) = axisnames(typeof(axes))
+axisnames(axes::Tuple) = map(axisnames, axes)
+axisnames(axes::Axis...) = axisnames(tuple(axes...))
 axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
 axisnames(field::Field) = axisnames(typeof(field))
 
@@ -59,8 +62,9 @@ function axisdim(field::Field, axis::Axis)::Int
     axes(field)[index] == axis ? index : error()
 end
 
-axisvalues(field::Field) = axisvalues(axes(axes)...)
+axisvalues() = ()
 axisvalues(axis::Axis, axes::Axis...) = tuple(values(axis), axisvalues(axes...)...)
+axisvalues(field::Field) = axisvalues(axes(field)...)
 
 function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
     @assert axisnames(new_axis) ∈ (a, b)
