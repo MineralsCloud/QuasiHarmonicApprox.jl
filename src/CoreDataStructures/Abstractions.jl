@@ -21,6 +21,7 @@ export Axis,
     axisnames,
     axisdim,
     axisvalues,
+    fieldvalues,
     replaceaxis
 
 abstract type Axis{a,A} end
@@ -62,16 +63,18 @@ axisvalues(axes::Tuple) = map(axisvalues, axes)
 axisvalues(axes::Axis...) = axisvalues(tuple(axes...))
 axisvalues(field::Field) = axisvalues(axes(field))
 
+fieldvalues(field::Field) = field.data
+
 function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
     @assert axisnames(new_axis) ∈ (a, b)
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
 
-Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(axisvalues(field)))
+Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(fieldvalues(field)))
 
 function Base.:*(field::T, axis::Axis)::T where {T <: Field}
     dim = axisdim(field, axis)
-    @set field.data = (dim == 1 ? axisvalues(field) .* axisvalues(axis) : axisvalues(field) .* transpose(axisvalues(axis)))
+    @set field.data = (dim == 1 ? fieldvalues(field) .* axisvalues(axis) : fieldvalues(field) .* transpose(axisvalues(axis)))
 end
 Base.:*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
 
