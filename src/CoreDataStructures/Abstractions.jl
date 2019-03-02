@@ -60,7 +60,7 @@ end
 axisvalues(axis::Axis) = axis.data
 axisvalues(axes::Tuple) = map(axisvalues, axes)
 axisvalues(axes::Axis...) = axisvalues(tuple(axes...))
-axisvalues(field::Field) = axisvalues(axes(field)...)
+axisvalues(field::Field) = axisvalues(axes(field))
 
 function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
     @assert axisnames(new_axis) ∈ (a, b)
