@@ -89,6 +89,8 @@ Base.firstindex(axis::Axis) = firstindex(axisvalues(axis))
 
 Base.lastindex(axis::Axis) = lastindex(axisvalues(axis))
 
+Base.eachindex(axis::Axis) = eachindex(axisvalues(axis))
+
 Base.size(axis::Axis) = size(axisvalues(axis))
 
 Base.length(axis::Axis) = length(axisvalues(axis))
