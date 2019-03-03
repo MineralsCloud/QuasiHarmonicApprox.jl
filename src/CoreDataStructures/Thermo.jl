@@ -50,7 +50,7 @@ ThermodynamicField(first::NaturalVariable, second::NaturalVariable, data) = Ther
 get_conjugate_variable_name(name::Symbol)::Symbol = CONJUGATE_PAIRS[name]
 
 get_conjugate_variable(field::ThermodynamicField, dim::Int) = differentiate(field, axes(field, dim))
-get_conjugate_variable(field::ThermodynamicField, name::Symbol) = get_conjugate_variable(field, axisdim(typeof(field), NaturalVariable{name}))
+get_conjugate_variable(field::ThermodynamicField, axis::NaturalVariable) = get_conjugate_variable(field, axisdim(typeof(field), typeof(axis)))
 
 function differentiate(field::T, axis::NaturalVariable)::T where {T <: ThermodynamicField}
     dim = axisdim(field, axis)
