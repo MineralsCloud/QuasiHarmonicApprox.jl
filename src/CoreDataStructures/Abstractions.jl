@@ -32,7 +32,7 @@ abstract type Field{a,b,A,B,T} end
 
 Base.axes(field::Field) = field.axes
 Base.axes(field::Field, dim::Int) = axes(field)[dim]
-Base.axes(field::Field, A::Type{<:Axis}) = axes(field, axisdim(A))
+Base.axes(field::Field, A::Type{<:Axis}) = axes(field, axisdim(typeof(field), A))
 Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
 axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
