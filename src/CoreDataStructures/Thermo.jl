@@ -14,13 +14,12 @@ module Thermo
 using Setfield: @set
 
 using QuasiHarmonicApproximation.CoreDataStructures.Abstractions
-import QuasiHarmonicApproximation.Tools: differentiate
+using QuasiHarmonicApproximation.Tools: differentiate
 
 export NaturalVariable,
     ThermodynamicField,
     get_conjugate_variable_name,
-    get_conjugate_variable,
-    differentiate
+    get_conjugate_variable
 
 const NATURAL_VARIABLE_LABELS = (:T, :S, :P, :V)
 const CONJUGATE_PAIRS = Dict(:T => :S, :P => :V, :S => :T, :V => :P)
@@ -49,11 +48,8 @@ ThermodynamicField(first::NaturalVariable, second::NaturalVariable, data) = Ther
 
 get_conjugate_variable_name(name::Symbol)::Symbol = CONJUGATE_PAIRS[name]
 
-get_conjugate_variable(field::ThermodynamicField, dim::Int) = differentiate(field, axes(field, dim))
-get_conjugate_variable(field::ThermodynamicField, axis::NaturalVariable) = get_conjugate_variable(field, axisdim(typeof(field), typeof(axis)))
-
-function differentiate(field::T, axis::NaturalVariable)::T where {T <: ThermodynamicField}
-    dim = axisdim(field, axis)
+function get_conjugate_variable(field::T, axis::Type{<: NaturalVariable})::T where {T <: ThermodynamicField}
+    dim = axisdim(typeof(field), axis)
     a, b = axisvalues(field)
     x = (dim == 1 ? repeat(a, 1, length(b)) : repeat(transpose(b), length(a)))
     @set field.data = differentiate(x, field.data, dim)
