@@ -37,14 +37,14 @@ Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
 axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
 axistypes(axis::Axis) = axistypes(typeof(axis))
-axistypes(axes::Tuple) = map(axistypes, axes)
+axistypes(axes::NTuple{N, Axis}) where {N} = map(axistypes, axes)
 axistypes(axes::Axis...) = axistypes(tuple(axes...))
 axistypes(field::Field) = axistypes(axes(field))
 
 axisnames(::Type{<:Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
 axisnames(::Type{<:Axes{a,b}}) where {a,b} = (a, b)
-axisnames(axes::Tuple) = map(axisnames, axes)
+axisnames(axes::NTuple{N, Axis}) where {N} = map(axisnames, axes)
 axisnames(axes::Axis...) = axisnames(tuple(axes...))
 axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
 axisnames(field::Field) = axisnames(typeof(field))
@@ -59,7 +59,7 @@ function axisdim(field::Field, axis::Axis)::Int
 end
 
 axisvalues(axis::Axis) = axis.data
-axisvalues(axes::Tuple) = map(axisvalues, axes)
+axisvalues(axes::NTuple{N, Axis}) where {N} = map(axisvalues, axes)
 axisvalues(axes::Axis...) = axisvalues(tuple(axes...))
 axisvalues(field::Field) = axisvalues(axes(field))
 
