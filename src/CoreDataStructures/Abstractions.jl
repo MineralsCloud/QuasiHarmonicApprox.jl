@@ -84,6 +84,7 @@ Base.eltype(::Type{<:Axis{a,A}}) where {a,A} = eltype(A)
 Base.eltype(axis::Axis) = eltype(typeof(axis))
 
 Base.getindex(axis::Axis, i...) = getindex(axisvalues(axis), i...)
+Base.getindex(field::Field, i...) = getindex(fieldvalues(field), i...)
 
 Base.firstindex(axis::Axis) = firstindex(axisvalues(axis))
 
@@ -100,6 +101,9 @@ Base.iterate(::Axis, ::Any) = nothing
 Base.iterate(::Type{T}) where {T <: Axis} = (T, nothing)
 Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
-Base.map(f, axis::Axis) = typeof(axis).name.wrapper(axisnames(axis), map(f, axisvalues(axis)))
+Base.map(f, axis::Axis) = typeof(axis)(map(f, axisvalues(axis)))
+
+Base.:+(a::T, b::T) where {T <: Field} = (@set a.data = fieldvalues(a) + fieldvalues(b))
+Base.:-(a::T, b::T) where {T <: Field} = (@set a.data = fieldvalues(a) - fieldvalues(b))
 
 end
