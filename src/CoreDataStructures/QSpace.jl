@@ -26,7 +26,6 @@ struct NormalMode{a,A <: AbstractVector} <: Axis{a,A}
     end
 end
 NormalMode{a}(data::A) where {a,A} = NormalMode{a,A}(data)
-NormalMode(a::Symbol, data) = NormalMode{a}(data)
 
 struct QSpaceField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
     axes::DualAxes{a,b,A,B}
