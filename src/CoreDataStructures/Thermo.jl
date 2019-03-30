@@ -35,7 +35,7 @@ NaturalVariable{a}(data::A) where {a,A} = NaturalVariable{a,A}(data)
 NaturalVariable(a::Symbol, data) = NaturalVariable{a}(data)
 
 struct ThermodynamicField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
-    axes::Axes{a,b,A,B}
+    axes::DualAxes{a,b,A,B}
     data::T
     function ThermodynamicField{a,b,A,B,T}(axes, data) where {a,b,A,B,T}
         @assert map(length, axes) == size(data)
@@ -43,7 +43,7 @@ struct ThermodynamicField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
         new(axes, data)
     end
 end
-ThermodynamicField(axes::Axes{a,b,A,B}, data::T) where {a,b,A,B,T} = ThermodynamicField{a,b,A,B,T}(axes, data)
+ThermodynamicField(axes::DualAxes{a,b,A,B}, data::T) where {a,b,A,B,T} = ThermodynamicField{a,b,A,B,T}(axes, data)
 ThermodynamicField(first::NaturalVariable, second::NaturalVariable, data) = ThermodynamicField((first, second), data)
 
 get_conjugate_variable_name(name::Symbol)::Symbol = CONJUGATE_PAIRS[name]

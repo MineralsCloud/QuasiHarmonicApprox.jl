@@ -29,14 +29,14 @@ NormalMode{a}(data::A) where {a,A} = NormalMode{a,A}(data)
 NormalMode(a::Symbol, data) = NormalMode{a}(data)
 
 struct QSpaceField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
-    axes::Axes{a,b,A,B}
+    axes::DualAxes{a,b,A,B}
     data::T
     function QSpaceField{a,b,R,S,T}(axes, data) where {a,b,R,S,T}
         @assert map(length, axes) == size(data)
         new(axes, data)
     end
 end
-QSpaceField(axes::Axes{a,b,A,B}, data::T) where {a,b,A,B,T} = QSpaceField{a,b,A,B,T}(axes, data)
+QSpaceField(axes::DualAxes{a,b,A,B}, data::T) where {a,b,A,B,T} = QSpaceField{a,b,A,B,T}(axes, data)
 QSpaceField(first::NormalMode, second::NormalMode, data) = QSpaceField((first, second), data)
 
 end

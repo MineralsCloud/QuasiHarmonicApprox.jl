@@ -14,7 +14,8 @@ module Abstractions
 using Setfield: @set
 
 export Axis,
-    Axes,
+    DualAxes,
+    NAxes,
     Field,
     axes,
     axistypes,
@@ -25,8 +26,8 @@ export Axis,
     replaceaxis
 
 abstract type Axis{a,A} end
-
-const Axes{a,b,A,B} = Tuple{Axis{a,A},Axis{b,B}}
+const DualAxes{a,b,A,B} = Tuple{Axis{a,A},Axis{b,B}}
+const NAxes = NTuple{N, Axis} where {N}
 
 abstract type Field{a,b,A,B,T} end
 
@@ -37,14 +38,14 @@ Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
 axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
 axistypes(axis::Axis) = axistypes(typeof(axis))
-axistypes(axes::NTuple{N, Axis}) where {N} = map(axistypes, axes)
+axistypes(axes::NAxes) = map(axistypes, axes)
 axistypes(axes::Axis...) = axistypes(tuple(axes...))
 axistypes(field::Field) = axistypes(axes(field))
 
 axisnames(::Type{<:Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
-axisnames(::Type{<:Axes{a,b}}) where {a,b} = (a, b)
-axisnames(axes::NTuple{N, Axis}) where {N} = map(axisnames, axes)
+axisnames(::Type{<:DualAxes{a,b}}) where {a,b} = (a, b)
+axisnames(axes::NAxes) = map(axisnames, axes)
 axisnames(axes::Axis...) = axisnames(tuple(axes...))
 axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
 axisnames(field::Field) = axisnames(typeof(field))
@@ -59,13 +60,13 @@ function axisdim(field::Field, axis::Axis)::Int
 end
 
 axisvalues(axis::Axis) = axis.data
-axisvalues(axes::NTuple{N, Axis}) where {N} = map(axisvalues, axes)
+axisvalues(axes::NAxes) = map(axisvalues, axes)
 axisvalues(axes::Axis...) = axisvalues(tuple(axes...))
 axisvalues(field::Field) = axisvalues(axes(field))
 
 fieldvalues(field::Field) = field.data
 
-function replaceaxis(axes::Axes{a,b}, new_axis::Axis)::Axes where {a,b}
+function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
     @assert axisnames(new_axis) ∈ (a, b)
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
