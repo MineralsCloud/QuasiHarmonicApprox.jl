@@ -11,6 +11,7 @@ julia>
 """
 module Interpolation
 
+using EquationsOfState
 using Interpolations
 
 using QuasiHarmonicApproximation.CoreDataStructures
@@ -21,7 +22,7 @@ export AbstractInterpolator,
 abstract type AbstractInterpolator end
 
 struct NDInterpolator{N} <: AbstractInterpolator
-    f::Function
+    f
 end
 
 function (interpolator::NDInterpolator{1})(x::Field, y::Field, axis::Type{<: Axis})
