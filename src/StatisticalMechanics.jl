@@ -25,7 +25,7 @@ const BOLTZMANN = 1.380648e-23
 
 validate_frequency(frequency::AbstractFloat) = frequency < 0 && throw(DomainError("Negative frequency is not proper for QHA calculation!"))
 
-(bose_einstein_distribution(temperature::T, frequency::T)::T) where {T <: AbstractFloat} = 1 / (exp(HBAR * frequency / (BOLTZMANN * temperature)) - 1)
+bose_einstein_distribution(temperature::T, frequency::T) where {T <: AbstractFloat} = 1 / (exp(HBAR * frequency / (BOLTZMANN * temperature)) - 1)
 
 function subsystem_partition_function(temperature::T, frequency::T)::T where {T <: AbstractFloat}
     frequency == 0 && return 1
