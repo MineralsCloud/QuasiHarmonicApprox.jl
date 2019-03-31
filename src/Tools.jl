@@ -11,7 +11,8 @@ julia>
 """
 module Tools
 
-export differentiate
+export differentiate,
+    deepflatten
 
 function differentiate(x::T, f::T)::T where {T <: AbstractVector}
     length(x) == length(f) ? n = length(x) : throw(DimensionMismatch("The two arguments must have the same length!"))
@@ -40,6 +41,24 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
         throw(DomainError(dim, "The `dim` variable must be `1` or `2`!"))
     end
     derivative
+end
+
+function deepflatten(arr)
+    dim = [1]
+
+    function recursiveflatten(arr, dim)
+        if isa(arr, Vector{<: Vector})
+            recursiveflatten(
+                collect(Iterators.flatten(arr)),
+                pushfirst!(dim, length(arr) / prod(dim))
+            )
+        else
+            arr, pushfirst!(dim, length(arr) / prod(dim))
+        end
+    end
+
+    flattened, dim = recursiveflatten(arr, dim)
+    reshape(flattened, dim[1:end-1]...)
 end
 
 end
