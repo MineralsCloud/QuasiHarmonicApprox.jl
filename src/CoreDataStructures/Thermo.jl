@@ -26,9 +26,9 @@ const CONJUGATE_PAIRS = Dict(:T => :S, :P => :V, :S => :T, :V => :P)
 
 struct NaturalVariable{a,A <: AbstractVector} <: Axis{a,A}
     data::A
-    function NaturalVariable{a,A}(data) where {a,A}
+    function NaturalVariable{a,A}(data::B) where {a,A,B}
         @assert a ∈ NATURAL_VARIABLE_LABELS
-        new(data)
+        new{a,B}(data)
     end
 end
 NaturalVariable{a}(data::A) where {a,A} = NaturalVariable{a,A}(data)
@@ -36,10 +36,10 @@ NaturalVariable{a}(data::A) where {a,A} = NaturalVariable{a,A}(data)
 struct ThermodynamicField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
     axes::DualAxes{a,b,A,B}
     data::T
-    function ThermodynamicField{a,b,A,B,T}(axes, data) where {a,b,A,B,T}
+    function ThermodynamicField{a,b,A,B,S}(axes::DualAxes{a,b,C,D}, data::T) where {a,b,A,B,C,D,S,T}
         @assert map(length, axes) == size(data)
         @assert (a => b) ∉ CONJUGATE_PAIRS
-        new(axes, data)
+        new{a,b,C,D,T}(axes, data)
     end
 end
 ThermodynamicField(axes::DualAxes{a,b,A,B}, data::T) where {a,b,A,B,T} = ThermodynamicField{a,b,A,B,T}(axes, data)
