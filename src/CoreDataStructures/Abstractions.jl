@@ -24,6 +24,8 @@ export Axis,
     axisvalues,
     replaceaxis
 
+const DATALENS = @lens _.data
+
 abstract type Axis{a,A} end
 const DualAxes{a,b,A,B} = Tuple{Axis{a,A},Axis{b,B}}
 const NAxes = NTuple{N,Axis} where {N}
@@ -40,19 +42,7 @@ axistypes(axis::Axis) = axistypes(typeof(axis))
 
 axisnames(::Type{<:Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
-axisnames(::Type{<:DualAxes{a,b}}) where {a,b} = (a, b)
 axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
-
-function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
-    index = findfirst(isequal(axisnames(A)), axisnames(F))
-    isa(index, Nothing) ? error() : index
-end
-function axisdim(field::Field, axis::Axis)::Int
-    index = axisdim(typeof(field), typeof(axis))
-    axes(field)[index] == axis ? index : error()
-end
-
-const DATALENS = @lens _.data
 
 axisvalues(axis::Axis) = get(axis, DATALENS)
 
@@ -62,6 +52,15 @@ for f in (axistypes, axisnames, axisvalues)
         $f(axes::Axis...) = $f(tuple(axes...))
         $f(field::Field) = $f(axes(field))
     end)
+end
+
+function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
+    index = findfirst(isequal(axisnames(A)), axisnames(F))
+    isnothing(index) ? error() : index
+end
+function axisdim(field::Field, axis::Axis)::Int
+    index = axisdim(typeof(field), typeof(axis))
+    axes(field)[index] == axis ? index : error()
 end
 
 function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
@@ -102,6 +101,6 @@ function Base.:*(field::T, axis::Axis)::T where {T <: Field}
     dim = axisdim(field, axis)
     set(field, DATALENS, dim == 1 ? get(field, DATALENS) .* axisvalues(axis) : get(field, DATALENS) .* transpose(axisvalues(axis)))
 end
-Base.:*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
+Base.:*(v::Axis, field::Field) = field * v  # Make it valid on both direction
 
 end
