@@ -104,6 +104,10 @@ Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
 Base.map(f, axis::Axis) = typeof(axis)(map(f, axisvalues(axis)))
 
+Base.eachrow(field::Field) = eachrow(fieldvalues(field))
+
+Base.eachcol(field::Field) = eachcol(fieldvalues(field))
+
 Base.:+(a::T, b::T) where {T <: Field} = (@set a.data = fieldvalues(a) + fieldvalues(b))
 Base.:-(a::T, b::T) where {T <: Field} = (@set a.data = fieldvalues(a) - fieldvalues(b))
 
