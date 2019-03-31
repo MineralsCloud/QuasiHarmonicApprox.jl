@@ -36,6 +36,5 @@ struct QSpaceField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
     end
 end
 QSpaceField(axes::DualAxes{a,b,A,B}, data::T) where {a,b,A,B,T} = QSpaceField{a,b,A,B,T}(axes, data)
-QSpaceField(first::NormalMode, second::NormalMode, data) = QSpaceField((first, second), data)
 
 end
