@@ -37,17 +37,11 @@ Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
 axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
 axistypes(axis::Axis) = axistypes(typeof(axis))
-axistypes(axes::NAxes) = map(axistypes, axes)
-axistypes(axes::Axis...) = axistypes(tuple(axes...))
-axistypes(field::Field) = axistypes(axes(field))
 
 axisnames(::Type{<:Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
 axisnames(::Type{<:DualAxes{a,b}}) where {a,b} = (a, b)
-axisnames(axes::NAxes) = map(axisnames, axes)
-axisnames(axes::Axis...) = axisnames(tuple(axes...))
 axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
-axisnames(field::Field) = axisnames(typeof(field))
 
 function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
     index = findfirst(isequal(axisnames(A)), axisnames(F))
@@ -58,43 +52,36 @@ function axisdim(field::Field, axis::Axis)::Int
     axes(field)[index] == axis ? index : error()
 end
 
-const datalens = @lens _.data
+const DATALENS = @lens _.data
 
-axisvalues(axis::Axis) = get(axis, datalens)
-axisvalues(axes::NAxes) = map(axisvalues, axes)
-axisvalues(axes::Axis...) = axisvalues(tuple(axes...))
-axisvalues(field::Field) = axisvalues(axes(field))
+axisvalues(axis::Axis) = get(axis, DATALENS)
+
+for f in (axistypes, axisnames, axisvalues)
+    eval(quote
+        $f(axes::NAxes) = map($f, axes)
+        $f(axes::Axis...) = $f(tuple(axes...))
+        $f(field::Field) = $f(axes(field))
+    end)
+end
 
 function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
     @assert axisnames(new_axis) ∈ (a, b)
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
 
-Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(get(field, datalens)))
+Base.transpose(field::Field) = typeof(field)(reverse(axes(field)), transpose(get(field, DATALENS)))
 
-function Base.:*(field::T, axis::Axis)::T where {T <: Field}
-    dim = axisdim(field, axis)
-    set(field, datalens, dim == 1 ? get(field, datalens) .* axisvalues(axis) : get(field, datalens) .* transpose(axisvalues(axis)))
-end
-Base.:*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
-
-Base.:(==)(A::Axis{a}, B::Axis{a}) where {a} = get(A, datalens) == get(B, datalens)
+Base.:(==)(A::Axis{a}, B::Axis{a}) where {a} = get(A, DATALENS) == get(B, DATALENS)
 
 Base.eltype(::Type{<:Axis{a,A}}) where {a,A} = eltype(A)
 Base.eltype(axis::Axis) = eltype(typeof(axis))
 
 Base.getindex(axis::Axis, i...) = getindex(axisvalues(axis), i...)
-Base.getindex(field::Field, i...) = getindex(get(field, datalens), i...)
+Base.getindex(field::Field, i...) = getindex(get(field, DATALENS), i...)
 
-Base.firstindex(axis::Axis) = firstindex(axisvalues(axis))
-
-Base.lastindex(axis::Axis) = lastindex(axisvalues(axis))
-
-Base.eachindex(axis::Axis) = eachindex(axisvalues(axis))
-
-Base.size(axis::Axis) = size(axisvalues(axis))
-
-Base.length(axis::Axis) = length(axisvalues(axis))
+for f in (firstindex, lastindex, eachindex, size, length)
+    eval(Base.$f(axis::Axis) = $f(axisvalues(axis)))
+end
 
 Base.iterate(axis::Axis) = (axis, nothing)
 Base.iterate(::Axis, ::Any) = nothing
@@ -103,14 +90,18 @@ Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
 Base.map(f, axis::Axis) = typeof(axis)(map(f, axisvalues(axis)))
 
-Base.eachrow(field::Field) = eachrow(get(field, datalens))
-
-Base.eachcol(field::Field) = eachcol(get(field, datalens))
-
-for operator in (Base.:+, Base.:-)
-    eval(quote
-        $operator(a::T, b::T) where {T <: Field} = set(a, datalens, $operator(get(a, datalens), get(b, datalens)))
-    end)
+for f in (eachrow, eachcol)
+    eval(Base.$f(field::Field) = $f(get(field, DATALENS)))
 end
+
+for operator in (:+, :-)
+    eval(Base.$operator(a::T, b::T) where {T <: Field} = set(a, DATALENS, $operator(get(a, DATALENS), get(b, DATALENS))))
+end
+
+function Base.:*(field::T, axis::Axis)::T where {T <: Field}
+    dim = axisdim(field, axis)
+    set(field, DATALENS, dim == 1 ? get(field, DATALENS) .* axisvalues(axis) : get(field, DATALENS) .* transpose(axisvalues(axis)))
+end
+Base.:*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
 
 end
