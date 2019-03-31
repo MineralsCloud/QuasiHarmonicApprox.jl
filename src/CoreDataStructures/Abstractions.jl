@@ -46,7 +46,7 @@ axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
 
 axisvalues(axis::Axis) = get(axis, DATALENS)
 
-for f in (axistypes, axisnames, axisvalues)
+for f in (:axistypes, :axisnames, :axisvalues)
     eval(quote
         $f(axes::NAxes) = map($f, axes)
         $f(axes::Axis...) = $f(tuple(axes...))
@@ -78,8 +78,10 @@ Base.eltype(axis::Axis) = eltype(typeof(axis))
 Base.getindex(axis::Axis, i...) = getindex(axisvalues(axis), i...)
 Base.getindex(field::Field, i...) = getindex(get(field, DATALENS), i...)
 
-for f in (firstindex, lastindex, eachindex, size, length)
-    eval(Base.$f(axis::Axis) = $f(axisvalues(axis)))
+for f in (:firstindex, :lastindex, :eachindex, :size, :length)
+    eval(quote
+        Base.$f(axis::Axis) = $f(axisvalues(axis))
+    end)
 end
 
 Base.iterate(axis::Axis) = (axis, nothing)
@@ -89,12 +91,16 @@ Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
 Base.map(f, axis::Axis) = typeof(axis)(map(f, axisvalues(axis)))
 
-for f in (eachrow, eachcol)
-    eval(Base.$f(field::Field) = $f(get(field, DATALENS)))
+for f in (:eachrow, :eachcol)
+    eval(quote
+        Base.$f(field::Field) = $f(get(field, DATALENS))
+    end)
 end
 
 for operator in (:+, :-)
-    eval(Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator(x, get(b, DATALENS)), a, DATALENS))
+    eval(quote
+        Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator(x, get(b, DATALENS)), a, DATALENS)
+    end)
 end
 
 function Base.:*(field::T, axis::Axis)::T where {T <: Field}
