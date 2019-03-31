@@ -11,7 +11,7 @@ julia>
 """
 module Abstractions
 
-using Setfield: @set
+using Setfield: get, set, @lens
 
 export Axis,
     DualAxes,
@@ -22,12 +22,11 @@ export Axis,
     axisnames,
     axisdim,
     axisvalues,
-    fieldvalues,
     replaceaxis
 
 abstract type Axis{a,A} end
 const DualAxes{a,b,A,B} = Tuple{Axis{a,A},Axis{b,B}}
-const NAxes = NTuple{N, Axis} where {N}
+const NAxes = NTuple{N,Axis} where {N}
 
 abstract type Field{a,b,A,B,T} end
 
@@ -59,33 +58,33 @@ function axisdim(field::Field, axis::Axis)::Int
     axes(field)[index] == axis ? index : error()
 end
 
-axisvalues(axis::Axis) = axis.data
+const datalens = @lens _.data
+
+axisvalues(axis::Axis) = get(axis, datalens)
 axisvalues(axes::NAxes) = map(axisvalues, axes)
 axisvalues(axes::Axis...) = axisvalues(tuple(axes...))
 axisvalues(field::Field) = axisvalues(axes(field))
-
-fieldvalues(field::Field) = field.data
 
 function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
     @assert axisnames(new_axis) ∈ (a, b)
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
 
-Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(fieldvalues(field)))
+Base.transpose(field::Field) = typeof(field).name.wrapper(reverse(axes(field)), transpose(get(field, datalens)))
 
 function Base.:*(field::T, axis::Axis)::T where {T <: Field}
     dim = axisdim(field, axis)
-    @set field.data = (dim == 1 ? fieldvalues(field) .* axisvalues(axis) : fieldvalues(field) .* transpose(axisvalues(axis)))
+    set(field, datalens, dim == 1 ? get(field, datalens) .* axisvalues(axis) : get(field, datalens) .* transpose(axisvalues(axis)))
 end
 Base.:*(v::Axis, field::Field) = *(field, v)  # Make it valid on both direction
 
-Base.:(==)(A::Axis{a}, B::Axis{a}) where {a} = A.data == B.data
+Base.:(==)(A::Axis{a}, B::Axis{a}) where {a} = get(A, datalens) == get(B, datalens)
 
 Base.eltype(::Type{<:Axis{a,A}}) where {a,A} = eltype(A)
 Base.eltype(axis::Axis) = eltype(typeof(axis))
 
 Base.getindex(axis::Axis, i...) = getindex(axisvalues(axis), i...)
-Base.getindex(field::Field, i...) = getindex(fieldvalues(field), i...)
+Base.getindex(field::Field, i...) = getindex(get(field, datalens), i...)
 
 Base.firstindex(axis::Axis) = firstindex(axisvalues(axis))
 
@@ -104,11 +103,14 @@ Base.iterate(::Type{<:Axis}, ::Any) = nothing
 
 Base.map(f, axis::Axis) = typeof(axis)(map(f, axisvalues(axis)))
 
-Base.eachrow(field::Field) = eachrow(fieldvalues(field))
+Base.eachrow(field::Field) = eachrow(get(field, datalens))
 
-Base.eachcol(field::Field) = eachcol(fieldvalues(field))
+Base.eachcol(field::Field) = eachcol(get(field, datalens))
 
-Base.:+(a::T, b::T) where {T <: Field} = (@set a.data = fieldvalues(a) + fieldvalues(b))
-Base.:-(a::T, b::T) where {T <: Field} = (@set a.data = fieldvalues(a) - fieldvalues(b))
+for operator in (Base.:+, Base.:-)
+    eval(quote
+        $operator(a::T, b::T) where {T <: Field} = set(a, datalens, $operator(get(a, datalens), get(b, datalens)))
+    end)
+end
 
 end
