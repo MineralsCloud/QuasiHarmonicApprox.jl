@@ -56,11 +56,11 @@ end
 
 function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
     index = findfirst(isequal(axisnames(A)), axisnames(F))
-    isnothing(index) ? error() : index
+    isnothing(index) ? error("Cannot find the index of the axis in the field!") : index
 end
 function axisdim(field::Field, axis::Axis)::Int
     index = axisdim(typeof(field), typeof(axis))
-    axes(field)[index] == axis ? index : error()
+    axes(field)[index] == axis ? index : error("Cannot find the index of the axis in the field!")
 end
 
 function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
