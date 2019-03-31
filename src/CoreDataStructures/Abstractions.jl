@@ -11,7 +11,7 @@ julia>
 """
 module Abstractions
 
-using Setfield: get, set, @lens
+using Setfield: @lens, get, modify
 
 export Axis,
     DualAxes,
@@ -94,12 +94,12 @@ for f in (eachrow, eachcol)
 end
 
 for operator in (:+, :-)
-    eval(Base.$operator(a::T, b::T) where {T <: Field} = set(a, DATALENS, $operator(get(a, DATALENS), get(b, DATALENS))))
+    eval(Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator(x, get(b, DATALENS)), a, DATALENS))
 end
 
 function Base.:*(field::T, axis::Axis)::T where {T <: Field}
     dim = axisdim(field, axis)
-    set(field, DATALENS, dim == 1 ? get(field, DATALENS) .* axisvalues(axis) : get(field, DATALENS) .* transpose(axisvalues(axis)))
+    modify(x->dim == 1 ? x .* axisvalues(axis) : x .* transpose(axisvalues(axis)), field, DATALENS)
 end
 Base.:*(v::Axis, field::Field) = field * v  # Make it valid on both direction
 

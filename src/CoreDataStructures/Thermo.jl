@@ -11,7 +11,7 @@ julia>
 """
 module Thermo
 
-using Setfield: set
+using Setfield: modify
 
 using QuasiHarmonicApproximation.CoreDataStructures.Abstractions
 using QuasiHarmonicApproximation.Tools: differentiate
@@ -51,7 +51,7 @@ function get_conjugate_variable(field::T, axis::Type{<: NaturalVariable})::T whe
     dim = axisdim(typeof(field), axis)
     a, b = axisvalues(field)
     x = (dim == 1 ? repeat(a, 1, length(b)) : repeat(transpose(b), length(a)))
-    set(field, Abstractions.DATALENS, differentiate(x, get(field, Abstractions.DATALENS), dim))
+    modify(y->differentiate(x, y, dim), field, Abstractions.DATALENS)
 end
 
 end
