@@ -120,10 +120,10 @@ for operator in (:+, :-)
     end)
 end
 
-function Base.:*(field::T, axis::Axis)::T where {T <: Field}
-    dim = axisdim(field, axis)
-    modify(x->dim == 1 ? x .* axisvalues(axis) : x .* transpose(axisvalues(axis)), field, DATALENS)
+for operator in (:*, :/)
+    eval(quote
+        Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator.(x, _getdata(b)), a, DATALENS)
+    end)
 end
-Base.:*(v::Axis, field::Field) = field * v  # Make it valid on both direction
 
 end
