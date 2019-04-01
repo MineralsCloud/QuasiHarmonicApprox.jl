@@ -14,6 +14,7 @@ module Abstractions
 using Setfield: @lens, get, modify
 
 export Axis,
+    CategoricalAxis,
     DualAxes,
     NAxes,
     Field,
@@ -29,6 +30,8 @@ const DATALENS = @lens _.data
 abstract type Axis{a,A} end
 const DualAxes{a,b,A,B} = Tuple{Axis{a,A},Axis{b,B}}
 const NAxes = NTuple{N,Axis} where {N}
+
+abstract type CategoricalAxis{a,A} <: Axis{a,A} end
 
 abstract type Field{a,b,A,B,T} end
 
@@ -62,8 +65,10 @@ function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
 end
 function axisdim(field::Field, axis::Axis)::Int
     index = axisdim(typeof(field), typeof(axis))
-    # axes(field, index) == axis ? index : error("Cannot find the index of the axis in the field!")
-    return index
+    axes(field, index) == axis ? index : error("Cannot find the index of the axis in the field!")
+end
+function axisdim(field::Field, axis::CategoricalAxis)::Int
+    axisdim(typeof(field), typeof(axis))
 end
 
 function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}

@@ -18,7 +18,7 @@ export NormalMode,
 
 const NORMAL_MODE_LABELS = (:q, :s)
 
-struct NormalMode{a,A <: AbstractVector} <: Axis{a,A}
+struct NormalMode{a,A <: AbstractVector} <: CategoricalAxis{a,A}
     data::A
     function NormalMode{a,A}(data::B) where {a,A,B}
         @assert a ∈ NORMAL_MODE_LABELS
