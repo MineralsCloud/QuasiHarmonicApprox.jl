@@ -44,7 +44,9 @@ axisnames(::Type{<:Axis{a}}) where {a} = a
 axisnames(axis::Axis) = axisnames(typeof(axis))
 axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
 
-axisvalues(axis::Axis) = get(axis, DATALENS)
+_getdata(x::Union{Axis,Field}) = get(x, DATALENS)  # Do not export
+
+axisvalues(axis::Axis) = _getdata(axis)
 
 for f in (:axistypes, :axisnames, :axisvalues)
     eval(quote
@@ -60,7 +62,8 @@ function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
 end
 function axisdim(field::Field, axis::Axis)::Int
     index = axisdim(typeof(field), typeof(axis))
-    axes(field)[index] == axis ? index : error("Cannot find the index of the axis in the field!")
+    # axes(field, index) == axis ? index : error("Cannot find the index of the axis in the field!")
+    return index
 end
 
 function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
@@ -68,38 +71,47 @@ function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
 
-Base.transpose(field::Field) = typeof(field)(reverse(axes(field)), transpose(get(field, DATALENS)))
+Base.transpose(field::Field) = typeof(field)(reverse(axes(field)), transpose(_getdata(field)))
 
-Base.:(==)(A::Axis{a}, B::Axis{a}) where {a} = get(A, DATALENS) == get(B, DATALENS)
+for S in (:Axis, :Field)
+    eval(quote
+        Base.:(==)(A::T, B::T) where {T <: $S} = _getdata(A) == _getdata(B)
+    end)
+end
 
 Base.eltype(::Type{<:Axis{a,A}}) where {a,A} = eltype(A)
 Base.eltype(axis::Axis) = eltype(typeof(axis))
 
-Base.getindex(axis::Axis, i...) = getindex(axisvalues(axis), i...)
-Base.getindex(field::Field, i...) = getindex(get(field, DATALENS), i...)
-
-for f in (:firstindex, :lastindex, :eachindex, :size, :length)
+for T in (:Axis, :Field)
     eval(quote
-        Base.$f(axis::Axis) = $f(axisvalues(axis))
+        Base.getindex(x::($T), i...) = getindex(_getdata(x), i...)
     end)
 end
 
-Base.iterate(axis::Axis) = (axis, nothing)
-Base.iterate(::Axis, ::Any) = nothing
-Base.iterate(::Type{T}) where {T <: Axis} = (T, nothing)
-Base.iterate(::Type{<:Axis}, ::Any) = nothing
+for (f, T) in Iterators.product((:firstindex, :lastindex, :eachindex, :size, :length), (:Axis, :Field))
+    eval(quote
+        Base.$f(x::($T)) = $f(_getdata(x))
+    end)
+end
+
+for T in (:Axis, :Field)
+    eval(quote
+        Base.iterate(x::($T)) = iterate(_getdata(x))
+        Base.iterate(x::($T), i) = iterate(_getdata(x), i)
+    end)
+end
 
 Base.map(f, axis::Axis) = typeof(axis)(map(f, axisvalues(axis)))
 
 for f in (:eachrow, :eachcol)
     eval(quote
-        Base.$f(field::Field) = $f(get(field, DATALENS))
+        Base.$f(field::Field) = $f(_getdata(field))
     end)
 end
 
 for operator in (:+, :-)
     eval(quote
-        Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator(x, get(b, DATALENS)), a, DATALENS)
+        Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator(x, _getdata(b)), a, DATALENS)
     end)
 end
 
