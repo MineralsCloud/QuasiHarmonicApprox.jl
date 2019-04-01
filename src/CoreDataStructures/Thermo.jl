@@ -43,6 +43,8 @@ struct ThermodynamicField{a,b,A,B,T <: AbstractMatrix} <: Field{a,b,A,B,T}
     end
 end
 ThermodynamicField(axes::DualAxes{a,b,A,B}, data::T) where {a,b,A,B,T} = ThermodynamicField{a,b,A,B,T}(axes, data)
+ThermodynamicField(first::NaturalVariable, second::NaturalVariable, data) = ThermodynamicField((first, second), data)
+ThermodynamicField{a,b}(first, second, data) where {a,b} = ThermodynamicField((NaturalVariable{a}(first), NaturalVariable{b}(second)), data)
 
 get_conjugate_variable_name(name::Symbol)::Symbol = CONJUGATE_PAIRS[name]
 
