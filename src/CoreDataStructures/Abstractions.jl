@@ -90,19 +90,18 @@ Base.eltype(axis::Axis) = eltype(typeof(axis))
 for T in (:Axis, :Field)
     eval(quote
         Base.getindex(x::($T), i...) = getindex(_getdata(x), i...)
+        function Base.iterate(x::($T), i = 1)
+            i > length(x) && return nothing
+            getindex(x, i), i + 1
+        end
     end)
 end
+
+Base.IteratorSize(::Field) = Base.HasShape{2}()
 
 for (f, T) in Iterators.product((:firstindex, :lastindex, :eachindex, :size, :length), (:Axis, :Field))
     eval(quote
         Base.$f(x::($T)) = $f(_getdata(x))
-    end)
-end
-
-for T in (:Axis, :Field)
-    eval(quote
-        Base.iterate(x::($T)) = iterate(_getdata(x))
-        Base.iterate(x::($T), i) = iterate(_getdata(x), i)
     end)
 end
 
@@ -122,7 +121,7 @@ end
 
 for operator in (:*, :/)
     eval(quote
-        Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator.(x, _getdata(b)), a, DATALENS)
+        Base.broadcast(::typeof($operator), a::T, b::T) where {T <: Field} = modify(x->broadcast($operator, x, _getdata(b)), a, DATALENS)
     end)
 end
 
