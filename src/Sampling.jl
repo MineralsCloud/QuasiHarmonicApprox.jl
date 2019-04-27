@@ -25,7 +25,7 @@ end
 function sample_brillouin_zone(q_weights::T, quantity::T) where {T <: QSpaceField}
     validate_brillouin_zone_sampling(q_weights, quantity)
     factor = sum(q_weights)
-    sum(quantity * q_weights) / factor  # * is elementwise
+    sum(quantity .* q_weights) / factor  # * is elementwise
 end
 
 end

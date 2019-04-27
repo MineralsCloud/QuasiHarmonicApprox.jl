@@ -56,7 +56,7 @@ function deepflatten(arr::Vector{<: Vector})
     end
 
     flattened, dim = recursiveflatten(arr, dim)
-    reshape(flattened, dim[1:end - 1]...)
+    reshape(flattened, reverse(dim)[2:end]...)
 end
 
 end
