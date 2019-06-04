@@ -12,3 +12,12 @@ JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 Rematch = "bfecab0d-fd4d-5014-a23f-56c5fae6447a"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
