@@ -1,11 +1,19 @@
 module QuasiHarmonicApproximation
 
-include("Loggers.jl")
+using Reexport
+
 include("StatisticalMechanics.jl")
-include("CoreDataStructures/CoreDataStructures.jl")
-include("Sampling.jl")
+
 include("Tools.jl")
+
+include("CoreDataStructures/CoreDataStructures.jl")
+
+include("Sampling.jl")
+
 include("Interpolation.jl")
+
 include("Thermodynamics.jl")
+
+include("BasicIO.jl")
 
 end # module

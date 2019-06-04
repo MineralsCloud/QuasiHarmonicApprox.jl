@@ -11,118 +11,116 @@ julia>
 """
 module Abstractions
 
-using MacroTools: @forward
-using Setfield: @set
+using Setfield: @lens, get, modify
 
-import Base: length, size,
-    ==, *, +, -,
-    getproperty, setproperty!,
-    iterate
+export Axis,
+    CategoricalAxis,
+    DualAxes,
+    NAxes,
+    Field,
+    axes,
+    axistypes,
+    axisnames,
+    axisdim,
+    axisvalues,
+    replaceaxis
 
-export AbstractAxis,
-    BiaxialField,
-    whichaxis,
-    getproperty, setproperty!,
-    length, size,
-    ==, *, +, -,
-    iscompatible, whichaxis_iscompatible,
-    iterate
+const DATALENS = @lens _.data
 
-##======================= Types declaration =======================##
-abstract type AbstractAxis{T} end
+abstract type Axis{a,A} end
+const DualAxes{a,b,A,B} = Tuple{Axis{a,A},Axis{b,B}}
+const NAxes = NTuple{N,Axis} where {N}
 
-abstract type BiaxialField{A, B} end
-##======================= End =======================##
+abstract type CategoricalAxis{a,A} <: Axis{a,A} end
 
-"""
-    whichaxis(::BiaxialField{A, B}, ::Val{T})
+abstract type Field{a,b,A,B,T} end
 
-If `T` is not a `Symbol`, it will definitely return `nothing`. If `T` is one of `A` and `B`, then
-`:first` or `:second` will be returned. Everything else (`Symbol` not in `(A, B)`) will return `nothing`.
-"""
-function whichaxis(::BiaxialField{A, B}, ::Val{T})::Union{Nothing, Symbol} where {A, B, T}
-    T in (A, B) || return nothing
-    T == A ? :first : :second
-end
-"""
-    whichaxis(f::BiaxialField, s::Symbol)
+Base.axes(field::Field) = field.axes
+Base.axes(field::Field, dim::Int) = axes(field)[dim]
+Base.axes(field::Field, A::Type{<:Axis}) = axes(field, axisdim(typeof(field), A))
+Base.axes(field::Field, axis::Axis) = axes(field, axisdim(field, axis))
 
-Based on multiple dispatch, actually only symbols in `(:first, :second)` and the type parameters of
-`BiaxialField` will return non-`nothing` result.
-"""
-function whichaxis(f::BiaxialField, s::Symbol)::Union{Nothing, Symbol}
-    s in (:first, :second) && return s
-    whichaxis(f, Val(s))
-end
+axistypes(::Type{<:Axis{a,A}}) where {a,A} = A
+axistypes(axis::Axis) = axistypes(typeof(axis))
 
-##======================= Getters and setters =======================##
-"""
-    getproperty(f::BiaxialField{A, B}, s::Symbol)
+axisnames(::Type{<:Axis{a}}) where {a} = a
+axisnames(axis::Axis) = axisnames(typeof(axis))
+axisnames(::Type{<:Field{a,b}}) where {a,b} = (a, b)
 
-Based on multiple dispatch, actually only symbols in `(:first, :second, :values)` and the type parameters
-of `BiaxialField` will not raise an error. `getproperty` is more recommended to use instead of `getfield`.
-"""
-function getproperty(f::BiaxialField{A, B}, s::Symbol) where {A, B}
-    s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
-    getfield(f, s)
-end
-"""
-    getproperty(::BiaxialField, ::Nothing)
+_getdata(x::Union{Axis,Field}) = get(x, DATALENS)  # Do not export
 
-This will just return `nothing`.
-"""
-getproperty(::BiaxialField, ::Nothing) = nothing
+axisvalues(axis::Axis) = _getdata(axis)
 
-function setproperty!(f::BiaxialField{A, B}, s::Symbol, x) where {A, B}
-    s in (A, B) && (s::Symbol = whichaxis(f, s))  # This is type-safe!
-    setfield!(f, s, x)  # Whether `s` is in `(A, B)` or not, it will be a valid property name.
-end
-##======================= End =======================##
-
-##======================= Forward basic operations =======================##
-@forward AbstractAxis.values length, size, ==
-
-function size(x::BiaxialField, s::Symbol)
-    axis = whichaxis(x, s)
-    isnothing(axis) && error("Cannot find corresponding axis to `$s`!")
-    axis == :first ? length(x.first) : length(x.second)
-end
-
-==(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in fieldnames(x))
-
-@forward BiaxialField.values iterate
-##======================= End =======================##
-
-function whichaxis_iscompatible(f::BiaxialField, v::AbstractAxis{T})::Union{Nothing, Symbol} where {T}
-    axis = whichaxis(f, T)
-    getproperty(f, axis) == v && return axis
-    nothing  # If `axis` is `nothing`, or the axis is not equals to `v`.
-end
-
-iscompatible(x::T, y::T) where {T <: BiaxialField} = all(getfield(x, f) == getfield(y, f) for f in (:first, :second))
-iscompatible(f::BiaxialField, v::AbstractAxis{T}) where {T} = isnothing(whichaxis_iscompatible(f, v)) ? false : true
-
-##======================= Arithmetic operations =======================##
-function *(f::T, v::AbstractAxis)::T where {T <: BiaxialField}
-    axis = whichaxis_iscompatible(f, v)
-    isnothing(axis) && throw(ArgumentError("The axis and field are not compatible so they cannot multiply!"))
-
-    @set f.values = if axis == :first
-        f.values .* v.values
-    else
-        f.values .* transpose(v.values)
-    end
-end
-*(v::AbstractAxis, f::BiaxialField) = *(f, v)  # Make it valid on both direction
-
-# Use metaprogramming to forward operations
-for op in (:+, :-)
+for f in (:axistypes, :axisnames, :axisvalues)
     eval(quote
-        function $op(f::T, g::T)::T where {T <: BiaxialField}
-            iscompatible(f, g) ? $op(f.values, g.values) : throw(ArgumentError("The 2 fields are not compatible!"))
+        $f(axes::NAxes) = map($f, axes)
+        $f(axes::Axis...) = $f(tuple(axes...))
+        $f(field::Field) = $f(axes(field))
+    end)
+end
+
+function axisdim(F::Type{<:Field}, A::Type{<:Axis})::Int
+    index = findfirst(isequal(axisnames(A)), axisnames(F))
+    isnothing(index) ? error("Cannot find the index of the axis in the field!") : index
+end
+function axisdim(field::Field, axis::Axis)::Int
+    index = axisdim(typeof(field), typeof(axis))
+    axes(field, index) == axis ? index : error("Cannot find the index of the axis in the field!")
+end
+(axisdim(field::Field, axis::CategoricalAxis)::Int) = axisdim(typeof(field), typeof(axis))
+
+function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
+    @assert axisnames(new_axis) ∈ (a, b)
+    axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
+end
+
+Base.transpose(field::Field) = typeof(field)(reverse(axes(field)), transpose(_getdata(field)))
+
+for S in (:Axis, :Field)
+    eval(quote
+        Base.:(==)(A::T, B::T) where {T <: $S} = _getdata(A) == _getdata(B)
+    end)
+end
+
+Base.eltype(::Type{<:Axis{a,A}}) where {a,A} = eltype(A)
+Base.eltype(axis::Axis) = eltype(typeof(axis))
+
+for T in (:Axis, :Field)
+    eval(quote
+        Base.getindex(x::($T), i...) = getindex(_getdata(x), i...)
+        function Base.iterate(x::($T), i = 1)
+            i > length(x) && return nothing
+            getindex(x, i), i + 1
         end
     end)
 end
-##======================= End =======================##
+
+Base.IteratorSize(::Field) = Base.HasShape{2}()
+
+for (f, T) in Iterators.product((:firstindex, :lastindex, :eachindex, :size, :length), (:Axis, :Field))
+    eval(quote
+        Base.$f(x::($T)) = $f(_getdata(x))
+    end)
+end
+
+Base.map(f, axis::Axis) = typeof(axis)(map(f, axisvalues(axis)))
+
+for f in (:eachrow, :eachcol)
+    eval(quote
+        Base.$f(field::Field) = $f(_getdata(field))
+    end)
+end
+
+for operator in (:+, :-)
+    eval(quote
+        Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator(x, _getdata(b)), a, DATALENS)
+    end)
+end
+
+for operator in (:*, :/)
+    eval(quote
+        Base.broadcast(::typeof($operator), a::T, b::T) where {T <: Field} = modify(x->broadcast($operator, x, _getdata(b)), a, DATALENS)
+    end)
+end
 
 end

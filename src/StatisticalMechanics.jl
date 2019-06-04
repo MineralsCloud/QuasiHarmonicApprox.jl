@@ -20,12 +20,14 @@ export bose_einstein_distribution,
     subsystem_entropy,
     subsystem_volumetric_specific_heat
 
-const HBAR = 6.62607004e-34
-const BOLTZMANN = 1.380648e-23
+const HBAR = 0.00012398419739326685
+const BOLTZMANN = 8.6173303e-05
 
 validate_frequency(frequency::AbstractFloat) = frequency < 0 && throw(DomainError("Negative frequency is not proper for QHA calculation!"))
 
-(bose_einstein_distribution(temperature::T, frequency::T)::T) where {T <: AbstractFloat} = 1 / (exp(HBAR * frequency / (BOLTZMANN * temperature)) - 1)
+function bose_einstein_distribution(temperature::T, frequency::T)::T where {T <: AbstractFloat}
+    1 / (exp(HBAR * frequency / (BOLTZMANN * temperature)) - 1)
+end
 
 function subsystem_partition_function(temperature::T, frequency::T)::T where {T <: AbstractFloat}
     frequency == 0 && return 1

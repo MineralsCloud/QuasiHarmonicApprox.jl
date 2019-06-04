@@ -11,11 +11,8 @@ julia>
 """
 module Tools
 
-using Setfield: @set
-
-using QuasiHarmonicApproximation.CoreDataStructures
-
-export differentiate
+export differentiate,
+    deepflatten
 
 function differentiate(x::T, f::T)::T where {T <: AbstractVector}
     length(x) == length(f) ? n = length(x) : throw(DimensionMismatch("The two arguments must have the same length!"))
@@ -45,17 +42,21 @@ function differentiate(x::T, f::T, dim::Int)::T where {T <: AbstractMatrix}
     end
     derivative
 end
-function differentiate(f::T, s::Symbol)::T where {T <: ThermodynamicField}
-    axis = whichaxis(f, s)
-    isnothing(axis) && throw(ArgumentError(""))
-    x, y = f.first, f.second
-    dim = Dict(:first => 1, :second => 2)[axis]
-    var = if dim == 1
-        repeat(x.values, 1, length(y))
-    else
-        repeat(transpose(y.values), length(x))
+
+function deepflatten(arr::Vector{<: Vector})
+    dim = [1]
+
+    function recursiveflatten(arr, dim)
+        if arr isa Vector{<: Vector}
+            recursiveflatten(collect(Iterators.flatten(arr)),
+                pushfirst!(dim, length(arr) / prod(dim)))
+        else
+            arr, pushfirst!(dim, length(arr) / prod(dim))
+        end
     end
-    @set f.values = differentiate(var, f.values, dim)
+
+    flattened, dim = recursiveflatten(arr, dim)
+    reshape(flattened, reverse(dim)[2:end]...)
 end
 
 end
