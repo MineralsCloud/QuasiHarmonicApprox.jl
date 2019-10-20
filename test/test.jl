@@ -32,10 +32,22 @@ function generate(f)
     ret
 end
 
-free_energy = ThermodynamicField{:T,:V}(temperature, volume, generate(subsystem_free_energy))
-internal_energy = ThermodynamicField{:T,:V}(temperature, volume, generate(subsystem_internal_energy))
+free_energy = ThermodynamicField{:T,:V}(
+    temperature,
+    volume,
+    generate(subsystem_free_energy),
+)
+internal_energy = ThermodynamicField{:T,:V}(
+    temperature,
+    volume,
+    generate(subsystem_internal_energy),
+)
 entropy = ThermodynamicField{:T,:V}(temperature, volume, generate(subsystem_entropy))
-cv = ThermodynamicField{:T,:V}(temperature, volume, generate(subsystem_volumetric_specific_heat))
+cv = ThermodynamicField{:T,:V}(
+    temperature,
+    volume,
+    generate(subsystem_volumetric_specific_heat),
+)
 
 fits = []
 ps = []

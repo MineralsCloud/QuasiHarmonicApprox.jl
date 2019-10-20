@@ -14,16 +14,16 @@ module Abstractions
 using Setfield: @lens, get, modify
 
 export Axis,
-    CategoricalAxis,
-    DualAxes,
-    NAxes,
-    Field,
-    axes,
-    axistypes,
-    axisnames,
-    axisdim,
-    axisvalues,
-    replaceaxis
+       CategoricalAxis,
+       DualAxes,
+       NAxes,
+       Field,
+       axes,
+       axistypes,
+       axisnames,
+       axisdim,
+       axisvalues,
+       replaceaxis
 
 const DATALENS = @lens _.data
 
@@ -74,11 +74,12 @@ function replaceaxis(axes::DualAxes{a,b}, new_axis::Axis)::DualAxes where {a,b}
     axisnames(new_axis) == a ? (new_axis, axes[2]) : (axes[1], new_axis)
 end
 
-Base.transpose(field::Field) = typeof(field)(reverse(axes(field)), transpose(_getdata(field)))
+Base.transpose(field::Field) =
+    typeof(field)(reverse(axes(field)), transpose(_getdata(field)))
 
 for S in (:Axis, :Field)
     eval(quote
-        Base.:(==)(A::T, B::T) where {T <: $S} = _getdata(A) == _getdata(B)
+        Base.:(==)(A::T, B::T) where {T<:$S} = _getdata(A) == _getdata(B)
     end)
 end
 
@@ -97,7 +98,10 @@ end
 
 Base.IteratorSize(::Field) = Base.HasShape{2}()
 
-for (f, T) in Iterators.product((:firstindex, :lastindex, :eachindex, :size, :length), (:Axis, :Field))
+for (f, T) in Iterators.product(
+    (:firstindex, :lastindex, :eachindex, :size, :length),
+    (:Axis, :Field),
+)
     eval(quote
         Base.$f(x::($T)) = $f(_getdata(x))
     end)
@@ -113,13 +117,15 @@ end
 
 for operator in (:+, :-)
     eval(quote
-        Base.$operator(a::T, b::T) where {T <: Field} = modify(x->$operator(x, _getdata(b)), a, DATALENS)
+        Base.$operator(a::T, b::T) where {T<:Field} =
+            modify(x -> $operator(x, _getdata(b)), a, DATALENS)
     end)
 end
 
 for operator in (:*, :/)
     eval(quote
-        Base.broadcast(::typeof($operator), a::T, b::T) where {T <: Field} = modify(x->broadcast($operator, x, _getdata(b)), a, DATALENS)
+        Base.broadcast(::typeof($operator), a::T, b::T) where {T<:Field} =
+            modify(x -> broadcast($operator, x, _getdata(b)), a, DATALENS)
     end)
 end
 

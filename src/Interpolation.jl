@@ -16,8 +16,7 @@ using Interpolations
 
 using QuasiHarmonicApproximation.CoreDataStructures
 
-export AbstractInterpolator,
-    NDInterpolator
+export AbstractInterpolator, NDInterpolator
 
 abstract type AbstractInterpolator end
 
@@ -25,7 +24,7 @@ struct NDInterpolator{N} <: AbstractInterpolator
     f
 end
 
-function (interpolator::NDInterpolator{1})(x::Field, y::Field, axis::Type{<: Axis})
+function (interpolator::NDInterpolator{1})(x::Field, y::Field, axis::Type{<:Axis})
     m, n = map(length, x.axes)
     dim = axisdim(typeof(y), axis)
 
