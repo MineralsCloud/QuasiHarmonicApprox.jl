@@ -1,4 +1,8 @@
-# QuasiHarmonicApproximation.jl
+```@meta
+CurrentModule = QuasiHarmonicApproximation
+```
+
+# QuasiHarmonicApproximation
 
 ```@index
 ```

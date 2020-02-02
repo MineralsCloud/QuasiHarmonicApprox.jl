@@ -1,17 +1,21 @@
-using Documenter, QuasiHarmonicApproximation
+using QuasiHarmonicApproximation
+using Documenter
 
 makedocs(;
     modules=[QuasiHarmonicApproximation],
-    format=Documenter.HTML(),
+    authors="Qi Zhang <singularitti@outlook.com>",
+    repo="https://github.com/MineralsCloud/QuasiHarmonicApproximation.jl/blob/{commit}{path}#L{line}",
+    sitename="QuasiHarmonicApproximation.jl",
+    format=Documenter.HTML(;
+        prettyurls=get(ENV, "CI", "false") == "true",
+        canonical="https://MineralsCloud.github.io/QuasiHarmonicApproximation.jl",
+        assets=String[],
+    ),
     pages=[
         "Home" => "index.md",
     ],
-    repo="https://github.com/singularitti/QuasiHarmonicApproximation.jl/blob/{commit}{path}#L{line}",
-    sitename="QuasiHarmonicApproximation.jl",
-    authors="Qi Zhang <singularitti@outlook.com>",
-    assets=String[],
 )
 
 deploydocs(;
-    repo="github.com/singularitti/QuasiHarmonicApproximation.jl",
+    repo="github.com/MineralsCloud/QuasiHarmonicApproximation.jl",
 )
