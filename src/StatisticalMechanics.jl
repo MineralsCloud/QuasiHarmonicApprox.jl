@@ -1,17 +1,6 @@
-"""
-# module StatisticalMechanics
-
-- Julia version: 1.0.2
-- Author: qz
-- Date: 2018-12-02
-
-# Examples
-
-```jldoctest
-julia>
-```
-"""
 module StatisticalMechanics
+
+using Unitful: ħ, k
 
 export bose_einstein_distribution,
        subsystem_partition_function,
@@ -20,54 +9,50 @@ export bose_einstein_distribution,
        subsystem_entropy,
        subsystem_volumetric_specific_heat
 
-const HBAR = 0.00012398419739326685
-const BOLTZMANN = 8.6173303e-05
+validate_frequency(ω) =
+    ω < zero(ω) && throw(DomainError("Negative frequency is not proper for QHA calculation!"))
 
-validate_frequency(frequency::AbstractFloat) =
-    frequency < 0 && throw(DomainError("Negative frequency is not proper for QHA calculation!"))
-
-function bose_einstein_distribution(temperature::T, frequency::T)::T where {T<:AbstractFloat}
-    1 / (exp(HBAR * frequency / (BOLTZMANN * temperature)) - 1)
+bose_einstein_distribution(t) = ω -> bose_einstein_distribution(t, ω)
+function bose_einstein_distribution(t, ω)
+    1 / (exp(ħ * ω / (k * t)) - 1)
 end
 
-function subsystem_partition_function(temperature::T, frequency::T)::T where {T<:AbstractFloat}
-    frequency == 0 && return 1
-
-    x = HBAR * frequency / (BOLTZMANN * temperature)
+subsystem_partition_function(t) = ω -> subsystem_partition_function(t, ω)
+function subsystem_partition_function(t, ω)
+    ω == 0 && return 1
+    x = ħ * ω / (k * t)
     return exp(x / 2) / (exp(x) - 1)
 end
 
-function subsystem_free_energy(temperature::T, frequency::T)::T where {T<:AbstractFloat}
-    validate_frequency(frequency)
-    frequency == 0 && return 0
-
-    hw = HBAR * frequency
-    kt = BOLTZMANN * temperature
-    return hw / 2 + kt * log(1 - exp(-hw / kt))
+subsystem_free_energy(t) = ω -> subsystem_free_energy(t, ω)
+function subsystem_free_energy(t, ω)
+    validate_frequency(ω)
+    ω == 0 && return 0
+    ħω, kt = ħ * ω, k * t
+    return ħω / 2 + kt * log(1 - exp(-ħω / kt))
 end
 
-function subsystem_internal_energy(temperature::T, frequency::T)::T where {T<:AbstractFloat}
-    validate_frequency(frequency)
-    frequency == 0 && return BOLTZMANN * temperature
-
-    hw = HBAR * frequency
-    return hw / 2 / tanh(hw / (2 * BOLTZMANN * temperature))
+subsystem_internal_energy(t) = ω -> subsystem_internal_energy(t, ω)
+function subsystem_internal_energy(t, ω)
+    validate_frequency(ω)
+    ω == 0 && return k * t
+    ħω = ħ * ω
+    return ħω / 2 * coth(ħω / (2k * t))
 end
 
-function subsystem_entropy(temperature::T, frequency::T)::T where {T<:AbstractFloat}
-    validate_frequency(frequency)
-
-    n = bose_einstein_distribution(temperature, frequency)
-    return BOLTZMANN * ((1 + n) * log(1 + n) - n * log(n))
+subsystem_entropy(t) = ω -> subsystem_entropy(t, ω)
+function subsystem_entropy(t, ω)
+    validate_frequency(ω)
+    n = bose_einstein_distribution(t, ω)
+    return k * ((1 + n) * log(1 + n) - n * log(n))
 end
 
-function subsystem_volumetric_specific_heat(temperature::T, frequency::T)::T where {T<:AbstractFloat}
-    validate_frequency(frequency)
-    frequency == 0 && return BOLTZMANN
-
-    hw = HBAR * frequency
-    kt = 2 * BOLTZMANN * temperature
-    return BOLTZMANN * (hw / sinh(hw / kt) / kt)^2
+subsystem_volumetric_specific_heat(t) = ω -> subsystem_volumetric_specific_heat(t, ω)
+function subsystem_volumetric_specific_heat(t, ω)
+    validate_frequency(ω)
+    ω == 0 && return k
+    x = ħ * ω / (2k * t)
+    return k * (x * csch(x))^2
 end
 
 end
