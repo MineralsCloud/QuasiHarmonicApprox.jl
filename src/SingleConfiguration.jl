@@ -1,5 +1,8 @@
 module SingleConfiguration
 
+using EquationsOfState.Collections
+using EquationsOfState.NonlinearFitting
+using EquationsOfState.Find
 using OptionalArgChecks: @argcheck
 using Unitful: Temperature, Frequency, Energy, @u_str
 
@@ -27,6 +30,17 @@ function free_energy(
         free_energy(t1, ω1, wₖ, e1)
     end
     reshape(Iterators.flatten(f) |> collect, size(ω)[3:4])
+end
+
+function v_from_p(t0, ω, wk, e0, p, eos)
+    f_t0v = free_energy(t0, ω, wk, e0)
+    eos = lsqfit(eos(Collections.Energy()), volumes, f_t0v)
+    return findvolume(eos(Pressure()), p, (0.5, 1.3) .* eos.v0)
+end
+
+function interpolate_f_v(f, t0, ω, wk, e0, p, eos, volumes)
+    v = v_from_p(t0, ω, wk, e0, p, eos)
+    return interpolate(f, volumes)(v)
 end
 
 end
