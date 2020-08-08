@@ -1,18 +1,21 @@
 module StatMech
 
 using OptionalArgChecks: @argcheck
-using Unitful: ħ, k
+using Unitful: NoUnits, Temperature, Frequency, Energy, Wavenumber, ħ, k, c0, upreferred
 
 export bose_einstein_distribution,
-    subsystem_partition_function,
-    subsystem_free_energy,
-    subsystem_internal_energy,
-    subsystem_entropy,
-    subsystem_volumetric_specific_heat
+    partition_function, free_energy, internal_energy, entropy, volumetric_specific_heat
 
-bose_einstein_distribution(t, ω) = 1 / expm1(ħ * ω / (k * t))
+function bose_einstein_distribution(t::Temperature, ω::Frequency)
+    @argcheck ω >= zero(ω)
+    return 1 / expm1(ħ * ω / (k * t))
+end
+bose_einstein_distribution(t::Temperature, e::Energy) =
+    bose_einstein_distribution(t, _e2ω(e))
+bose_einstein_distribution(t::Temperature, ṽ::Wavenumber) =
+    bose_einstein_distribution(t, _ṽ2ω(ṽ))
 
-function subsystem_partition_function(t, ω)
+function partition_function(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     if iszero(ω)
         return 1
@@ -21,41 +24,55 @@ function subsystem_partition_function(t, ω)
         return exp(x / 2) / expm1(x)
     end
 end
+partition_function(t::Temperature, e::Energy) = partition_function(t, _e2ω(e))
+partition_function(t::Temperature, ṽ::Wavenumber) = partition_function(t, _ṽ2ω(ṽ))
 
-function subsystem_free_energy(t, ω)
+function free_energy(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     if iszero(ω)
-        return 0
+        return upreferred(zero(ħ * ω))
     else
         ħω, kt = ħ * ω, k * t
         return -ħω / 2 + kt * log(expm1(ħω / kt))
     end
 end
+free_energy(t::Temperature, e::Energy) = free_energy(t, _e2ω(e))
+free_energy(t::Temperature, ṽ::Wavenumber) = free_energy(t, _ṽ2ω(ṽ))
 
-function subsystem_internal_energy(t, ω)
+function internal_energy(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     if iszero(ω)
         return k * t
     else
         ħω = ħ * ω / 2
-        return ħω * coth(ħω / (k * t))
+        return ħω * coth(NoUnits(ħω / (k * t)))  # Can't use `ustrip`!
     end
 end
+internal_energy(t::Temperature, e::Energy) = internal_energy(t, _e2ω(e))
+internal_energy(t::Temperature, ṽ::Wavenumber) = internal_energy(t, _ṽ2ω(ṽ))
 
-function subsystem_entropy(t, ω)
-    @argcheck ω >= zero(ω)
+function entropy(t::Temperature, ω::Frequency)
     n = bose_einstein_distribution(t, ω)
     return k * ((1 + n) * log1p(n) - n * log(n))
 end
+entropy(t::Temperature, e::Energy) = entropy(t, _e2ω(e))
+entropy(t::Temperature, ṽ::Wavenumber) = entropy(t, _ṽ2ω(ṽ))
 
-function subsystem_volumetric_specific_heat(t, ω)
+function volumetric_specific_heat(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     if iszero(ω)
         return k
     else
-        x = ħ * ω / (2k * t)
+        x = NoUnits(ħ * ω / (2k * t))
         return k * (x * csch(x))^2
     end
 end
+volumetric_specific_heat(t::Temperature, e::Energy) = volumetric_specific_heat(t, _e2ω(e))
+volumetric_specific_heat(t::Temperature, ṽ::Wavenumber) =
+    volumetric_specific_heat(t, _ṽ2ω(ṽ))
+
+_e2ω(e::Energy) = e / ħ
+
+_ṽ2ω(ṽ::Wavenumber) = ṽ * c0
 
 end
