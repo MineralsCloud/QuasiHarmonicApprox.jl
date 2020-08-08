@@ -1,7 +1,7 @@
 module StatMech
 
 using OptionalArgChecks: @argcheck
-using Unitful: ħ, k
+using Unitful: ħ, k, NoUnits
 
 export bose_einstein_distribution,
     subsystem_partition_function,
@@ -30,7 +30,7 @@ function subsystem_internal_energy(t, ω)
         return k * t
     else
         ħω = ħ * ω / 2
-        return ħω * coth(ħω / (k * t))
+        return ħω * coth(NoUnits(ħω / (k * t)))  # Can't use `ustrip`!
     end
 end
 
