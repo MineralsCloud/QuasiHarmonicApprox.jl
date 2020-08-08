@@ -14,22 +14,14 @@ bose_einstein_distribution(t, ω) = 1 / expm1(ħ * ω / (k * t))
 
 function subsystem_partition_function(t, ω)
     @argcheck ω >= zero(ω)
-    if iszero(ω)
-        return 1
-    else
-        x = ħ * ω / (k * t)
-        return exp(x / 2) / expm1(x)
-    end
+    x = ħ * ω / (k * t)
+    return exp(x / 2) / expm1(x)
 end
 
 function subsystem_free_energy(t, ω)
     @argcheck ω >= zero(ω)
-    if iszero(ω)
-        return 0
-    else
-        ħω, kt = ħ * ω, k * t
-        return -ħω / 2 + kt * log(expm1(ħω / kt))
-    end
+    ħω, kt = ħ * ω, k * t
+    return -ħω / 2 + kt * log(expm1(ħω / kt))
 end
 
 function subsystem_internal_energy(t, ω)
