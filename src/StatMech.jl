@@ -45,7 +45,7 @@ function subsystem_volumetric_specific_heat(t, ω)
     if iszero(ω)
         return k
     else
-        x = ħ * ω / (2k * t)
+        x = NoUnits(ħ * ω / (2k * t))
         return k * (x * csch(x))^2
     end
 end
