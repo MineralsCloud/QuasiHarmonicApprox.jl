@@ -1,7 +1,7 @@
 module StatMech
 
 using OptionalArgChecks: @argcheck
-using Unitful: NoUnits, Temperature, Frequency, ħ, k
+using Unitful: NoUnits, Temperature, Frequency, Energy, Wavenumber, ħ, k, c0
 
 export bose_einstein_distribution,
     partition_function, free_energy, internal_energy, entropy, volumetric_specific_heat
@@ -10,18 +10,26 @@ function bose_einstein_distribution(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     return 1 / expm1(ħ * ω / (k * t))
 end
+bose_einstein_distribution(t::Temperature, e::Energy) =
+    bose_einstein_distribution(t, _e2ω(e))
+bose_einstein_distribution(t::Temperature, ṽ::Wavenumber) =
+    bose_einstein_distribution(t, _ṽ2ω(ṽ))
 
 function partition_function(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     x = ħ * ω / (k * t)
     return exp(x / 2) / expm1(x)
 end
+partition_function(t::Temperature, e::Energy) = partition_function(t, _e2ω(e))
+partition_function(t::Temperature, ṽ::Wavenumber) = partition_function(t, _ṽ2ω(ṽ))
 
 function free_energy(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     ħω, kt = ħ * ω, k * t
     return -ħω / 2 + kt * log(expm1(ħω / kt))
 end
+free_energy(t::Temperature, e::Energy) = free_energy(t, _e2ω(e))
+free_energy(t::Temperature, ṽ::Wavenumber) = free_energy(t, _ṽ2ω(ṽ))
 
 function internal_energy(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
@@ -32,11 +40,15 @@ function internal_energy(t::Temperature, ω::Frequency)
         return ħω * coth(NoUnits(ħω / (k * t)))  # Can't use `ustrip`!
     end
 end
+internal_energy(t::Temperature, e::Energy) = internal_energy(t, _e2ω(e))
+internal_energy(t::Temperature, ṽ::Wavenumber) = internal_energy(t, _ṽ2ω(ṽ))
 
 function entropy(t::Temperature, ω::Frequency)
     n = bose_einstein_distribution(t, ω)
     return k * ((1 + n) * log1p(n) - n * log(n))
 end
+entropy(t::Temperature, e::Energy) = entropy(t, _e2ω(e))
+entropy(t::Temperature, ṽ::Wavenumber) = entropy(t, _ṽ2ω(ṽ))
 
 function volumetric_specific_heat(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
@@ -47,5 +59,12 @@ function volumetric_specific_heat(t::Temperature, ω::Frequency)
         return k * (x * csch(x))^2
     end
 end
+volumetric_specific_heat(t::Temperature, e::Energy) = volumetric_specific_heat(t, _e2ω(e))
+volumetric_specific_heat(t::Temperature, ṽ::Wavenumber) =
+    volumetric_specific_heat(t, _ṽ2ω(ṽ))
+
+_e2ω(e::Energy) = e / ħ
+
+_ṽ2ω(ṽ::Wavenumber) = ṽ * c0
 
 end
