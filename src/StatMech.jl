@@ -28,7 +28,7 @@ function subsystem_free_energy(t, ω)
         return 0
     else
         ħω, kt = ħ * ω, k * t
-        return ħω / 2 + kt * log(1 - exp(-ħω / kt))
+        return -ħω / 2 + kt * log(expm1(ħω / kt))
     end
 end
 
@@ -37,8 +37,8 @@ function subsystem_internal_energy(t, ω)
     if iszero(ω)
         return k * t
     else
-        ħω = ħ * ω
-        return ħω / 2 * coth(ħω / (2k * t))
+        ħω = ħ * ω / 2
+        return ħω * coth(ħω / (k * t))
     end
 end
 
