@@ -10,9 +10,7 @@ export bose_einstein_distribution,
     subsystem_entropy,
     subsystem_volumetric_specific_heat
 
-function bose_einstein_distribution(t, ω)
-    1 / (exp(ħ * ω / (k * t)) - 1)
-end
+bose_einstein_distribution(t, ω) = 1 / expm1(ħ * ω / (k * t))
 
 function subsystem_partition_function(t, ω)
     @argcheck ω >= zero(ω)
@@ -20,7 +18,7 @@ function subsystem_partition_function(t, ω)
         return 1
     else
         x = ħ * ω / (k * t)
-        return exp(x / 2) / (exp(x) - 1)
+        return exp(x / 2) / expm1(x)
     end
 end
 
@@ -47,7 +45,7 @@ end
 function subsystem_entropy(t, ω)
     @argcheck ω >= zero(ω)
     n = bose_einstein_distribution(t, ω)
-    return k * ((1 + n) * log(1 + n) - n * log(n))
+    return k * ((1 + n) * log1p(n) - n * log(n))
 end
 
 function subsystem_volumetric_specific_heat(t, ω)
