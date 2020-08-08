@@ -17,6 +17,7 @@ end
 
 subsystem_partition_function(t) = ω -> subsystem_partition_function(t, ω)
 function subsystem_partition_function(t, ω)
+    @argcheck ω >= zero(ω)
     if iszero(ω)
         return 1
     else
@@ -27,7 +28,7 @@ end
 
 subsystem_free_energy(t) = ω -> subsystem_free_energy(t, ω)
 function subsystem_free_energy(t, ω)
-    @argcheck ω < zero(ω)
+    @argcheck ω >= zero(ω)
     if iszero(ω)
         return 0
     else
@@ -38,7 +39,7 @@ end
 
 subsystem_internal_energy(t) = ω -> subsystem_internal_energy(t, ω)
 function subsystem_internal_energy(t, ω)
-    @argcheck ω < zero(ω)
+    @argcheck ω >= zero(ω)
     if iszero(ω)
         return k * t
     else
@@ -49,14 +50,14 @@ end
 
 subsystem_entropy(t) = ω -> subsystem_entropy(t, ω)
 function subsystem_entropy(t, ω)
-    @argcheck ω < zero(ω)
+    @argcheck ω >= zero(ω)
     n = bose_einstein_distribution(t, ω)
     return k * ((1 + n) * log(1 + n) - n * log(n))
 end
 
 subsystem_volumetric_specific_heat(t) = ω -> subsystem_volumetric_specific_heat(t, ω)
 function subsystem_volumetric_specific_heat(t, ω)
-    @argcheck ω < zero(ω)
+    @argcheck ω >= zero(ω)
     if iszero(ω)
         return k
     else
