@@ -1,4 +1,4 @@
-module StatisticalMechanics
+module StatMech
 
 using OptionalArgChecks: @argcheck
 using Unitful: ħ, k

@@ -1,5 +1,5 @@
 module QuasiHarmonicApproximation
 
-include("StatisticalMechanics.jl")
+include("StatMech.jl")
 
 end # module
