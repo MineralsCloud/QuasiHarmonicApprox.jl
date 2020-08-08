@@ -4,30 +4,26 @@ using OptionalArgChecks: @argcheck
 using Unitful: ħ, k, NoUnits
 
 export bose_einstein_distribution,
-    subsystem_partition_function,
-    subsystem_free_energy,
-    subsystem_internal_energy,
-    subsystem_entropy,
-    subsystem_volumetric_specific_heat
+    partition_function, free_energy, internal_energy, entropy, volumetric_specific_heat
 
 function bose_einstein_distribution(t, ω)
     @argcheck ω >= zero(ω)
     return 1 / expm1(ħ * ω / (k * t))
 end
 
-function subsystem_partition_function(t, ω)
+function partition_function(t, ω)
     @argcheck ω >= zero(ω)
     x = ħ * ω / (k * t)
     return exp(x / 2) / expm1(x)
 end
 
-function subsystem_free_energy(t, ω)
+function free_energy(t, ω)
     @argcheck ω >= zero(ω)
     ħω, kt = ħ * ω, k * t
     return -ħω / 2 + kt * log(expm1(ħω / kt))
 end
 
-function subsystem_internal_energy(t, ω)
+function internal_energy(t, ω)
     @argcheck ω >= zero(ω)
     if iszero(ω)
         return k * t
@@ -37,12 +33,12 @@ function subsystem_internal_energy(t, ω)
     end
 end
 
-function subsystem_entropy(t, ω)
+function entropy(t, ω)
     n = bose_einstein_distribution(t, ω)
     return k * ((1 + n) * log1p(n) - n * log(n))
 end
 
-function subsystem_volumetric_specific_heat(t, ω)
+function volumetric_specific_heat(t, ω)
     @argcheck ω >= zero(ω)
     if iszero(ω)
         return k
