@@ -17,5 +17,16 @@ function free_energy(
     g = dropdims(sum(f; dims = 1); dims = 1)
     return g' * wₖ + e0
 end
+function free_energy(
+    t::AbstractVector{<:Temperature},
+    ω::AbstractArray{<:Frequency,4},
+    wₖ::AbstractVector,
+    e0::AbstractMatrix{<:Energy} = zeros(size(ω)[3:4]) * u"eV",
+)
+    f = map(t, eachslice(ω; dims = 3), eachrow(e0)) do t1, ω1, e1
+        free_energy(t1, ω1, wₖ, e1)
+    end
+    reshape(Iterators.flatten(f) |> collect, size(ω)[3:4])
+end
 
 end
