@@ -1,6 +1,6 @@
 module QuasiHarmonicApproximation
 
 include("StatMech.jl")
-include("SingleConfiguration.jl")
+include("SingleConfig.jl")
 
 end # module

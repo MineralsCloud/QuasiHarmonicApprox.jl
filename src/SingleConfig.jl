@@ -1,4 +1,4 @@
-module SingleConfiguration
+module SingleConfig
 
 using DimensionalData
 using EquationsOfState.Collections
