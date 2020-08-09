@@ -31,6 +31,7 @@ end
 
 times(ω::DimensionalArray{T,2,<:Tuple{WaveVector,Branch}}, wₖ::Weights) where {T} = ω' * wₖ
 times(ω::DimensionalArray{T,2,<:Tuple{Branch,WaveVector}}, wₖ::Weights) where {T} = ω * wₖ
+
 function v_from_p(t0, ω, wk, e0, p, eos)
     f_t0v = free_energy(t0, ω, wk, e0)
     eos = lsqfit(eos(Collections.Energy()), volumes, f_t0v)
