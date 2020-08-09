@@ -5,7 +5,7 @@ using EquationsOfState.Collections
 using EquationsOfState.NonlinearFitting
 using EquationsOfState.Find
 using OptionalArgChecks: @argcheck
-using Unitful: Temperature, Frequency, Energy, @u_str
+using Unitful: Temperature, Frequency, Energy, Wavenumber, @u_str
 
 import ..StatMech: free_energy
 
@@ -14,13 +14,14 @@ export WaveVector, Branch, Frequencies, Weights, times
 @dim WaveVector "WaveVector"
 @dim Branch "Branch"
 
-Frequencies = DimensionalArray{
-    T,
-    2,
-    <:Union{Tuple{WaveVector,Branch},Tuple{Branch,WaveVector}},
-} where {T}
+const FrequenciesAxes = Union{Tuple{WaveVector,Branch},Tuple{Branch,WaveVector}}
 
-Weights = DimensionalArray{T,1,<:Tuple{WaveVector}} where {T}
+const Frequencies =
+    DimensionalArray{<:Union{Frequency,Energy,Wavenumber},2,<:FrequenciesAxes}
+Frequencies(data, axes::FrequenciesAxes) = DimensionalArray(data, axes)
+
+const Weights = DimensionalArray{<:Real,1,<:Tuple{WaveVector}}
+Weights(data, axes) = DimensionalArray(data, axes)
 
 function free_energy(t::Temperature, ω::Frequencies, wₖ::Weights, e0::Energy = 0u"eV")
     @argcheck all(w >= zero(w) for w in wₖ)
