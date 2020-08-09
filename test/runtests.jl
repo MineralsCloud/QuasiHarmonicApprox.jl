@@ -1,5 +1,6 @@
-using QuasiHarmonicApproximation
+using QuasiHarmonicApprox
 using Test
 
-@testset "QuasiHarmonicApproximation.jl" begin
+@testset "QuasiHarmonicApprox.jl" begin
+    # Write your tests here.
 end
