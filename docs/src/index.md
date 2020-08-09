@@ -1,12 +1,12 @@
 ```@meta
-CurrentModule = QuasiHarmonicApproximation
+CurrentModule = QuasiHarmonicApprox
 ```
 
-# QuasiHarmonicApproximation
+# QuasiHarmonicApprox
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [QuasiHarmonicApproximation]
+Modules = [QuasiHarmonicApprox]
 ```

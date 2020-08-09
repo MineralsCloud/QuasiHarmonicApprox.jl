@@ -1,14 +1,14 @@
-using QuasiHarmonicApproximation
+using QuasiHarmonicApprox
 using Documenter
 
 makedocs(;
-    modules=[QuasiHarmonicApproximation],
+    modules=[QuasiHarmonicApprox],
     authors="Qi Zhang <singularitti@outlook.com>",
-    repo="https://github.com/MineralsCloud/QuasiHarmonicApproximation.jl/blob/{commit}{path}#L{line}",
-    sitename="QuasiHarmonicApproximation.jl",
+    repo="https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/blob/{commit}{path}#L{line}",
+    sitename="QuasiHarmonicApprox.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://MineralsCloud.github.io/QuasiHarmonicApproximation.jl",
+        canonical="https://MineralsCloud.github.io/QuasiHarmonicApprox.jl",
         assets=String[],
     ),
     pages=[
@@ -17,5 +17,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/MineralsCloud/QuasiHarmonicApproximation.jl",
+    repo="github.com/MineralsCloud/QuasiHarmonicApprox.jl",
 )
