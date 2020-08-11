@@ -29,6 +29,16 @@ function free_energy(t::Temperature, ω::Frequencies, wₖ::Weights, e0::Energy 
     f = map(Base.Fix1(free_energy, t), ω)
     sum(times(f, wₖ)) + e0
 end
+function free_energy(
+    t::AbstractVector{<:Temperature},
+    ω::AbstractVector{<:Frequencies},
+    wₖ::Weights,
+    e0::AbstractVector{<:Energy} = zeros(length(ω)) * 0u"eV",
+)  # For T-independent frequencies
+    length(ω) == length(e0) ||
+        throw(DimensionMismatch("ω and e0 should be the same length!"))
+    return [free_energy(tt, ww, wₖ, e00) for tt in t, (ww, e00) in zip(ω, e0)]
+end
 
 times(ω::DimensionalArray{T,2,<:Tuple{WaveVector,Branch}}, wₖ::Weights) where {T} = ω' * wₖ
 times(ω::DimensionalArray{T,2,<:Tuple{Branch,WaveVector}}, wₖ::Weights) where {T} = ω * wₖ
