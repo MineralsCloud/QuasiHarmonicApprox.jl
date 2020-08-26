@@ -1,9 +1,9 @@
 module SingleConfig
 
 using DimensionalData
-using EquationsOfState.Collections
-using EquationsOfState.NonlinearFitting
-using EquationsOfState.Find
+using EquationsOfStateOfSolids.Collections
+using EquationsOfStateOfSolids.Fitting
+using EquationsOfStateOfSolids.Volume
 using OptionalArgChecks: @argcheck
 using Unitful: Temperature, Frequency, Energy, Wavenumber, @u_str
 
@@ -43,10 +43,10 @@ end
 times(ω::DimensionalArray{T,2,<:Tuple{WaveVector,Branch}}, wₖ::Weights) where {T} = ω' * wₖ
 times(ω::DimensionalArray{T,2,<:Tuple{Branch,WaveVector}}, wₖ::Weights) where {T} = ω * wₖ
 
-function v_from_p(t0, ω, wk, e0, p, eos)
+function v_from_p(t0, ω, wk, e0, p, eosparam)
     f_t0v = free_energy(t0, ω, wk, e0)
-    eos = lsqfit(eos(Collections.Energy()), volumes, f_t0v)
-    return findvolume(eos(Pressure()), p, (0.5, 1.3) .* eos.v0)
+    eos = eosfit(EnergyEOS(eosparam), volumes, f_t0v)
+    return mustfindvolume(PressureEOS(eosparam), p)
 end
 
 function interpolate_f_v(f, t0, ω, wk, e0, p, eos, volumes)
