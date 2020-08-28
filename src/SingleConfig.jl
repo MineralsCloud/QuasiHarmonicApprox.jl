@@ -9,7 +9,7 @@ using Unitful: Temperature, Frequency, Energy, Wavenumber, @u_str
 
 import ..StatMech: free_energy
 
-export WaveVector, Branch, Frequencies, Weights, times
+export WaveVector, Branch, Frequencies, Weights
 
 @dim WaveVector "WaveVector"
 @dim Branch "Branch"
