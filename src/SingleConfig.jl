@@ -7,9 +7,10 @@ using EquationsOfStateOfSolids.Volume
 using OptionalArgChecks: @argcheck
 using Unitful: Temperature, Frequency, Energy, Wavenumber, upreferred
 
+import DimensionalData
 import ..StatMech: free_energy
 
-export WaveVector, Branch, Temp, Pressure, Vol
+export Wavevector, Branch
 
 const Wavevector = Dim{:Wavevector}
 const Branch = Dim{:Branch}
@@ -54,5 +55,11 @@ function interpolate_f_v(f, t0, ω, wk, e0, p, eos, volumes)
     v = v_from_p(t0, ω, wk, e0, p, eos)
     return interpolate(f, volumes)(v)
 end
+
+DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
+DimensionalData.name(::Type{<:Branch}) = "Branch"
+
+DimensionalData.shortname(::Type{<:Wavevector}) = "𝐪"
+DimensionalData.shortname(::Type{<:Branch}) = "𝑛"
 
 end
