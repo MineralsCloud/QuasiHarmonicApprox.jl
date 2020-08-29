@@ -5,19 +5,24 @@ using EquationsOfStateOfSolids.Collections
 using EquationsOfStateOfSolids.Fitting
 using EquationsOfStateOfSolids.Volume
 using OptionalArgChecks: @argcheck
-using Unitful: Temperature, Frequency, Energy, Wavenumber, @u_str
+using Unitful: Temperature, Frequency, Energy, Wavenumber, upreferred
 
 import ..StatMech: free_energy
 
-export WaveVector, Branch, Frequencies, Weights
+export WaveVector, Branch, Temp, Pressure, Vol
 
 @dim WaveVector "WaveVector"
 @dim Branch "Branch"
+@dim Temp "Temperature"
+@dim Pressure "Pressure"
+@dim Vol "Volume"
 
-const FrequenciesAxes = Union{Tuple{WaveVector,Branch},Tuple{Branch,WaveVector}}
+const FreqAxes2 = Union{Tuple{WaveVector,Branch},Tuple{Branch,WaveVector}}
+const FreqAxes3 = Union{Tuple{WaveVector,Branch,Vol},Tuple{Branch,WaveVector,Vol}}
+const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes2}
+const TempIndependentFreq =
+    AbstractDimArray{<:Union{Frequency,Energy,Wavenumber},3,<:FreqAxes3}
 
-const Frequencies = DimArray{<:Union{Frequency,Energy,Wavenumber},2,<:FrequenciesAxes}
-Frequencies(data, axes::FrequenciesAxes) = DimArray(data, axes)
 
 
 function free_energy(t::Temperature, ω::Freq, wₖ, e0::Energy = 0u"eV")
