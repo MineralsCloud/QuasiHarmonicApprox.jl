@@ -1,6 +1,6 @@
 module SingleConfig
 
-using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, @dim
+using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, Dim
 using EquationsOfStateOfSolids.Collections
 using EquationsOfStateOfSolids.Fitting
 using EquationsOfStateOfSolids.Volume
@@ -11,14 +11,11 @@ import ..StatMech: free_energy
 
 export WaveVector, Branch, Temp, Pressure, Vol
 
-@dim WaveVector "WaveVector"
-@dim Branch "Branch"
-@dim Temp "Temperature"
-@dim Pressure "Pressure"
-@dim Vol "Volume"
-
-const FreqAxes2 = Union{Tuple{WaveVector,Branch},Tuple{Branch,WaveVector}}
-const FreqAxes3 = Union{Tuple{WaveVector,Branch,Vol},Tuple{Branch,WaveVector,Vol}}
+const Wavevector = Dim{:Wavevector}
+const Branch = Dim{:Branch}
+const Vol = Dim{:Vol}
+const FreqAxes2 = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
+const FreqAxes3 = Union{Tuple{Wavevector,Branch,Vol},Tuple{Branch,Wavevector,Vol}}
 const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes2}
 const TempIndependentFreq =
     AbstractDimArray{<:Union{Frequency,Energy,Wavenumber},3,<:FreqAxes3}
@@ -39,11 +36,11 @@ function free_energy(
         throw(DimensionMismatch("ω and e0 should be the same length!"))
     return [free_energy(tt, ww, wₖ, e00) for tt in t, (ww, e00) in zip(ω, e0)]
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
-function sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Branch,WaveVector}}, wₖ) where {T}
+function sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
     @argcheck all(wₖ .> zero(eltype(wₖ)))
     return ω * wₖ
 end
-sample_bz(ω::AbstractDimMatrix{T,<:Tuple{WaveVector,Branch}}, wₖ) where {T} =
+sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(ω', wₖ)
 
 
