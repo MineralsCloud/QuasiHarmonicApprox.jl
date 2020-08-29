@@ -23,14 +23,13 @@ const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes2}
 const TempIndependentFreq =
     AbstractDimArray{<:Union{Frequency,Energy,Wavenumber},3,<:FreqAxes3}
 
-
-
-function free_energy(t::Temperature, ω::Freq, wₖ, e0::Energy = 0u"eV")
-    @argcheck all(w >= zero(w) for w in wₖ)
-    wₖ = wₖ / sum(wₖ)
-    f = map(Base.Fix1(free_energy, t), ω)
-    sum(times(f, wₖ)) + e0
+function free_energy(t::Temperature, ω::Freq, wₖ, e₀::Energy = zero(upreferred(Energy)))
+    wₖ /= sum(wₖ)  # Normalize weights
+    fₕₒ = free_energy.(t, ω)  # free energy on each harmonic oscillator
+    return sum(sample_bz(fₕₒ, wₖ)) + e₀  # Scalar
 end
+
+
 function free_energy(
     t::AbstractVector{<:Temperature},
     ω::AbstractVector{<:Frequencies},
