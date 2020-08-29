@@ -1,6 +1,6 @@
 module SingleConfig
 
-using DimensionalData
+using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, @dim
 using EquationsOfStateOfSolids.Collections
 using EquationsOfStateOfSolids.Fitting
 using EquationsOfStateOfSolids.Volume
@@ -34,9 +34,13 @@ function free_energy(
     length(ω) == length(e0) ||
         throw(DimensionMismatch("ω and e0 should be the same length!"))
     return [free_energy(tt, ww, wₖ, e00) for tt in t, (ww, e00) in zip(ω, e0)]
-times(ω::DimArray{T,2,<:Tuple{WaveVector,Branch}}, wₖ) where {T} = ω' * wₖ
-times(ω::DimArray{T,2,<:Tuple{Branch,WaveVector}}, wₖ) where {T} = ω * wₖ
+# Relax the constraint on wₖ, it can even be a 2×1 matrix!
+function sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Branch,WaveVector}}, wₖ) where {T}
+    @argcheck all(wₖ .> zero(eltype(wₖ)))
+    return ω * wₖ
 end
+sample_bz(ω::AbstractDimMatrix{T,<:Tuple{WaveVector,Branch}}, wₖ) where {T} =
+    sample_bz(ω', wₖ)
 
 
 function v_from_p(t0, ω, wk, e0, p, eosparam)
