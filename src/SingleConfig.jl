@@ -1,25 +1,24 @@
 module SingleConfig
 
-using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, Dim
+using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, Dim, dims, val
 using EquationsOfStateOfSolids.Collections
 using EquationsOfStateOfSolids.Fitting
 using EquationsOfStateOfSolids.Volume
 using OptionalArgChecks: @argcheck
-using Unitful: Temperature, Frequency, Energy, Wavenumber, upreferred
+using Unitful: Temperature, Frequency, Energy, Wavenumber
 
 import DimensionalData
 import ..StatMech: free_energy
 
-export Wavevector, Branch
+export Wavevector, Branch, Temp, Vol, v2p
 
 const Wavevector = Dim{:Wavevector}
 const Branch = Dim{:Branch}
+const Temp = Dim{:Temp}
 const Vol = Dim{:Vol}
-const FreqAxes2 = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
-const FreqAxes3 = Union{Tuple{Wavevector,Branch,Vol},Tuple{Branch,Wavevector,Vol}}
-const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes2}
-const TempIndependentFreq =
-    AbstractDimArray{<:Union{Frequency,Energy,Wavenumber},3,<:FreqAxes3}
+const Press = Dim{:Press}
+const FreqAxes = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
+const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes}
 
 function free_energy(t::Temperature, ω::Freq, wₖ)
     wₖ /= sum(wₖ)  # Normalize weights
@@ -44,11 +43,13 @@ end
 sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(ω', wₖ)
 
-
-function v_from_p(t0, ω, wk, e0, p, eosparam)
-    f_t0v = free_energy(t0, ω, wk, e0)
-    eos = eosfit(EnergyEOS(eosparam), volumes, f_t0v)
-    return mustfindvolume(PressureEOS(eosparam), p)
+function v2p(fₜᵥ, eosparam)
+    t, v = dims(fₜᵥ, (Temp, Vol))
+    volumes = val(v)
+    map(eachslice(fₜᵥ; dims = Temp), t) do fₜ₀ᵥ, t0
+        eos = eosfit(EnergyEOS(eosparam), volumes, fₜ₀ᵥ)
+        DimArray(fₜ₀ᵥ, (Temp(t0), Press(map(PressureEOS(eos), volumes))))
+    end
 end
 
 function interpolate_f_v(f, t0, ω, wk, e0, p, eos, volumes)
