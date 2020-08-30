@@ -1,8 +1,8 @@
 module SingleConfig
 
 using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, Dim, dims, val
-using EquationsOfStateOfSolids.Collections
-using EquationsOfStateOfSolids.Fitting
+using EquationsOfStateOfSolids.Collections: BirchMurnaghan3rd, EnergyEOS, PressureEOS
+using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume
 using Unitful: Temperature, Frequency, Energy, Wavenumber
 
@@ -35,12 +35,19 @@ end
 sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(ω', wₖ)
 
-function v2p(fₜᵥ, eosparam)
+function v2p(
+    fₜᵥ,
+    param = BirchMurnaghan3rd(
+        minimum(dims(fₜᵥ, Vol)),
+        zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Vol)),
+        4,
+    ),
+)
     t, v = dims(fₜᵥ, (Temp, Vol))
     volumes = val(v)
-    map(eachslice(fₜᵥ; dims = Temp), t) do fₜ₀ᵥ, t0
-        eos = eosfit(EnergyEOS(eosparam), volumes, fₜ₀ᵥ)
-        DimArray(fₜ₀ᵥ, (Temp(t0), Press(map(PressureEOS(eos), volumes))))
+    return map(eachslice(fₜᵥ; dims = Temp), t) do fₜ₀ᵥ, t0
+        eos = eosfit(EnergyEOS(param), volumes, fₜ₀ᵥ)
+        DimArray(reshape(fₜ₀ᵥ, 1, :), (Temp([t0]), Press(map(PressureEOS(eos), volumes))))
     end
 end
 
