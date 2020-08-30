@@ -4,7 +4,6 @@ using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, Dim, dims,
 using EquationsOfStateOfSolids.Collections
 using EquationsOfStateOfSolids.Fitting
 using EquationsOfStateOfSolids.Volume
-using OptionalArgChecks: @argcheck
 using Unitful: Temperature, Frequency, Energy, Wavenumber
 
 import DimensionalData
@@ -21,15 +20,17 @@ const FreqAxes = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
 const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes}
 
 function free_energy(t::Temperature, ω::Freq, wₖ)
-    wₖ /= sum(wₖ)  # Normalize weights
+    wₖ = wₖ ./ sum(wₖ)  # Normalize weights
     fₕₒ = free_energy.(t, ω)  # free energy on each harmonic oscillator
     return sum(sample_bz(fₕₒ, wₖ))  # Scalar
 end
 
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
 function sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
-    @argcheck all(wₖ .> zero(eltype(wₖ)))
-    return ω * wₖ
+    if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
+        throw(DomainError("All the values of the weights should be greater than 0!"))
+    end
+    return ω * collect(wₖ)  # Allow wₖ to be a tuple
 end
 sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(ω', wₖ)
