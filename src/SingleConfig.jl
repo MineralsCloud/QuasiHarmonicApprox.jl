@@ -26,15 +26,6 @@ function free_energy(t::Temperature, ω::Freq, wₖ)
     return sum(sample_bz(fₕₒ, wₖ))  # Scalar
 end
 
-
-function free_energy(
-    t::AbstractVector{<:Temperature},
-    ω::AbstractVector{<:Frequencies},
-    e0::AbstractVector{<:Energy} = zeros(length(ω)) * 0u"eV",
-)  # For T-independent frequencies
-    length(ω) == length(e0) ||
-        throw(DimensionMismatch("ω and e0 should be the same length!"))
-    return [free_energy(tt, ww, wₖ, e00) for tt in t, (ww, e00) in zip(ω, e0)]
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
 function sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
     @argcheck all(wₖ .> zero(eltype(wₖ)))
