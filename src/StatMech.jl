@@ -3,17 +3,15 @@ module StatMech
 using OptionalArgChecks: @argcheck
 using Unitful: NoUnits, Temperature, Frequency, Energy, Wavenumber, ħ, k, c0, upreferred
 
-export bose_einstein_distribution,
+export bose_einstein,
     partition_function, free_energy, internal_energy, entropy, volumetric_specific_heat
 
-function bose_einstein_distribution(t::Temperature, ω::Frequency)
+function bose_einstein(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
     return 1 / expm1(ħ * ω / (k * t))
 end
-bose_einstein_distribution(t::Temperature, e::Energy) =
-    bose_einstein_distribution(t, _e2ω(e))
-bose_einstein_distribution(t::Temperature, ṽ::Wavenumber) =
-    bose_einstein_distribution(t, _ṽ2ω(ṽ))
+bose_einstein(t::Temperature, e::Energy) = bose_einstein(t, _e2ω(e))
+bose_einstein(t::Temperature, ṽ::Wavenumber) = bose_einstein(t, _ṽ2ω(ṽ))
 
 function partition_function(t::Temperature, ω::Frequency)
     @argcheck ω >= zero(ω)
@@ -52,7 +50,7 @@ internal_energy(t::Temperature, e::Energy) = internal_energy(t, _e2ω(e))
 internal_energy(t::Temperature, ṽ::Wavenumber) = internal_energy(t, _ṽ2ω(ṽ))
 
 function entropy(t::Temperature, ω::Frequency)
-    n = bose_einstein_distribution(t, ω)
+    n = bose_einstein(t, ω)
     return k * ((1 + n) * log1p(n) - n * log(n))
 end
 entropy(t::Temperature, e::Energy) = entropy(t, _e2ω(e))
