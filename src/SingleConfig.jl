@@ -33,7 +33,7 @@ function sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) wh
     return ω * collect(wₖ)  # Allow wₖ to be a tuple
 end
 sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
-    sample_bz(ω', wₖ)
+    sample_bz(transpose(ω), wₖ)  # Just want to align axis, `transpose` is enough.
 
 function v2p(
     fₜᵥ,
