@@ -1,6 +1,7 @@
 module SingleConfig
 
-using DimensionalData: AbstractDimMatrix, AbstractDimArray, DimArray, Dim, dims, val
+using DimensionalData:
+    AbstractDimMatrix, AbstractDimArray, DimArray, Dim, dims, val, refdims, swapdims, dimnum
 using EquationsOfStateOfSolids.Collections: BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume
@@ -37,7 +38,7 @@ sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
 
 function v2p(
     fₜᵥ,
-    param = BirchMurnaghan3rd(
+    initparam = BirchMurnaghan3rd(
         minimum(dims(fₜᵥ, Vol)),
         zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Vol)),
         4,
@@ -45,15 +46,17 @@ function v2p(
 )
     t, v = dims(fₜᵥ, (Temp, Vol))
     volumes = val(v)
-    return map(eachslice(fₜᵥ; dims = Temp), t) do fₜ₀ᵥ, t0
-        eos = eosfit(EnergyEOS(param), volumes, fₜ₀ᵥ)
-        DimArray(reshape(fₜ₀ᵥ, 1, :), (Temp([t0]), Press(map(PressureEOS(eos), volumes))))
+    arr = map(eachslice(fₜᵥ; dims = Temp)) do fₜ₀ᵥ
+        eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
+        p = map(PressureEOS(eosparam), volumes)
+        fₜ₀ᵥ = if dimnum(fₜᵥ, Temp) == 1
+            DimArray(reshape(fₜ₀ᵥ, 1, :) |> collect, (Temp([val(refdims(fₜ₀ᵥ))]), v))
+        else
+            DimArray(reshape(fₜ₀ᵥ, :, 1) |> collect, (v, Temp([val(refdims(fₜ₀ᵥ))])))
+        end
+        replacedim(fₜ₀ᵥ, Vol => Press(p))
     end
-end
-
-function interpolate_f_v(f, t0, ω, wk, e0, p, eos, volumes)
-    v = v_from_p(t0, ω, wk, e0, p, eos)
-    return interpolate(f, volumes)(v)
+    return DimArray(arr, (t,))
 end
 
 DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
@@ -61,5 +64,14 @@ DimensionalData.name(::Type{<:Branch}) = "Branch"
 
 DimensionalData.shortname(::Type{<:Wavevector}) = "𝐪"
 DimensionalData.shortname(::Type{<:Branch}) = "𝑛"
+
+function replacedim(A::AbstractDimArray, dimensions::Pair...)
+    for (olddim, newdim) in dimensions
+        alldims = Any[dims(A)...]
+        alldims[findfirst(x -> x isa olddim, alldims)] = newdim
+        A = swapdims(A, Tuple(alldims))
+    end
+    return A
+end
 
 end
