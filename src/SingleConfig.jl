@@ -8,7 +8,7 @@ using EquationsOfStateOfSolids.Volume
 using Unitful: Temperature, Frequency, Energy, Wavenumber
 
 import DimensionalData
-import ..StatMech: free_energy
+import ..StatMech: ho_free_energy
 
 export Wavevector, Branch, Temp, Vol, v2p
 
@@ -20,9 +20,9 @@ const Press = Dim{:Press}
 const FreqAxes = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
 const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes}
 
-function free_energy(t::Temperature, ω::Freq, wₖ)
+function ho_free_energy(t::Temperature, ω::Freq, wₖ)
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
-    fₕₒ = free_energy.(t, ω)  # free energy on each harmonic oscillator
+    fₕₒ = ho_free_energy.(t, ω)  # free energy on each harmonic oscillator
     return sum(sample_bz(fₕₒ, wₖ))  # Scalar
 end
 
