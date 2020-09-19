@@ -19,11 +19,7 @@ const Vol = Dim{:Vol}
 const Press = Dim{:Press}
 const NormalMode = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
 
-function ho_free_energy(
-    t,
-    ω::AbstractDimMatrix{T,<:NormalMode,<:AbstractMatrix{T}},
-    wₖ,
-) where {T}
+function ho_free_energy(t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
     fₕₒ = ho_free_energy.(t, ω)  # free energy on each harmonic oscillator
     return sum(sample_bz(fₕₒ, wₖ))  # Scalar
