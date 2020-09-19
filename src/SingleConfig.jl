@@ -53,9 +53,9 @@ function v2p(
         eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
         p = map(PressureEOS(eosparam), volumes)
         fₜ₀ᵥ = if dimnum(fₜᵥ, Temp) == 1
-            DimArray(reshape(fₜ₀ᵥ, 1, :) |> collect, (Temp([val(refdims(fₜ₀ᵥ))]), v))
+            DimArray(reshape(fₜ₀ᵥ, 1, :), (Temp([val(refdims(fₜ₀ᵥ))]), v))
         else
-            DimArray(reshape(fₜ₀ᵥ, :, 1) |> collect, (v, Temp([val(refdims(fₜ₀ᵥ))])))
+            DimArray(reshape(fₜ₀ᵥ, :, 1), (v, Temp([val(refdims(fₜ₀ᵥ))])))
         end
         replacedim(fₜ₀ᵥ, Vol => Press(p))
     end
