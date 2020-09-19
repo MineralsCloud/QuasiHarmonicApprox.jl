@@ -5,7 +5,6 @@ using DimensionalData:
 using EquationsOfStateOfSolids.Collections: BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume
-using Unitful: Temperature, Frequency, Energy, Wavenumber
 
 import DimensionalData
 import ..StatMech: ho_free_energy
@@ -17,10 +16,9 @@ const Branch = Dim{:Branch}
 const Temp = Dim{:Temp}
 const Vol = Dim{:Vol}
 const Press = Dim{:Press}
-const FreqAxes = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
-const Freq = AbstractDimMatrix{<:Union{Frequency,Energy,Wavenumber},<:FreqAxes}
+const NormalMode = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
 
-function ho_free_energy(t::Temperature, ω::Freq, wₖ)
+function ho_free_energy(t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
     fₕₒ = ho_free_energy.(t, ω)  # free energy on each harmonic oscillator
     return sum(sample_bz(fₕₒ, wₖ))  # Scalar
@@ -50,9 +48,9 @@ function v2p(
         eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
         p = map(PressureEOS(eosparam), volumes)
         fₜ₀ᵥ = if dimnum(fₜᵥ, Temp) == 1
-            DimArray(reshape(fₜ₀ᵥ, 1, :) |> collect, (Temp([val(refdims(fₜ₀ᵥ))]), v))
+            DimArray(reshape(fₜ₀ᵥ, 1, :), (Temp([val(refdims(fₜ₀ᵥ))]), v))
         else
-            DimArray(reshape(fₜ₀ᵥ, :, 1) |> collect, (v, Temp([val(refdims(fₜ₀ᵥ))])))
+            DimArray(reshape(fₜ₀ᵥ, :, 1), (v, Temp([val(refdims(fₜ₀ᵥ))])))
         end
         replacedim(fₜ₀ᵥ, Vol => Press(p))
     end
