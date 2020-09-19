@@ -5,7 +5,6 @@ using DimensionalData:
 using EquationsOfStateOfSolids.Collections: BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume
-using Unitful: Temperature, Frequency, Energy, Wavenumber
 
 import DimensionalData
 import ..StatMech: ho_free_energy
