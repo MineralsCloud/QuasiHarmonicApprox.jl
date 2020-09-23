@@ -18,6 +18,7 @@ const Temperature = Dim{:Temperature}
 const Volume = Dim{:Volume}
 const Pressure = Dim{:Pressure}
 const NormalMode = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
+const TempVolOrVolTemp = Union{Tuple{Temperature,Volume},Tuple{Volume,Temperature}}
 
 function ho_free_energy(t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
@@ -36,46 +37,38 @@ sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(transpose(ω), wₖ)  # Just want to align axis, `transpose` is enough.
 
 function v2p(
-    fₜᵥ::AbstractMatrix{<:Energy},
-    initparam::Parameters = BirchMurnaghan3rd(
-        minimum(dims(fₜᵥ, Volume)),
-        zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Volume)),
-        4,
-    ),
+    energies::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp},
+    param0::Parameters
 )
-    temperatures, volumes = dims(fₜᵥ, (Temperature, Volume))
-    arr = map(eachslice(fₜᵥ; dims = Temperature)) do fₜ₀ᵥ
-        eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
-        p = map(PressureEOS(eosparam), volumes)
+    temperatures, volumes = dims(energies, (Temperature, Volume))
+    arr = map(eachslice(energies; dims = Temperature)) do fₜ₀ᵥ
+        param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
+        p = map(PressureEOS(param), volumes)
         DimArray(data(fₜ₀ᵥ), (Pressure(p),); refdims = refdims(fₜ₀ᵥ))
     end
     return DimArray(arr, (temperatures,))
 end
 function v2p(
-    fₜᵥ::AbstractMatrix{<:Energy},
+    energies::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp},
     pressures,
-    initparam::Parameters = BirchMurnaghan3rd(
-        minimum(dims(fₜᵥ, Volume)),
-        zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Volume)),
-        4,
-    ),
+    param0::Parameters 
 )
-    temperatures, volumes = dims(fₜᵥ, (Temperature, Volume))
-    arr = map(eachslice(fₜᵥ; dims = Temperature)) do fₜ₀ᵥ
-        eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
-        p = map(PressureEOS(eosparam), volumes)
+    temperatures, volumes = dims(energies, (Temperature, Volume))
+    arr = map(eachslice(energies; dims = Temperature)) do fₜ₀ᵥ
+        param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
+        p = map(PressureEOS(param), volumes)
         inarr = map(pressures) do p0
             x, i = findmin(abs.(p .- p0))
             v = if firstindex(p) < i < lastindex(p)
                 if x <= p0
-                    mustfindvolume(PressureEOS(eosparam), p0)
+                    mustfindvolume(PressureEOS(param), p0)
                 else
-                    mustfindvolume(PressureEOS(eosparam), p0)
+                    mustfindvolume(PressureEOS(param), p0)
                 end
             else
-                mustfindvolume(PressureEOS(eosparam), p0)
+                mustfindvolume(PressureEOS(param), p0)
             end
-            EnergyEOS(eosparam)(v)
+            EnergyEOS(param)(v)
         end
         DimArray(inarr, (Pressure(pressures),); refdims = refdims(fₜ₀ᵥ))
     end
