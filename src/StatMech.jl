@@ -1,14 +1,10 @@
 module StatMech
 
 using OptionalArgChecks: @argcheck
-using Unitful: AbstractQuantity, NoUnits, ħ, k, c0, upreferred, dimension, @u_str
+using Unitful: Frequency, Energy, Wavenumber, NoUnits, ħ, k, c0, upreferred
 
 export bose_einstein,
     partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_specific_heat
-
-const Frequency = AbstractQuantity{T,dimension(u"1/s")} where {T}
-const Energy = AbstractQuantity{T,dimension(u"J")} where {T}
-const Wavenumber = AbstractQuantity{T,dimension(u"1/m")} where {T}
 
 function bose_einstein(t, ω::Frequency)
     @argcheck isreal(ω)
