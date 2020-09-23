@@ -9,13 +9,13 @@ using EquationsOfStateOfSolids.Volume
 import DimensionalData
 import ..StatMech: ho_free_energy
 
-export Wavevector, Branch, Temp, Vol, v2p
+export Wavevector, Branch, Temperature, Volume, v2p
 
 const Wavevector = Dim{:Wavevector}
 const Branch = Dim{:Branch}
-const Temp = Dim{:Temp}
-const Vol = Dim{:Vol}
-const Press = Dim{:Press}
+const Temperature = Dim{:Temperature}
+const Volume = Dim{:Volume}
+const Pressure = Dim{:Pressure}
 const NormalMode = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
 
 function ho_free_energy(t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
@@ -37,8 +37,8 @@ sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
 function v2p(
     fₜᵥ,
     initparam = BirchMurnaghan3rd(
-        minimum(dims(fₜᵥ, Vol)),
-        zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Vol)),
+        minimum(dims(fₜᵥ, Volume)),
+        zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Volume)),
         4,
     ),
 )
