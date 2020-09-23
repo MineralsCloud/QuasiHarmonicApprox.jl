@@ -1,10 +1,8 @@
 module SingleConfig
 
-using DimensionalData:
-    AbstractDimMatrix, AbstractDimArray, DimArray, Dim, dims, val, refdims, swapdims, dimnum
+using DimensionalData: AbstractDimMatrix, DimArray, Dim, dims, refdims, data
 using EquationsOfStateOfSolids.Collections: BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
-using EquationsOfStateOfSolids.Volume
 
 import DimensionalData
 import ..StatMech: ho_free_energy
