@@ -3,6 +3,7 @@ module SingleConfig
 using DimensionalData: AbstractDimMatrix, DimArray, Dim, dims, refdims, data
 using EquationsOfStateOfSolids.Collections: BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
+using Unitful: Energy
 
 import DimensionalData
 import ..StatMech: ho_free_energy
@@ -33,7 +34,7 @@ sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(transpose(ω), wₖ)  # Just want to align axis, `transpose` is enough.
 
 function v2p(
-    fₜᵥ,
+    fₜᵥ::AbstractMatrix{<:Energy},
     initparam = BirchMurnaghan3rd(
         minimum(dims(fₜᵥ, Volume)),
         zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Volume)),
