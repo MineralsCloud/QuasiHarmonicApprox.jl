@@ -1,8 +1,10 @@
 module SingleConfig
 
 using DimensionalData: AbstractDimMatrix, DimArray, Dim, dims, refdims, data
-using EquationsOfStateOfSolids.Collections: BirchMurnaghan3rd, EnergyEOS, PressureEOS
+using EquationsOfStateOfSolids.Collections:
+    Parameters, BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
+using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Unitful: Energy
 
 import DimensionalData
@@ -35,7 +37,7 @@ sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
 
 function v2p(
     fₜᵥ::AbstractMatrix{<:Energy},
-    initparam = BirchMurnaghan3rd(
+    initparam::Parameters = BirchMurnaghan3rd(
         minimum(dims(fₜᵥ, Volume)),
         zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Volume)),
         4,
@@ -46,6 +48,36 @@ function v2p(
         eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
         p = map(PressureEOS(eosparam), volumes)
         DimArray(data(fₜ₀ᵥ), (Pressure(p),); refdims = refdims(fₜ₀ᵥ))
+    end
+    return DimArray(arr, (temperatures,))
+end
+function v2p(
+    fₜᵥ::AbstractMatrix{<:Energy},
+    pressures,
+    initparam::Parameters = BirchMurnaghan3rd(
+        minimum(dims(fₜᵥ, Volume)),
+        zero(eltype(fₜᵥ)) / minimum(dims(fₜᵥ, Volume)),
+        4,
+    ),
+)
+    temperatures, volumes = dims(fₜᵥ, (Temperature, Volume))
+    arr = map(eachslice(fₜᵥ; dims = Temperature)) do fₜ₀ᵥ
+        eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
+        p = map(PressureEOS(eosparam), volumes)
+        inarr = map(pressures) do p0
+            x, i = findmin(abs.(p .- p0))
+            v = if firstindex(p) < i < lastindex(p)
+                if x <= p0
+                    mustfindvolume(PressureEOS(eosparam), p0)
+                else
+                    mustfindvolume(PressureEOS(eosparam), p0)
+                end
+            else
+                mustfindvolume(PressureEOS(eosparam), p0)
+            end
+            EnergyEOS(eosparam)(v)
+        end
+        DimArray(inarr, (Pressure(pressures),); refdims = refdims(fₜ₀ᵥ))
     end
     return DimArray(arr, (temperatures,))
 end
