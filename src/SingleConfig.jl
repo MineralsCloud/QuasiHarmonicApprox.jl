@@ -55,10 +55,4 @@ DimensionalData.name(::Type{<:Volume}) = "Volume"
 DimensionalData.name(::Type{<:Temperature}) = "Temperature"
 DimensionalData.name(::Type{<:Pressure}) = "Pressure"
 
-DimensionalData.shortname(::Type{<:Wavevector}) = "𝐪"
-DimensionalData.shortname(::Type{<:Branch}) = "𝑛"
-DimensionalData.shortname(::Type{<:Volume}) = "V"
-DimensionalData.shortname(::Type{<:Temperature}) = "T"
-DimensionalData.shortname(::Type{<:Pressure}) = "P"
-
 end
