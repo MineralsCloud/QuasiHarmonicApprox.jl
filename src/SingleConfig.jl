@@ -42,19 +42,13 @@ function v2p(
         4,
     ),
 )
-    t, v = dims(fₜᵥ, (Temp, Vol))
-    volumes = val(v)
-    arr = map(eachslice(fₜᵥ; dims = Temp)) do fₜ₀ᵥ
+    temperatures, volumes = dims(fₜᵥ, (Temperature, Volume))
+    arr = map(eachslice(fₜᵥ; dims = Temperature)) do fₜ₀ᵥ
         eosparam = eosfit(EnergyEOS(initparam), volumes, fₜ₀ᵥ)
         p = map(PressureEOS(eosparam), volumes)
-        fₜ₀ᵥ = if dimnum(fₜᵥ, Temp) == 1
-            DimArray(reshape(fₜ₀ᵥ, 1, :), (Temp([val(refdims(fₜ₀ᵥ))]), v))
-        else
-            DimArray(reshape(fₜ₀ᵥ, :, 1), (v, Temp([val(refdims(fₜ₀ᵥ))])))
-        end
-        replacedim(fₜ₀ᵥ, Vol => Press(p))
+        DimArray(data(fₜ₀ᵥ), (Pressure(p),); refdims = refdims(fₜ₀ᵥ))
     end
-    return DimArray(arr, (t,))
+    return DimArray(arr, (temperatures,))
 end
 
 DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
