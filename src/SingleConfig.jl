@@ -59,17 +59,14 @@ end
 
 DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
 DimensionalData.name(::Type{<:Branch}) = "Branch"
+DimensionalData.name(::Type{<:Volume}) = "Volume"
+DimensionalData.name(::Type{<:Temperature}) = "Temperature"
+DimensionalData.name(::Type{<:Pressure}) = "Pressure"
 
 DimensionalData.shortname(::Type{<:Wavevector}) = "𝐪"
 DimensionalData.shortname(::Type{<:Branch}) = "𝑛"
-
-function replacedim(A::AbstractDimArray, dimensions::Pair...)
-    for (olddim, newdim) in dimensions
-        alldims = Any[dims(A)...]
-        alldims[findfirst(x -> x isa olddim, alldims)] = newdim
-        A = swapdims(A, Tuple(alldims))
-    end
-    return A
-end
+DimensionalData.shortname(::Type{<:Volume}) = "V"
+DimensionalData.shortname(::Type{<:Temperature}) = "T"
+DimensionalData.shortname(::Type{<:Pressure}) = "P"
 
 end
