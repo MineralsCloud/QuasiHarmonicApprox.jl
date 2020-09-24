@@ -1,7 +1,7 @@
 module SingleConfig
 
 using DimensionalData:
-    AbstractDimMatrix, AbstractDimVector, DimArray, Dim, dims, refdims, data
+    AbstractDimMatrix, AbstractDimVector, DimArray, Dim, dims, swapdims, rebuild
 using EquationsOfStateOfSolids.Collections:
     Parameters, BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
@@ -39,43 +39,27 @@ sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
 function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param0::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
     param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
-    p = map(PressureEOS(param), volumes)
-    function _v2p()
-        return DimArray(data(fₜ₀ᵥ), (Press(p),); refdims = refdims(fₜ₀ᵥ))
-    end
+    _v2p() = swapdims(fₜ₀ᵥ, (Press(map(PressureEOS(param), volumes)),))  # `swapdims` will keep `refdims`
     function _v2p(pressures)
-        inarr = map(pressures) do p0
-            x, i = findmin(abs.(p .- p0))
-            v = if firstindex(p) < i < lastindex(p)
-                if x <= p0
-                    mustfindvolume(PressureEOS(param), p0)
-                else
-                    mustfindvolume(PressureEOS(param), p0)
-                end
-            else
-                mustfindvolume(PressureEOS(param), p0)
-            end
+        fₜ₀ₚ = map(pressures) do p0
+            v = mustfindvolume(PressureEOS(param), p0)
             EnergyEOS(param)(v)
         end
-        return DimArray(inarr, (Press(pressures),); refdims = refdims(fₜ₀ᵥ))
+        return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
     end
     return _v2p
 end
 function v2p(
-    energies::AbstractDimMatrix{<:Energy,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}},
+    fₜᵥ::AbstractDimMatrix{<:Energy,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}},
     param0::Parameters,
 )
     function _v2p()
-        arr = map(eachslice(energies; dims = Temp)) do fₜ₀ᵥ
-            v2p(fₜ₀ᵥ, param0)()
-        end
-        return DimArray(arr, dims(energies, (Temp,)))
+        arr = map(fₜ₀ᵥ -> v2p(fₜ₀ᵥ, param0)(), eachslice(fₜᵥ; dims = Temp))
+        return DimArray(arr, dims(fₜᵥ, (Temp,)))
     end
     function _v2p(pressures)
-        arr = map(eachslice(energies; dims = Temp)) do fₜ₀ᵥ
-            v2p(fₜ₀ᵥ, param0)(pressures)
-        end
-        return DimArray(arr, dims(energies, (Temp,)))
+        arr = map(fₜ₀ᵥ -> v2p(fₜ₀ᵥ, param0)(pressures), eachslice(fₜᵥ; dims = Temp))
+        return DimArray(arr, dims(fₜᵥ, (Temp,)))
     end
     return _v2p
 end
