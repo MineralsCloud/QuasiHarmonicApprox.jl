@@ -36,31 +36,48 @@ end
 sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(transpose(ω), wₖ)  # Just want to align axis, `transpose` is enough.
 
-function v2p(energies::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp}, param0::Parameters)
-    temperatures, volumes = dims(energies, (Temperature, Volume))
-    arr = map(eachslice(energies; dims = Temperature)) do fₜ₀ᵥ
-        param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
-        p = map(PressureEOS(param), volumes)
-        function _v2p()
-            return DimArray(data(fₜ₀ᵥ), (Pressure(p),); refdims = refdims(fₜ₀ᵥ))
-        end
-        function _v2p(pressures)
-            inarr = map(pressures) do p0
-                x, i = findmin(abs.(p .- p0))
-                v = if firstindex(p) < i < lastindex(p)
-                    if x <= p0
-                        mustfindvolume(PressureEOS(param), p0)
-                    else
-                        mustfindvolume(PressureEOS(param), p0)
-                    end
+function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param0::Parameters)
+    volumes = dims(fₜ₀ᵥ, Vol)
+    param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
+    p = map(PressureEOS(param), volumes)
+    function _v2p()
+        return DimArray(data(fₜ₀ᵥ), (Press(p),); refdims = refdims(fₜ₀ᵥ))
+    end
+    function _v2p(pressures)
+        inarr = map(pressures) do p0
+            x, i = findmin(abs.(p .- p0))
+            v = if firstindex(p) < i < lastindex(p)
+                if x <= p0
+                    mustfindvolume(PressureEOS(param), p0)
                 else
                     mustfindvolume(PressureEOS(param), p0)
                 end
-                EnergyEOS(param)(v)
+            else
+                mustfindvolume(PressureEOS(param), p0)
             end
+            EnergyEOS(param)(v)
         end
+        return DimArray(inarr, (Press(pressures),); refdims = refdims(fₜ₀ᵥ))
     end
-    return DimArray(arr, (temperatures,))
+    return _v2p
+end
+function v2p(
+    energies::AbstractDimMatrix{<:Energy,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}},
+    param0::Parameters,
+)
+    function _v2p()
+        arr = map(eachslice(energies; dims = Temp)) do fₜ₀ᵥ
+            v2p(fₜ₀ᵥ, param0)()
+        end
+        return DimArray(arr, dims(energies, (Temp,)))
+    end
+    function _v2p(pressures)
+        arr = map(eachslice(energies; dims = Temp)) do fₜ₀ᵥ
+            v2p(fₜ₀ᵥ, param0)(pressures)
+        end
+        return DimArray(arr, dims(energies, (Temp,)))
+    end
+    return _v2p
 end
 
 DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
