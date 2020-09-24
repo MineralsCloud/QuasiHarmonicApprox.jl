@@ -36,41 +36,29 @@ end
 sample_bz(ω::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
     sample_bz(transpose(ω), wₖ)  # Just want to align axis, `transpose` is enough.
 
-function v2p(
-    energies::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp},
-    param0::Parameters
-)
+function v2p(energies::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp}, param0::Parameters)
     temperatures, volumes = dims(energies, (Temperature, Volume))
     arr = map(eachslice(energies; dims = Temperature)) do fₜ₀ᵥ
         param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
         p = map(PressureEOS(param), volumes)
-        DimArray(data(fₜ₀ᵥ), (Pressure(p),); refdims = refdims(fₜ₀ᵥ))
-    end
-    return DimArray(arr, (temperatures,))
-end
-function v2p(
-    energies::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp},
-    pressures,
-    param0::Parameters 
-)
-    temperatures, volumes = dims(energies, (Temperature, Volume))
-    arr = map(eachslice(energies; dims = Temperature)) do fₜ₀ᵥ
-        param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
-        p = map(PressureEOS(param), volumes)
-        inarr = map(pressures) do p0
-            x, i = findmin(abs.(p .- p0))
-            v = if firstindex(p) < i < lastindex(p)
-                if x <= p0
-                    mustfindvolume(PressureEOS(param), p0)
+        function _v2p()
+            return DimArray(data(fₜ₀ᵥ), (Pressure(p),); refdims = refdims(fₜ₀ᵥ))
+        end
+        function _v2p(pressures)
+            inarr = map(pressures) do p0
+                x, i = findmin(abs.(p .- p0))
+                v = if firstindex(p) < i < lastindex(p)
+                    if x <= p0
+                        mustfindvolume(PressureEOS(param), p0)
+                    else
+                        mustfindvolume(PressureEOS(param), p0)
+                    end
                 else
                     mustfindvolume(PressureEOS(param), p0)
                 end
-            else
-                mustfindvolume(PressureEOS(param), p0)
+                EnergyEOS(param)(v)
             end
-            EnergyEOS(param)(v)
         end
-        DimArray(inarr, (Pressure(pressures),); refdims = refdims(fₜ₀ᵥ))
     end
     return DimArray(arr, (temperatures,))
 end
