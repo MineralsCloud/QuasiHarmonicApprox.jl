@@ -3,7 +3,7 @@ module SingleConfig
 using DimensionalData: AbstractDimMatrix, Dim
 
 import DimensionalData
-import ..StatMech: ho_free_energy
+import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_specific_heat
 
 export Wavevector, Branch
 
@@ -19,12 +19,15 @@ function testconverge(t, ωs, wₖs, N = 3)
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
 end
 
-function ho_free_energy(t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
+function property(f, t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
-    fₕₒ = ho_free_energy.(t, ω)  # free energy on each harmonic oscillator
-    return sum(sample_bz(fₕₒ, wₖ))  # Scalar
+    fₕₒ = f.(t, ω)  # (Free) energy on each harmonic oscillator
     return sample_bz(fₕₒ, wₖ)  # Scalar
 end
+ho_free_energy(t, ω, wₖ) = property(ho_free_energy, t, ω, wₖ)
+ho_internal_energy(t, ω, wₖ) = property(ho_internal_energy, t, ω, wₖ)
+ho_entropy(t, ω, wₖ) = property(ho_entropy, t, ω, wₖ)
+ho_vol_specific_heat(t, ω, wₖ) = property(ho_vol_specific_heat, t, ω, wₖ)
 
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
 function sample_bz(xₙₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
