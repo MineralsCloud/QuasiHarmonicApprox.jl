@@ -60,12 +60,12 @@ end
 
 function property(f, t::Temperature, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
-    fₕₒ = f.(t, ω)  # (Free) energy on each harmonic oscillator
-    return sample_bz(fₕₒ, wₖ)  # Scalar
+    fₙₖ = f.(t, ω)  # (Free) energy on each harmonic oscillator
+    return sample_bz(fₙₖ, wₖ)  # Scalar
 end
 function property(f, t, ω::AbstractDimArray{T,3,<:TempIndependentNormalModes}, wₖ) where {T}
     return DimArray(
-        [f(tᵢ, ωᵥ, wₖ) for tᵢ in t, ωᵥ in eachslice(ω; dims = Vol)],
+        [f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in eachslice(ω; dims = Vol)],
         (Temp(t), dims(ω, Vol)),
     )
 end
@@ -86,14 +86,14 @@ ho_entropy(t, ω, wₖ) = property(ho_entropy, t, ω, wₖ)
 ho_vol_sp_ht(t, ω, wₖ) = property(ho_vol_sp_ht, t, ω, wₖ)
 
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
-function sample_bz(xₙₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
+function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
     if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
         throw(DomainError("All the values of the weights should be greater than 0!"))
     end
-    return sum(xₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
+    return sum(fₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
 end
-sample_bz(xₖₙ::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
-    sample_bz(transpose(xₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
+sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
+    sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
 
 DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
 DimensionalData.name(::Type{<:Branch}) = "Branch"
