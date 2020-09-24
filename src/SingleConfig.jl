@@ -1,6 +1,7 @@
 module SingleConfig
 
-using DimensionalData: AbstractDimMatrix, DimArray, Dim, dims, refdims, data
+using DimensionalData:
+    AbstractDimMatrix, AbstractDimVector, DimArray, Dim, dims, refdims, data
 using EquationsOfStateOfSolids.Collections:
     Parameters, BirchMurnaghan3rd, EnergyEOS, PressureEOS
 using EquationsOfStateOfSolids.Fitting: eosfit
@@ -10,15 +11,14 @@ using Unitful: Energy
 import DimensionalData
 import ..StatMech: ho_free_energy
 
-export Wavevector, Branch, Temperature, Volume, v2p
+export Wavevector, Branch, Temp, Vol, v2p
 
 const Wavevector = Dim{:Wavevector}
 const Branch = Dim{:Branch}
-const Temperature = Dim{:Temperature}
-const Volume = Dim{:Volume}
-const Pressure = Dim{:Pressure}
+const Temp = Dim{:Temp}
+const Vol = Dim{:Vol}
+const Press = Dim{:Press}
 const NormalMode = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
-const TempVolOrVolTemp = Union{Tuple{Temperature,Volume},Tuple{Volume,Temperature}}
 
 function ho_free_energy(t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
@@ -82,8 +82,8 @@ end
 
 DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
 DimensionalData.name(::Type{<:Branch}) = "Branch"
-DimensionalData.name(::Type{<:Volume}) = "Volume"
-DimensionalData.name(::Type{<:Temperature}) = "Temperature"
-DimensionalData.name(::Type{<:Pressure}) = "Pressure"
+DimensionalData.name(::Type{<:Vol}) = "Volume"
+DimensionalData.name(::Type{<:Temp}) = "Temperature"
+DimensionalData.name(::Type{<:Press}) = "Pressure"
 
 end
