@@ -5,11 +5,22 @@ using DimensionalData: AbstractDimMatrix, Dim
 import DimensionalData
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
-export Wavevector, Branch
+export Wavevector, Branch, Temp, Vol, Press
 
 const Wavevector = Dim{:Wavevector}
 const Branch = Dim{:Branch}
+const Temp = Dim{:Temp}
+const Vol = Dim{:Vol}
+const Press = Dim{:Press}
 const NormalMode = Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}}
+const TempIndependentNormalModes = Union{
+    Tuple{Wavevector,Branch,Vol},
+    Tuple{Branch,Wavevector,Vol},
+    Tuple{Vol,Branch,Wavevector},
+    Tuple{Vol,Wavevector,Branch},
+    Tuple{Wavevector,Vol,Branch},
+    Tuple{Branch,Vol,Wavevector},
+}
 
 function testconverge(t, ωs, wₖs, N = 3)
     perm = sortperm(wₖs; by = length)
