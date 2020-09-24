@@ -4,7 +4,7 @@ using OptionalArgChecks: @argcheck
 using Unitful: Frequency, Energy, Wavenumber, NoUnits, ħ, k, c0, upreferred
 
 export bose_einstein,
-    partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_specific_heat
+    partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
 function bose_einstein(t, ω::Frequency)
     @argcheck isreal(ω)
@@ -56,7 +56,7 @@ end
 ho_entropy(t, e::Energy) = ho_entropy(t, e2ω(e))
 ho_entropy(t, ṽ::Wavenumber) = ho_entropy(t, ṽ2ω(ṽ))
 
-function ho_vol_specific_heat(t, ω::Frequency)
+function ho_vol_sp_ht(t, ω::Frequency)
     @argcheck isreal(ω)
     if iszero(ω)
         return k
@@ -65,8 +65,8 @@ function ho_vol_specific_heat(t, ω::Frequency)
         return k * (x * csch(x))^2
     end
 end
-ho_vol_specific_heat(t, e::Energy) = ho_vol_specific_heat(t, e2ω(e))
-ho_vol_specific_heat(t, ṽ::Wavenumber) = ho_vol_specific_heat(t, ṽ2ω(ṽ))
+ho_vol_sp_ht(t, e::Energy) = ho_vol_sp_ht(t, e2ω(e))
+ho_vol_sp_ht(t, ṽ::Wavenumber) = ho_vol_sp_ht(t, ṽ2ω(ṽ))
 
 e2ω(e::Energy) = e / ħ  # Do not export!
 
