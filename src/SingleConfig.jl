@@ -1,6 +1,7 @@
 module SingleConfig
 
-using DimensionalData: AbstractDimMatrix, Dim
+using DimensionalData: AbstractDimArray, AbstractDimMatrix, DimArray, Dim, dims
+using Unitful: Temperature
 
 import DimensionalData
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
@@ -30,11 +31,18 @@ function testconverge(t, ωs, wₖs, N = 3)
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
 end
 
-function property(f, t, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
+function property(f, t::Temperature, ω::AbstractDimMatrix{T,<:NormalMode}, wₖ) where {T}
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
     fₕₒ = f.(t, ω)  # (Free) energy on each harmonic oscillator
     return sample_bz(fₕₒ, wₖ)  # Scalar
 end
+function property(f, t, ω::AbstractDimArray{T,3,<:TempIndependentNormalModes}, wₖ) where {T}
+    return DimArray(
+        [f(tᵢ, ωᵥ, wₖ) for tᵢ in t, ωᵥ in eachslice(ω; dims = Vol)],
+        (Temp(t), dims(ω, Vol)),
+    )
+end
+
 ho_free_energy(t, ω, wₖ) = property(ho_free_energy, t, ω, wₖ)
 ho_internal_energy(t, ω, wₖ) = property(ho_internal_energy, t, ω, wₖ)
 ho_entropy(t, ω, wₖ) = property(ho_entropy, t, ω, wₖ)
