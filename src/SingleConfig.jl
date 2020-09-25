@@ -79,21 +79,18 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
             end
             function $f(t, ω::TempIndependentNormalModes, wₖ)
                 return DimArray(
-                    [$f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in eachslice(ω; dims = Vol)],
+                    [$f(t₀, ω[Vol(i)], wₖ) for t₀ in t, i in 1:size(ω, Vol)],  # Slower than `eachslice(ω; dims = Vol)`
                     (Temp(t), dims(ω, Vol)),
                 )
             end
             $f(t, ω::AbstractDimVector{<:NormalModes,<:Tuple{Vol}}, wₖ) =
                 DimArray([$f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in ω], (Temp(t), dims(ω, Vol)))
             function $f(t, ω::TempDependentNormalModes, wₖ)
-                adims = dims(ω, (Temp, Vol))
-                arr = map(eachslice(ω; dims = Temp), t) do ωₜ₀ᵥ, t₀
-                    map(eachslice(ωₜ₀ᵥ; dims = Vol)) do ωₜᵥ
-                        $f(t₀, ωₜᵥ, wₖ)
-                    end
-                end
-                arr = reshape(collect(Iterators.flatten(arr))', length.(adims))
-                return DimArray(arr, adims)
+                arr = [
+                    $f(t[i], ω[Temp(i), Vol(j)], wₖ)
+                    for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
+                ]  # `eachslice` is not easy to use here
+                return DimArray(arr, dims(ω, (Temp, Vol)))
             end
             function $f(
                 t,
@@ -103,11 +100,10 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
                 },
                 wₖ,
             )
-                arr = map(eachslice(ω; dims = Temp), t) do ωₜ₀ᵥ, t₀
-                    map(eachslice(ωₜ₀ᵥ; dims = Vol)) do ωₜᵥ
-                        $f(t₀, ωₜᵥ, wₖ)
-                    end
-                end
+                arr = [
+                    $f(t[i], ω[Temp(i), Vol(j)], wₖ)
+                    for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
+                ]  # `eachslice` is not easy to use here
                 return DimArray(arr, dims(ω, (Temp, Vol)))
             end
         end,
