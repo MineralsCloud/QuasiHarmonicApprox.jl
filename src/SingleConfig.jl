@@ -84,9 +84,11 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
                 return sample_bz(fₙₖ, wₖ)  # Scalar
             end
             function $f(t, ω::TempIndependentNormalModes, wₖ)
+                M, N = length(t), size(ω, Vol)
+                arr = [$f(t₀, ω[Vol(i)], wₖ) for t₀ in t, i in 1:N]  # Slower than `eachslice(ω; dims = Vol)`
                 return DimArray(
-                    [$f(t₀, ω[Vol(i)], wₖ) for t₀ in t, i in 1:size(ω, Vol)],  # Slower than `eachslice(ω; dims = Vol)`
-                    (Temp(t), dims(ω, Vol)),
+                    reshape(arr, (M, N)),  # In case `t` is a scalar
+                    (Temp(Tuple(t)), Vol(Tuple(dims(ω, Vol)))),  # In case `t` is a scalar
                 )
             end
             function $f(t, ω::TempDependentNormalModes, wₖ)
@@ -102,7 +104,6 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
         end,
     )
 end
-
 
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
 function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
