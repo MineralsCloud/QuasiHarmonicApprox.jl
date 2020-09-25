@@ -9,7 +9,7 @@ import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
 export Wavevector, Branch, Temp, Vol, Press
 
-const Wavevector = Dim{:Wavevector}
+const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
 const Branch = Dim{:Branch}
 const Temp = Dim{:Temp}
 const Vol = Dim{:Vol}
@@ -89,9 +89,9 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
                 return DimArray(
                     reshape(arr, (M, N)),  # In case `t` is a scalar
                     (Temp(Tuple(t)), Vol(Tuple(dims(ω, Vol)))),  # In case `t` is a scalar
-                )
+                )  # TODO: Should I make `arr` staitic?
             end
-            function $f(t, ω::TempDependentNormalModes, wₖ)
+            function $f(t, ω::TempDependentNormalModes, wₖ)  # FIXME: fix `ω[Vol(i)]` method error
                 if size(ω, Temp) != length(t)
                     throw(DimensionMismatch("`t` and `Temp` does not have the same length!"))
                 end
@@ -99,7 +99,7 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
                     $f(t[i], ω[Temp(i), Vol(j)], wₖ)
                     for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
                 ]  # `eachslice` is not easy to use here
-                return DimArray(arr, dims(ω, (Temp, Vol)))
+                return DimArray(arr, dims(ω, (Temp, Vol)))  # TODO: Tuplefy dims
             end
         end,
     )
