@@ -18,47 +18,53 @@ const NormalModes = AbstractDimMatrix{
     T,
     <:Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}},
 } where {T}
-const TempIndependentNormalModes = AbstractDimArray{
-    T,
-    3,
-    <:Union{
-        Tuple{Wavevector,Branch,Vol},
-        Tuple{Branch,Wavevector,Vol},
-        Tuple{Vol,Branch,Wavevector},
-        Tuple{Vol,Wavevector,Branch},
-        Tuple{Wavevector,Vol,Branch},
-        Tuple{Branch,Vol,Wavevector},
+const TempIndependentNormalModes = Union{
+    AbstractDimArray{
+        T,
+        3,
+        <:Union{
+            Tuple{Wavevector,Branch,Vol},
+            Tuple{Branch,Wavevector,Vol},
+            Tuple{Vol,Branch,Wavevector},
+            Tuple{Vol,Wavevector,Branch},
+            Tuple{Wavevector,Vol,Branch},
+            Tuple{Branch,Vol,Wavevector},
+        },
     },
+    AbstractDimVector{<:NormalModes,<:Tuple{Vol}},
 } where {T}
-const TempDependentNormalModes = AbstractDimArray{
-    T,
-    4,
-    <:Union{
-        Tuple{Wavevector,Branch,Vol,Temp},
-        Tuple{Wavevector,Branch,Temp,Vol},
-        Tuple{Wavevector,Vol,Branch,Temp},
-        Tuple{Wavevector,Vol,Temp,Branch},
-        Tuple{Wavevector,Temp,Branch,Vol},
-        Tuple{Wavevector,Temp,Vol,Branch},
-        Tuple{Branch,Wavevector,Vol,Temp},
-        Tuple{Branch,Wavevector,Temp,Vol},
-        Tuple{Branch,Vol,Wavevector,Temp},
-        Tuple{Branch,Vol,Temp,Wavevector},
-        Tuple{Branch,Temp,Wavevector,Vol},
-        Tuple{Branch,Temp,Vol,Wavevector},
-        Tuple{Vol,Wavevector,Branch,Temp},
-        Tuple{Vol,Wavevector,Temp,Branch},
-        Tuple{Vol,Branch,Wavevector,Temp},
-        Tuple{Vol,Branch,Temp,Wavevector},
-        Tuple{Vol,Temp,Wavevector,Branch},
-        Tuple{Vol,Temp,Branch,Wavevector},
-        Tuple{Temp,Wavevector,Branch,Vol},
-        Tuple{Temp,Wavevector,Vol,Branch},
-        Tuple{Temp,Branch,Wavevector,Vol},
-        Tuple{Temp,Branch,Vol,Wavevector},
-        Tuple{Temp,Vol,Wavevector,Branch},
-        Tuple{Temp,Vol,Branch,Wavevector},
+const TempDependentNormalModes = Union{
+    AbstractDimArray{
+        T,
+        4,
+        <:Union{
+            Tuple{Wavevector,Branch,Vol,Temp},
+            Tuple{Wavevector,Branch,Temp,Vol},
+            Tuple{Wavevector,Vol,Branch,Temp},
+            Tuple{Wavevector,Vol,Temp,Branch},
+            Tuple{Wavevector,Temp,Branch,Vol},
+            Tuple{Wavevector,Temp,Vol,Branch},
+            Tuple{Branch,Wavevector,Vol,Temp},
+            Tuple{Branch,Wavevector,Temp,Vol},
+            Tuple{Branch,Vol,Wavevector,Temp},
+            Tuple{Branch,Vol,Temp,Wavevector},
+            Tuple{Branch,Temp,Wavevector,Vol},
+            Tuple{Branch,Temp,Vol,Wavevector},
+            Tuple{Vol,Wavevector,Branch,Temp},
+            Tuple{Vol,Wavevector,Temp,Branch},
+            Tuple{Vol,Branch,Wavevector,Temp},
+            Tuple{Vol,Branch,Temp,Wavevector},
+            Tuple{Vol,Temp,Wavevector,Branch},
+            Tuple{Vol,Temp,Branch,Wavevector},
+            Tuple{Temp,Wavevector,Branch,Vol},
+            Tuple{Temp,Wavevector,Vol,Branch},
+            Tuple{Temp,Branch,Wavevector,Vol},
+            Tuple{Temp,Branch,Vol,Wavevector},
+            Tuple{Temp,Vol,Wavevector,Branch},
+            Tuple{Temp,Vol,Branch,Wavevector},
+        },
     },
+    AbstractDimMatrix{<:NormalModes,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}},
 } where {T}
 
 function testconverge(t, ωs, wₖs, N = 3)
@@ -83,26 +89,10 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
                     (Temp(t), dims(ω, Vol)),
                 )
             end
-            $f(t, ω::AbstractDimVector{<:NormalModes,<:Tuple{Vol}}, wₖ) =
-                DimArray([$f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in ω], (Temp(t), dims(ω, Vol)))
             function $f(t, ω::TempDependentNormalModes, wₖ)
                 if size(ω, Temp) != length(t)
                     throw(DimensionMismatch("`t` and `Temp` does not have the same length!"))
                 end
-                arr = [
-                    $f(t[i], ω[Temp(i), Vol(j)], wₖ)
-                    for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
-                ]  # `eachslice` is not easy to use here
-                return DimArray(arr, dims(ω, (Temp, Vol)))
-            end
-            function $f(
-                t,
-                ω::AbstractDimMatrix{
-                    <:NormalModes,
-                    <:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}},
-                },
-                wₖ,
-            )
                 arr = [
                     $f(t[i], ω[Temp(i), Vol(j)], wₖ)
                     for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
