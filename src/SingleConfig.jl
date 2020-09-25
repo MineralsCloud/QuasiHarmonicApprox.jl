@@ -83,6 +83,8 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
                     (Temp(t), dims(ω, Vol)),
                 )
             end
+            $f(t, ω::AbstractDimVector{<:NormalModes,<:Tuple{Vol}}, wₖ) =
+                DimArray([$f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in ω], (Temp(t), dims(ω, Vol)))
             function $f(t, ω::TempDependentNormalModes, wₖ)
                 adims = dims(ω, (Temp, Vol))
                 arr = map(eachslice(ω; dims = Temp), t) do ωₜ₀ᵥ, t₀
@@ -92,6 +94,21 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
                 end
                 arr = reshape(collect(Iterators.flatten(arr))', length.(adims))
                 return DimArray(arr, adims)
+            end
+            function $f(
+                t,
+                ω::AbstractDimMatrix{
+                    <:NormalModes,
+                    <:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}},
+                },
+                wₖ,
+            )
+                arr = map(eachslice(ω; dims = Temp), t) do ωₜ₀ᵥ, t₀
+                    map(eachslice(ωₜ₀ᵥ; dims = Vol)) do ωₜᵥ
+                        $f(t₀, ωₜᵥ, wₖ)
+                    end
+                end
+                return DimArray(arr, dims(ω, (Temp, Vol)))
             end
         end,
     )
