@@ -76,33 +76,32 @@ function testconverge(t, ωs, wₖs, N = 3)
 end
 
 for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
-    eval(
-        quote
-            function $f(t::Temperature, ω::NormalModes, wₖ)
-                wₖ = wₖ ./ sum(wₖ)  # Normalize weights
-                fₙₖ = $f.(t, ω)  # Physical property on each harmonic oscillator
-                return sample_bz(fₙₖ, wₖ)  # Scalar
+    expr = quote
+        function $f(t::Temperature, ω::NormalModes, wₖ)
+            wₖ = wₖ ./ sum(wₖ)  # Normalize weights
+            fₙₖ = $f.(t, ω)  # Physical property on each harmonic oscillator
+            return sample_bz(fₙₖ, wₖ)  # Scalar
+        end
+        function $f(t, ω::TempIndependentNormalModes, wₖ)
+            M, N = length(t), size(ω, Vol)
+            arr = [$f(t₀, ω[Vol(i)], wₖ) for t₀ in t, i in 1:N]  # Slower than `eachslice(ω; dims = Vol)`
+            return DimArray(
+                reshape(arr, (M, N)),  # In case `t` is a scalar
+                (Temp(Tuple(t)), Vol(Tuple(dims(ω, Vol)))),  # In case `t` is a scalar
+            )  # TODO: Should I make `arr` staitic?
+        end
+        function $f(t, ω::TempDependentNormalModes, wₖ)  # FIXME: fix `ω[Vol(i)]` method error
+            if size(ω, Temp) != length(t)
+                throw(DimensionMismatch("`t` and `Temp` does not have the same length!"))
             end
-            function $f(t, ω::TempIndependentNormalModes, wₖ)
-                M, N = length(t), size(ω, Vol)
-                arr = [$f(t₀, ω[Vol(i)], wₖ) for t₀ in t, i in 1:N]  # Slower than `eachslice(ω; dims = Vol)`
-                return DimArray(
-                    reshape(arr, (M, N)),  # In case `t` is a scalar
-                    (Temp(Tuple(t)), Vol(Tuple(dims(ω, Vol)))),  # In case `t` is a scalar
-                )  # TODO: Should I make `arr` staitic?
-            end
-            function $f(t, ω::TempDependentNormalModes, wₖ)  # FIXME: fix `ω[Vol(i)]` method error
-                if size(ω, Temp) != length(t)
-                    throw(DimensionMismatch("`t` and `Temp` does not have the same length!"))
-                end
-                arr = [
-                    $f(t[i], ω[Temp(i), Vol(j)], wₖ)
-                    for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
-                ]  # `eachslice` is not easy to use here
-                return DimArray(arr, dims(ω, (Temp, Vol)))  # TODO: Tuplefy dims
-            end
-        end,
-    )
+            arr = [
+                $f(t[i], ω[Temp(i), Vol(j)], wₖ)
+                for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
+            ]  # `eachslice` is not easy to use here
+            return DimArray(arr, dims(ω, (Temp, Vol)))  # TODO: Tuplefy dims
+        end
+    end
+    eval(expr)
 end
 
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
