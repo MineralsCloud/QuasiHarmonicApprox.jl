@@ -105,6 +105,11 @@ for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
 end
 
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
+function sample_bz(f, ω::NormalModes, wₖ)  # Scalar
+    wₖ = wₖ ./ sum(wₖ)  # Normalize weights
+    fₙₖ = f.(ω)  # Physical property on each harmonic oscillator
+    return sample_bz(fₙₖ, wₖ)  # Scalar
+end
 function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
     if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
         throw(DomainError("All the values of the weights should be greater than 0!"))
