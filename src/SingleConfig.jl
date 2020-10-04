@@ -1,13 +1,13 @@
 module SingleConfig
 
 using DimensionalData:
-    AbstractDimArray, AbstractDimMatrix, AbstractDimVector, DimArray, Dim, dims
+    AbstractDimArray, AbstractDimMatrix, AbstractDimVector, DimArray, Dim, dims, swapdims
 using Unitful: Temperature, Energy
 
 import DimensionalData
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
-export Wavevector, Branch, Temp, Vol, Press
+export Wavevector, Branch, Temp, Vol, Press, FreeEnergy, sample_bz
 
 const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
 const Branch = Dim{:Branch}
@@ -75,30 +75,29 @@ function testconverge(t, ωs, wₖs, N = 3)
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
 end
 
-for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
+const FreeEnergy = DimArray{<:Energy,2,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}}
+const InternalEnergy = DimArray{<:Energy,2,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}}
+const Entropy = DimArray{T,2,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}} where {T}
+const VolSpHt = DimArray{T,2,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}} where {T}
+
+for (T, f) in zip(
+    (:FreeEnergy, :InternalEnergy, :Entropy, :VolSpHt),
+    (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
+)
     expr = quote
-        function $f(t::Temperature, ω::NormalModes, wₖ)
-            wₖ = wₖ ./ sum(wₖ)  # Normalize weights
-            fₙₖ = $f.(t, ω)  # Physical property on each harmonic oscillator
-            return sample_bz(fₙₖ, wₖ)  # Scalar
+        function $T(ω::TempIndependentNormalModes, wₖ, axes)
+            t, v = dims(axes, (Temp, Vol))
+            M, N = map(length, (t, v))
+            arr = [sample_bz(x -> $f(t[i], x), ω[Vol(j)], wₖ) for i in 1:M, j in 1:N]  # Slower than `eachslice(ω; dims = Vol)`
+            return swapdims(DimArray(reshape(arr, (M, N)), (t, v)), axes)
         end
-        function $f(t, ω::TempIndependentNormalModes, wₖ)
-            M, N = length(t), size(ω, Vol)
-            arr = [$f(t₀, ω[Vol(i)], wₖ) for t₀ in t, i in 1:N]  # Slower than `eachslice(ω; dims = Vol)`
-            return DimArray(
-                reshape(arr, (M, N)),  # In case `t` is a scalar
-                (Temp(Tuple(t)), Vol(Tuple(dims(ω, Vol)))),  # In case `t` is a scalar
-            )  # TODO: Should I make `arr` staitic?
-        end
-        function $f(t, ω::TempDependentNormalModes, wₖ)  # FIXME: fix `ω[Vol(i)]` method error
-            if size(ω, Temp) != length(t)
-                throw(DimensionMismatch("`t` and `Temp` does not have the same length!"))
-            end
+        function $T(ω::TempDependentNormalModes, wₖ, axes)  # FIXME: fix `ω[Vol(i)]` method error
+            t, v = dims(axes, (Temp, Vol))
+            M, N = map(length, (t, v))
             arr = [
-                $f(t[i], ω[Temp(i), Vol(j)], wₖ)
-                for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
+                sample_bz(x -> $f(t[i], x), ω[Temp(i), Vol(j)], wₖ) for i in 1:M, j in 1:N
             ]  # `eachslice` is not easy to use here
-            return DimArray(arr, dims(ω, (Temp, Vol)))  # TODO: Tuplefy dims
+            return swapdims(DimArray(arr, (t, v)), axes)
         end
     end
     eval(expr)
