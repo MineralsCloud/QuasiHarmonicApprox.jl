@@ -24,8 +24,7 @@ export Wavevector,
     HoInternalEnergy,
     HoEntropy,
     HoVolSpHt,
-    TempIndepNormalModes,
-    TempDepNormalModes,
+    collectmodes,
     sample_bz
 
 const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
@@ -41,10 +40,6 @@ const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
 const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
 const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
 const TempVolOrVolTempField = AbstractDimMatrix{T,<:TempVolOrVolTemp} where {T}
-const HoFreeEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
-const HoInternalEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
-const HoEntropy = DimArray{T,2,<:TempVolOrVolTemp} where {T}
-const HoVolSpHt = DimArray{T,2,<:TempVolOrVolTemp} where {T}
 
 function testconverge(t, ωs, wₖs, N = 3)
     perm = sortperm(wₖs; by = length)
@@ -54,12 +49,11 @@ function testconverge(t, ωs, wₖs, N = 3)
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
 end
 
-function TempIndepNormalModes(ω::AbstractDimArray{T,3})::TempIndepNormalModes where {T}
+function collectmodes(ω::AbstractDimArray{T,3})::TempIndepNormalModes where {T}
     @argcheck all(hasdim(ω, (Branch, Wavevector, Vol)))
     return DimArray([ωᵥ for ωᵥ in eachslice(ω; dims = Vol)], dims(ω, Vol))
 end
-
-function TempDepNormalModes(ω::AbstractDimArray{T,4})::TempDepNormalModes where {T}
+function collectmodes(ω::AbstractDimArray{T,4})::TempDepNormalModes where {T}
     @argcheck all(hasdim(ω, (Branch, Wavevector, Vol, Temp)))
     M, N = map(Base.Fix1(size, ω), (Temp, Vol))
     return DimArray([ω[Temp(i), Vol(j)] for i in 1:M, j in 1:N], dims(ω, (Temp, Vol)))
