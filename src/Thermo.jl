@@ -9,8 +9,6 @@ using Unitful: Energy
 
 using ..SingleConfig: Temp, Vol, Press
 
-import DimensionalData
-
 function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param0::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
     param = eosfit(EnergyEOS(param0), volumes, fₜ₀ᵥ)
@@ -38,9 +36,5 @@ function v2p(
     end
     return _v2p
 end
-
-DimensionalData.name(::Type{<:Vol}) = "Volume"
-DimensionalData.name(::Type{<:Temp}) = "Temperature"
-DimensionalData.name(::Type{<:Press}) = "Pressure"
 
 end

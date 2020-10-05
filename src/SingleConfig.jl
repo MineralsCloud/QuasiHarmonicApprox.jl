@@ -108,5 +108,8 @@ sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where 
 
 DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
 DimensionalData.name(::Type{<:Branch}) = "Branch"
+DimensionalData.name(::Type{<:Vol}) = "Volume"
+DimensionalData.name(::Type{<:Temp}) = "Temperature"
+DimensionalData.name(::Type{<:Press}) = "Pressure"
 
 end
