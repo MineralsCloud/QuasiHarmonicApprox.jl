@@ -20,12 +20,11 @@ export Wavevector,
     Temp,
     Vol,
     Press,
-    FreeEnergy,
-    InternalEnergy,
-    Entropy,
-    VolSpHt,
-    TempIndepNormalModes,
-    TempDepNormalModes,
+    HoFreeEnergy,
+    HoInternalEnergy,
+    HoEntropy,
+    HoVolSpHt,
+    collectmodes,
     sample_bz
 
 const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
@@ -40,11 +39,6 @@ const NormalModes = AbstractDimMatrix{
 const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
 const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
 const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
-const TempVolOrVolTempField = AbstractDimMatrix{T,<:TempVolOrVolTemp} where {T}
-const FreeEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
-const InternalEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
-const Entropy = DimArray{T,2,<:TempVolOrVolTemp} where {T}
-const VolSpHt = DimArray{T,2,<:TempVolOrVolTemp} where {T}
 
 function testconverge(t, ωs, wₖs, N = 3)
     perm = sortperm(wₖs; by = length)
@@ -54,34 +48,29 @@ function testconverge(t, ωs, wₖs, N = 3)
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
 end
 
-function TempIndepNormalModes(ω::AbstractDimArray{T,3})::TempIndepNormalModes where {T}
+function collectmodes(ω::AbstractDimArray{T,3})::TempIndepNormalModes where {T}
     @argcheck all(hasdim(ω, (Branch, Wavevector, Vol)))
     return DimArray([ωᵥ for ωᵥ in eachslice(ω; dims = Vol)], dims(ω, Vol))
 end
-
-function TempDepNormalModes(ω::AbstractDimArray{T,4})::TempDepNormalModes where {T}
+function collectmodes(ω::AbstractDimArray{T,4})::TempDepNormalModes where {T}
     @argcheck all(hasdim(ω, (Branch, Wavevector, Vol, Temp)))
     M, N = map(Base.Fix1(size, ω), (Temp, Vol))
     return DimArray([ω[Temp(i), Vol(j)] for i in 1:M, j in 1:N], dims(ω, (Temp, Vol)))
 end
 
 for (T, f) in zip(
-    (:FreeEnergy, :InternalEnergy, :Entropy, :VolSpHt),
+    (:HoFreeEnergy, :HoInternalEnergy, :HoEntropy, :HoVolSpHt),
     (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
 )
     expr = quote
-        function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)::TempVolOrVolTempField
+        function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)
             t, v = dims(ax, (Temp, Vol))
             arr = [sample_bz(x -> $f(t₀, x), ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
             return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
         end
         $T(ω::TempIndepNormalModes, wₖ, t::Union{Temp,Tuple{<:Temp}}) =
             $T(ω, wₖ, (t, dims(ω, Vol)...))
-        function $T(
-            ω::TempDepNormalModes,
-            wₖ,
-            ax::TempVolOrVolTemp = dims(ω, (Temp, Vol)),
-        )::TempVolOrVolTempField
+        function $T(ω::TempDepNormalModes, wₖ, ax::TempVolOrVolTemp = dims(ω, (Temp, Vol)))
             t, v = dims(axes, (Temp, Vol))
             M, N = size(ω)
             arr = [sample_bz(x -> $f(t[i], x), ω[i, j], wₖ) for i in 1:M, j in 1:N]  # `eachslice` is not easy to use here
