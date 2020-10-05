@@ -1,13 +1,32 @@
 module SingleConfig
 
 using DimensionalData:
-    AbstractDimArray, AbstractDimMatrix, AbstractDimVector, DimArray, Dim, dims
+    AbstractDimArray,
+    AbstractDimMatrix,
+    AbstractDimVector,
+    DimArray,
+    Dim,
+    dims,
+    swapdims,
+    hasdim
+using OptionalArgChecks: @argcheck
 using Unitful: Temperature, Energy
 
 import DimensionalData
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
-export Wavevector, Branch, Temp, Vol, Press
+export Wavevector,
+    Branch,
+    Temp,
+    Vol,
+    Press,
+    FreeEnergy,
+    InternalEnergy,
+    Entropy,
+    VolSpHt,
+    TempIndepNormalModes,
+    TempDepNormalModes,
+    sample_bz
 
 const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
 const Branch = Dim{:Branch}
@@ -18,54 +37,14 @@ const NormalModes = AbstractDimMatrix{
     T,
     <:Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}},
 } where {T}
-const TempIndependentNormalModes = Union{
-    AbstractDimArray{
-        T,
-        3,
-        <:Union{
-            Tuple{Wavevector,Branch,Vol},
-            Tuple{Branch,Wavevector,Vol},
-            Tuple{Vol,Branch,Wavevector},
-            Tuple{Vol,Wavevector,Branch},
-            Tuple{Wavevector,Vol,Branch},
-            Tuple{Branch,Vol,Wavevector},
-        },
-    },
-    AbstractDimVector{<:NormalModes,<:Tuple{Vol}},
-} where {T}
-const TempDependentNormalModes = Union{
-    AbstractDimArray{
-        T,
-        4,
-        <:Union{
-            Tuple{Wavevector,Branch,Vol,Temp},
-            Tuple{Wavevector,Branch,Temp,Vol},
-            Tuple{Wavevector,Vol,Branch,Temp},
-            Tuple{Wavevector,Vol,Temp,Branch},
-            Tuple{Wavevector,Temp,Branch,Vol},
-            Tuple{Wavevector,Temp,Vol,Branch},
-            Tuple{Branch,Wavevector,Vol,Temp},
-            Tuple{Branch,Wavevector,Temp,Vol},
-            Tuple{Branch,Vol,Wavevector,Temp},
-            Tuple{Branch,Vol,Temp,Wavevector},
-            Tuple{Branch,Temp,Wavevector,Vol},
-            Tuple{Branch,Temp,Vol,Wavevector},
-            Tuple{Vol,Wavevector,Branch,Temp},
-            Tuple{Vol,Wavevector,Temp,Branch},
-            Tuple{Vol,Branch,Wavevector,Temp},
-            Tuple{Vol,Branch,Temp,Wavevector},
-            Tuple{Vol,Temp,Wavevector,Branch},
-            Tuple{Vol,Temp,Branch,Wavevector},
-            Tuple{Temp,Wavevector,Branch,Vol},
-            Tuple{Temp,Wavevector,Vol,Branch},
-            Tuple{Temp,Branch,Wavevector,Vol},
-            Tuple{Temp,Branch,Vol,Wavevector},
-            Tuple{Temp,Vol,Wavevector,Branch},
-            Tuple{Temp,Vol,Branch,Wavevector},
-        },
-    },
-    AbstractDimMatrix{<:NormalModes,<:Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}},
-} where {T}
+const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
+const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
+const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
+const TempVolOrVolTempField = AbstractDimMatrix{T,<:TempVolOrVolTemp} where {T}
+const FreeEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
+const InternalEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
+const Entropy = DimArray{T,2,<:TempVolOrVolTemp} where {T}
+const VolSpHt = DimArray{T,2,<:TempVolOrVolTemp} where {T}
 
 function testconverge(t, ωs, wₖs, N = 3)
     perm = sortperm(wₖs; by = length)
@@ -75,37 +54,49 @@ function testconverge(t, ωs, wₖs, N = 3)
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
 end
 
-for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
-    eval(
-        quote
-            function $f(t::Temperature, ω::NormalModes, wₖ)
-                wₖ = wₖ ./ sum(wₖ)  # Normalize weights
-                fₙₖ = $f.(t, ω)  # Physical property on each harmonic oscillator
-                return sample_bz(fₙₖ, wₖ)  # Scalar
-            end
-            function $f(t, ω::TempIndependentNormalModes, wₖ)
-                M, N = length(t), size(ω, Vol)
-                arr = [$f(t₀, ω[Vol(i)], wₖ) for t₀ in t, i in 1:N]  # Slower than `eachslice(ω; dims = Vol)`
-                return DimArray(
-                    reshape(arr, (M, N)),  # In case `t` is a scalar
-                    (Temp(Tuple(t)), Vol(Tuple(dims(ω, Vol)))),  # In case `t` is a scalar
-                )  # TODO: Should I make `arr` staitic?
-            end
-            function $f(t, ω::TempDependentNormalModes, wₖ)  # FIXME: fix `ω[Vol(i)]` method error
-                if size(ω, Temp) != length(t)
-                    throw(DimensionMismatch("`t` and `Temp` does not have the same length!"))
-                end
-                arr = [
-                    $f(t[i], ω[Temp(i), Vol(j)], wₖ)
-                    for i in 1:size(ω, Temp), j in 1:size(ω, Vol)
-                ]  # `eachslice` is not easy to use here
-                return DimArray(arr, dims(ω, (Temp, Vol)))  # TODO: Tuplefy dims
-            end
-        end,
-    )
+function TempIndepNormalModes(ω::AbstractDimArray{T,3})::TempIndepNormalModes where {T}
+    @argcheck all(hasdim(ω, (Branch, Wavevector, Vol)))
+    return DimArray([ωᵥ for ωᵥ in eachslice(ω; dims = Vol)], dims(ω, Vol))
+end
+
+function TempDepNormalModes(ω::AbstractDimArray{T,4})::TempDepNormalModes where {T}
+    @argcheck all(hasdim(ω, (Branch, Wavevector, Vol, Temp)))
+    M, N = map(Base.Fix1(size, ω), (Temp, Vol))
+    return DimArray([ω[Temp(i), Vol(j)] for i in 1:M, j in 1:N], dims(ω, (Temp, Vol)))
+end
+
+for (T, f) in zip(
+    (:FreeEnergy, :InternalEnergy, :Entropy, :VolSpHt),
+    (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
+)
+    expr = quote
+        function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)::TempVolOrVolTempField
+            t, v = dims(ax, (Temp, Vol))
+            arr = [sample_bz(x -> $f(t₀, x), ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
+            return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
+        end
+        $T(ω::TempIndepNormalModes, wₖ, t::Union{Temp,Tuple{<:Temp}}) =
+            $T(ω, wₖ, (t, dims(ω, Vol)...))
+        function $T(
+            ω::TempDepNormalModes,
+            wₖ,
+            ax::TempVolOrVolTemp = dims(ω, (Temp, Vol)),
+        )::TempVolOrVolTempField
+            t, v = dims(axes, (Temp, Vol))
+            M, N = size(ω)
+            arr = [sample_bz(x -> $f(t[i], x), ω[i, j], wₖ) for i in 1:M, j in 1:N]  # `eachslice` is not easy to use here
+            return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
+        end
+    end
+    eval(expr)
 end
 
 # Relax the constraint on wₖ, it can even be a 2×1 matrix!
+function sample_bz(f, ω::NormalModes, wₖ)  # Scalar
+    wₖ = wₖ ./ sum(wₖ)  # Normalize weights
+    fₙₖ = f.(ω)  # Physical property on each harmonic oscillator
+    return sample_bz(fₙₖ, wₖ)  # Scalar
+end
 function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
     if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
         throw(DomainError("All the values of the weights should be greater than 0!"))
