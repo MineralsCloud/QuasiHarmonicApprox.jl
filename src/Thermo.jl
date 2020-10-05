@@ -7,9 +7,11 @@ using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Unitful: Energy
 
-using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTempField
+using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTemp
 
 export v2p
+
+const TempVolOrVolTempField = AbstractDimMatrix{T,<:TempVolOrVolTemp} where {T}
 
 function v2p(eos::EnergyEOS, fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}})
     volumes = dims(fₜ₀ᵥ, Vol)

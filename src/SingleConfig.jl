@@ -39,7 +39,6 @@ const NormalModes = AbstractDimMatrix{
 const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
 const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
 const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
-const TempVolOrVolTempField = AbstractDimMatrix{T,<:TempVolOrVolTemp} where {T}
 
 function testconverge(t, ωs, wₖs, N = 3)
     perm = sortperm(wₖs; by = length)
@@ -64,18 +63,14 @@ for (T, f) in zip(
     (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
 )
     expr = quote
-        function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)::TempVolOrVolTempField
+        function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)
             t, v = dims(ax, (Temp, Vol))
             arr = [sample_bz(x -> $f(t₀, x), ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
             return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
         end
         $T(ω::TempIndepNormalModes, wₖ, t::Union{Temp,Tuple{<:Temp}}) =
             $T(ω, wₖ, (t, dims(ω, Vol)...))
-        function $T(
-            ω::TempDepNormalModes,
-            wₖ,
-            ax::TempVolOrVolTemp = dims(ω, (Temp, Vol)),
-        )::TempVolOrVolTempField
+        function $T(ω::TempDepNormalModes, wₖ, ax::TempVolOrVolTemp = dims(ω, (Temp, Vol)))
             t, v = dims(axes, (Temp, Vol))
             M, N = size(ω)
             arr = [sample_bz(x -> $f(t[i], x), ω[i, j], wₖ) for i in 1:M, j in 1:N]  # `eachslice` is not easy to use here
