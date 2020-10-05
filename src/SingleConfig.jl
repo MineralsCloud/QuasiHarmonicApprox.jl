@@ -20,10 +20,10 @@ export Wavevector,
     Temp,
     Vol,
     Press,
-    FreeEnergy,
-    InternalEnergy,
-    Entropy,
-    VolSpHt,
+    HoFreeEnergy,
+    HoInternalEnergy,
+    HoEntropy,
+    HoVolSpHt,
     TempIndepNormalModes,
     TempDepNormalModes,
     sample_bz
@@ -41,10 +41,10 @@ const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
 const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
 const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
 const TempVolOrVolTempField = AbstractDimMatrix{T,<:TempVolOrVolTemp} where {T}
-const FreeEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
-const InternalEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
-const Entropy = DimArray{T,2,<:TempVolOrVolTemp} where {T}
-const VolSpHt = DimArray{T,2,<:TempVolOrVolTemp} where {T}
+const HoFreeEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
+const HoInternalEnergy = DimArray{<:Energy,2,<:TempVolOrVolTemp}
+const HoEntropy = DimArray{T,2,<:TempVolOrVolTemp} where {T}
+const HoVolSpHt = DimArray{T,2,<:TempVolOrVolTemp} where {T}
 
 function testconverge(t, ωs, wₖs, N = 3)
     perm = sortperm(wₖs; by = length)
@@ -66,7 +66,7 @@ function TempDepNormalModes(ω::AbstractDimArray{T,4})::TempDepNormalModes where
 end
 
 for (T, f) in zip(
-    (:FreeEnergy, :InternalEnergy, :Entropy, :VolSpHt),
+    (:HoFreeEnergy, :HoInternalEnergy, :HoEntropy, :HoVolSpHt),
     (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
 )
     expr = quote
