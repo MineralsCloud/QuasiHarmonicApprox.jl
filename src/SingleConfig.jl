@@ -67,21 +67,22 @@ for (T, f) in zip(
     (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
 )
     expr = quote
-        function $T(ω::TempIndepNormalModes, wₖ, axes)::TempVolOrVolTempField
-            t, v = dims(axes, Temp), Base.Fix2(dims, Vol)(hasdim(axes, Vol) ? axes : ω)
-            M, N = map(length, (t, v))
-            arr = [sample_bz(x -> $f(t[i], x), ω[j], wₖ) for i in 1:M, j in 1:N]  # Slower than `eachslice(ω; dims = Vol)`
-            return swapdims(DimArray(reshape(arr, (M, N)), (t, v)), axes)
+        function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)::TempVolOrVolTempField
+            t, v = dims(ax, (Temp, Vol))
+            arr = [sample_bz(x -> $f(t₀, x), ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
+            return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
         end
+        $T(ω::TempIndepNormalModes, wₖ, t::Union{Temp,Tuple{<:Temp}}) =
+            $T(ω, wₖ, (t, dims(ω, Vol)...))
         function $T(
             ω::TempDepNormalModes,
             wₖ,
-            axes = dims(ω, (Temp, Vol)),
+            ax::TempVolOrVolTemp = dims(ω, (Temp, Vol)),
         )::TempVolOrVolTempField
             t, v = dims(axes, (Temp, Vol))
-            M, N = map(length, (t, v))
+            M, N = size(ω)
             arr = [sample_bz(x -> $f(t[i], x), ω[i, j], wₖ) for i in 1:M, j in 1:N]  # `eachslice` is not easy to use here
-            return swapdims(DimArray(arr, (t, v)), axes)
+            return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
         end
     end
     eval(expr)
