@@ -1,7 +1,7 @@
 module Thermo
 
 using DimensionalData:
-    AbstractDimMatrix, AbstractDimVector, DimArray, Dim, dims, swapdims, rebuild, dimnum
+    AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild
 using EquationsOfStateOfSolids.Collections: Parameters, EnergyEOS, PressureEOS, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
@@ -29,7 +29,9 @@ function v2p(eos::EnergyEOS, fₜᵥ::TempVolOrVolTempField{<:Energy})
     function _v2p(pressures)
         arr = map(fₜ₀ᵥ -> v2p(eos, fₜ₀ᵥ)(pressures), eachslice(fₜᵥ; dims = Temp))
         mat = hcat(arr...)'
-        return DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures)))
+        ax = dims(fₜᵥ)
+        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
+        return set(x, Vol = Press(pressures))
     end
     return _v2p
 end
