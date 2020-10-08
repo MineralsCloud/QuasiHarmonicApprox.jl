@@ -1,4 +1,4 @@
-module Thermo
+module Thermodyn
 
 using DimensionalData:
     AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild
