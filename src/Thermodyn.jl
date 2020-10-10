@@ -1,7 +1,8 @@
 module Thermodyn
 
+using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 using DimensionalData:
-    AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild
+    AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild, val
 using EquationsOfStateOfSolids.Collections: Parameters, EnergyEOS, PressureEOS, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
@@ -33,6 +34,22 @@ function v2p(param::Parameters, fₜᵥ::TempVolOrVolTempField)
         return set(x, Vol = Press(pressures))
     end
 end
+function v2p(param::Parameters, fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}) where {T}
+    p = sortperm(val(dims(fₜ₀ᵥ, Vol)))
+    volumes = val(dims(fₜ₀ᵥ, Vol))[p]
+    min, max = extrema(volumes)
+    y = collect(fₜ₀ᵥ)[p]
+    return function (pressures)
+        fₜ₀ₚ = map(pressures) do pressure
+            v = mustfindvolume(PressureEOS(param), pressure)
+            if min <= v <= max
+                interpolate((volumes,), y, Gridded(Linear()))(v)
+            else
+                extrapolate(interpolate((volumes,), fₜ₀ᵥ, Gridded(Linear())), Periodic())(v)
+            end
+        end
+        return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
+    end
 end
 
 end
