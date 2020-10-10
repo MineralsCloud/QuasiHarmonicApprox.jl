@@ -12,9 +12,7 @@ using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTemp
 
 export v2p
 
-const TempVolOrVolTempField = AbstractDimMatrix{T,<:TempVolOrVolTemp} where {T}
-
-function v2p(param::Parameters, fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}})
+function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
     param = eosfit(EnergyEOS(param), volumes, fₜ₀ᵥ)
     return function (pressures)
@@ -25,7 +23,7 @@ function v2p(param::Parameters, fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{V
         return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
     end
 end
-function v2p(param::Parameters, fₜᵥ::TempVolOrVolTempField)
+function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, param::Parameters) where {T}
     return function (pressures)
         arr = map(fₜ₀ᵥ -> v2p(param, fₜ₀ᵥ)(pressures), eachslice(fₜᵥ; dims = Temp))
         mat = hcat(arr...)'
@@ -34,7 +32,7 @@ function v2p(param::Parameters, fₜᵥ::TempVolOrVolTempField)
         return set(x, Vol = Press(pressures))
     end
 end
-function v2p(param::Parameters, fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}) where {T}
+function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) where {T}
     p = sortperm(val(dims(fₜ₀ᵥ, Vol)))
     volumes = val(dims(fₜ₀ᵥ, Vol))[p]
     min, max = extrema(volumes)
