@@ -23,15 +23,6 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parame
         return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
     end
 end
-function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, param::Parameters) where {T}
-    return function (pressures)
-        arr = map(fₜ₀ᵥ -> v2p(param, fₜ₀ᵥ)(pressures), eachslice(fₜᵥ; dims = Temp))
-        mat = hcat(arr...)'
-        ax = dims(fₜᵥ)
-        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
-        return set(x, Vol = Press(pressures))
-    end
-end
 function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) where {T}
     p = sortperm(val(dims(fₜ₀ᵥ, Vol)))
     volumes = val(dims(fₜ₀ᵥ, Vol))[p]
@@ -47,6 +38,15 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) w
             end
         end
         return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
+    end
+end
+function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, param::Parameters) where {T}
+    return function (pressures)
+        arr = map(fₜ₀ᵥ -> v2p(param, fₜ₀ᵥ)(pressures), eachslice(fₜᵥ; dims = Temp))
+        mat = hcat(arr...)'
+        ax = dims(fₜᵥ)
+        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
+        return set(x, Vol = Press(pressures))
     end
 end
 
