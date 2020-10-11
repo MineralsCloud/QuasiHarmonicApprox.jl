@@ -46,7 +46,7 @@ function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, param::Parameters
         mat = hcat(arr...)'
         ax = dims(fₜᵥ)
         x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
-        return set(x, Vol = Press(pressures))
+        return set(x, Vol => Press(pressures))
     end
 end
 
