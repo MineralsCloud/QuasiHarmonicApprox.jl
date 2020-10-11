@@ -10,13 +10,12 @@ using DimensionalData:
     swapdims,
     hasdim
 using OptionalArgChecks: @argcheck
-using Unitful: Temperature, Energy
 
 import DimensionalData
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
-export Wavevector,
-    Branch,
+export Wv,
+    Br,
     Temp,
     Vol,
     Press,
@@ -27,15 +26,12 @@ export Wavevector,
     collectmodes,
     sample_bz
 
-const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
-const Branch = Dim{:Branch}
-const Temp = Dim{:Temp}
-const Vol = Dim{:Vol}
-const Press = Dim{:Press}
-const NormalModes = AbstractDimMatrix{
-    T,
-    <:Union{Tuple{Wavevector,Branch},Tuple{Branch,Wavevector}},
-} where {T}
+const Wv = Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
+const Br = Branch = Dim{:Branch}
+const Temp = Temperature = Dim{:Temperature}
+const Vol = Volume = Dim{:Volume}
+const Press = Pressure = Dim{:Pressure}
+const NormalModes = AbstractDimMatrix{T,<:Union{Tuple{Wv,Br},Tuple{Br,Wv}}} where {T}
 const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
 const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
 const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
@@ -86,17 +82,17 @@ function sample_bz(f, ω::NormalModes, wₖ)  # Scalar
     fₙₖ = f.(ω)  # Physical property on each harmonic oscillator
     return sample_bz(fₙₖ, wₖ)  # Scalar
 end
-function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
+function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T}
     if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
         throw(DomainError("All the values of the weights should be greater than 0!"))
     end
     return sum(fₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
 end
-sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T} =
+sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T} =
     sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
 
-DimensionalData.name(::Type{<:Wavevector}) = "Wavevector"
-DimensionalData.name(::Type{<:Branch}) = "Branch"
+DimensionalData.name(::Type{<:Wv}) = "Wavevector"
+DimensionalData.name(::Type{<:Br}) = "Branch"
 DimensionalData.name(::Type{<:Vol}) = "Volume"
 DimensionalData.name(::Type{<:Temp}) = "Temperature"
 DimensionalData.name(::Type{<:Press}) = "Pressure"
