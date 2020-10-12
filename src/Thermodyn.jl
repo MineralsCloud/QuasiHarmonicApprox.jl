@@ -1,12 +1,12 @@
 module Thermodyn
 
-using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 using DimensionalData:
     AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild, val
 using EquationsOfStateOfSolids.Collections: Parameters, EnergyEOS, PressureEOS, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Unitful: Energy
+using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 
 using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTemp
 
@@ -20,7 +20,7 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parame
             v = mustfindvolume(PressureEOS(param), pressure)
             EnergyEOS(param)(v)
         end
-        return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
+        return DimArray(fₜ₀ₚ, (Press(pressures),))
     end
 end
 function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) where {T}
