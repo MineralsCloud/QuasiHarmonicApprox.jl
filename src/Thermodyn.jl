@@ -50,4 +50,21 @@ function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, param::Parameters
     end
 end
 
+function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
+    volumes = dims(fₜ₀ᵥ, Vol)
+    param = eosfit(EnergyEOS(param), volumes, fₜ₀ᵥ)
+    return function (pressures)
+        vₜ₀ₚ = map(pressure -> mustfindvolume(PressureEOS(param), pressure), pressures)
+        return DimArray(vₜ₀ₚ, (Press(pressures),))
+    end
+end
+function volume(fₜᵥ::AbstractDimMatrix, param::Parameters)
+    return function (pressures)
+        arr = map(fₜ₀ᵥ -> volume(fₜ₀ᵥ, param)(pressures), eachslice(fₜᵥ; dims = Temp))
+        mat = hcat(arr...)'
+        ax = dims(fₜᵥ)
+        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
+        return set(x, Vol => Press(pressures))
+    end
+end
 end
