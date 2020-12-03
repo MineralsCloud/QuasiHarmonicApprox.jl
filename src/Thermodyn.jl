@@ -2,15 +2,16 @@ module Thermodyn
 
 using DimensionalData:
     AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild, val
+using DiffEqOperators
 using EquationsOfStateOfSolids.Collections: Parameters, EnergyEOS, PressureEOS, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
-using Unitful: Energy
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
+using Unitful: Energy, Volume
 
 using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTemp
 
-export v2p
+export v2p, volume, alpha
 
 function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
@@ -67,4 +68,23 @@ function volume(fₜᵥ::AbstractDimMatrix, param::Parameters)
         return set(x, Vol => Press(pressures))
     end
 end
+
+function alpha(vₜₚ₀::AbstractDimVector{<:Volume,<:Tuple{Temp}})
+    temp = val(dims(vₜₚ₀, Temp))
+    Dₜ = CenteredDifference{1}(1, 2, (maximum(temp) - minimum(temp)) / (length(temp)), length(temp) - 2)  # Derivative operator
+    dvdt = Matrix(Dₜ) * vₜₚ₀
+    return dvdt ./ vₜₚ₀[2:(end-1)]
+end
+function alpha(vₜₚ)
+    arr = map(enumerate(eachslice(vₜₚ; dims = Press))) do (i, vₜₚ₀)
+        alpha(vₜₚ₀)
+    end
+    mat = hcat(arr...)
+    ax = dims(vₜₚ)
+    x = swapdims(
+        DimArray(mat, (Temp(dims(vₜₚ, Temp)[2:(end-1)]), dims(vₜₚ, Press))),
+        map(typeof, ax),
+    )
+end
+
 end
