@@ -10,7 +10,7 @@ OptionalArgChecks = "dfbeeb84-381a-44da-9ec9-a723abf299c7"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
-DimensionalData = "0.10, 0.11, 0.12, 0.13, 0.14"
+DimensionalData = "0.10, 0.11, 0.12, 0.13, 0.14, 0.15"
 OptionalArgChecks = "0.3"
 Unitful = "0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 1"
 julia = "1"
