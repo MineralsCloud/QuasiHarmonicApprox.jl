@@ -3,7 +3,7 @@ module Thermodyn
 using DimensionalData:
     AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild, val
 using DiffEqOperators
-using EquationsOfStateOfSolids.Collections: Parameters, EnergyEOS, PressureEOS, getparam
+using EquationsOfStateOfSolids.Collections: Parameters, EnergyEos, PressureEos, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Volume: mustfindvolume
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
@@ -15,11 +15,11 @@ export v2p, volume, alpha
 
 function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEOS(param), volumes, fₜ₀ᵥ)
+    param = eosfit(EnergyEos(param), volumes, fₜ₀ᵥ)
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
-            v = mustfindvolume(PressureEOS(param), pressure)
-            EnergyEOS(param)(v)
+            v = mustfindvolume(PressureEos(param), pressure)
+            EnergyEos(param)(v)
         end
         return DimArray(fₜ₀ₚ, (Press(pressures),))
     end
@@ -31,7 +31,7 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) w
     y = collect(fₜ₀ᵥ)[p]
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
-            v = mustfindvolume(PressureEOS(param), pressure)
+            v = mustfindvolume(PressureEos(param), pressure)
             if min <= v <= max
                 interpolate((volumes,), y, Gridded(Linear()))(v)
             else
@@ -53,9 +53,9 @@ end
 
 function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEOS(param), volumes, fₜ₀ᵥ)
+    param = eosfit(EnergyEos(param), volumes, fₜ₀ᵥ)
     return function (pressures)
-        vₜ₀ₚ = map(pressure -> mustfindvolume(PressureEOS(param), pressure), pressures)
+        vₜ₀ₚ = map(pressure -> mustfindvolume(PressureEos(param), pressure), pressures)
         return DimArray(vₜ₀ₚ, (Press(pressures),))
     end
 end
