@@ -2,10 +2,10 @@ module Thermodyn
 
 using DimensionalData:
     AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild, val
-using DiffEqOperators
-using EquationsOfStateOfSolids.Collections: Parameters, EnergyEos, PressureEos, getparam
+using DiffEqOperators: CenteredDifference
+using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
-using EquationsOfStateOfSolids.Volume: mustfindvolume
+using EquationsOfStateOfSolids.Inverse: mustfindvolume
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 using Unitful: Energy, Volume
 
@@ -15,11 +15,11 @@ export v2p, volume, alpha
 
 function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEos(param), volumes, fₜ₀ᵥ)
+    param = eosfit(EnergyEquation(param), volumes, fₜ₀ᵥ)
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
-            v = mustfindvolume(PressureEos(param), pressure)
-            EnergyEos(param)(v)
+            v = mustfindvolume(PressureEquation(param), pressure)
+            EnergyEquation(param)(v)
         end
         return DimArray(fₜ₀ₚ, (Press(pressures),))
     end
@@ -31,7 +31,7 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) w
     y = collect(fₜ₀ᵥ)[p]
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
-            v = mustfindvolume(PressureEos(param), pressure)
+            v = mustfindvolume(PressureEquation(param), pressure)
             if min <= v <= max
                 interpolate((volumes,), y, Gridded(Linear()))(v)
             else
@@ -53,9 +53,9 @@ end
 
 function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEos(param), volumes, fₜ₀ᵥ)
+    param = eosfit(EnergyEquation(param), volumes, fₜ₀ᵥ)
     return function (pressures)
-        vₜ₀ₚ = map(pressure -> mustfindvolume(PressureEos(param), pressure), pressures)
+        vₜ₀ₚ = map(pressure -> mustfindvolume(PressureEquation(param), pressure), pressures)
         return DimArray(vₜ₀ₚ, (Press(pressures),))
     end
 end
@@ -71,7 +71,12 @@ end
 
 function alpha(vₜₚ₀::AbstractDimVector{<:Volume,<:Tuple{Temp}})
     temp = val(dims(vₜₚ₀, Temp))
-    Dₜ = CenteredDifference{1}(1, 2, (maximum(temp) - minimum(temp)) / (length(temp)), length(temp) - 2)  # Derivative operator
+    Dₜ = CenteredDifference{1}(
+        1,
+        2,
+        (maximum(temp) - minimum(temp)) / (length(temp)),
+        length(temp) - 2,
+    )  # Derivative operator
     dvdt = Matrix(Dₜ) * vₜₚ₀
     return dvdt ./ vₜₚ₀[2:(end-1)]
 end
