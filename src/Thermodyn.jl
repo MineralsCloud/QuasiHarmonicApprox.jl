@@ -5,7 +5,7 @@ using DimensionalData:
 using DiffEqOperators: CenteredDifference
 using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
-using EquationsOfStateOfSolids.Inverse: mustfindvolume
+using EquationsOfStateOfSolids.Inverse: inverse
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 using Unitful: Energy, Volume
 
@@ -18,7 +18,7 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parame
     param = eosfit(EnergyEquation(param), volumes, fₜ₀ᵥ)
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
-            v = mustfindvolume(PressureEquation(param), pressure)
+            v = inverse(PressureEquation(param))(pressure)
             EnergyEquation(param)(v)
         end
         return DimArray(fₜ₀ₚ, (Press(pressures),))
@@ -31,7 +31,7 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) w
     y = collect(fₜ₀ᵥ)[p]
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
-            v = mustfindvolume(PressureEquation(param), pressure)
+            v = inverse(PressureEquation(param))(pressure)
             if min <= v <= max
                 interpolate((volumes,), y, Gridded(Linear()))(v)
             else
@@ -55,7 +55,7 @@ function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Par
     volumes = dims(fₜ₀ᵥ, Vol)
     param = eosfit(EnergyEquation(param), volumes, fₜ₀ᵥ)
     return function (pressures)
-        vₜ₀ₚ = map(pressure -> mustfindvolume(PressureEquation(param), pressure), pressures)
+        vₜ₀ₚ = map(inverse(PressureEquation(param)), pressures)
         return DimArray(vₜ₀ₚ, (Press(pressures),))
     end
 end
