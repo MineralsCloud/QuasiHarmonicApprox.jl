@@ -13,9 +13,9 @@ using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTemp
 
 export v2p, volume, alpha
 
-function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
+function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEquation(param), volumes, fₜ₀ᵥ)
+    param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
             v = inverse(PressureEquation(param))(pressure)
@@ -50,9 +50,9 @@ function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, param::Parameters
     end
 end
 
-function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parameters)
+function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEquation(param), volumes, fₜ₀ᵥ)
+    param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
     return function (pressures)
         vₜ₀ₚ = map(inverse(PressureEquation(param)), pressures)
         return DimArray(vₜ₀ₚ, (Press(pressures),))
