@@ -25,19 +25,18 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, param::Parame
     end
 end
 function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) where {T}
-    p = sortperm(val(dims(fₜ₀ᵥ, Vol)))
-    volumes = val(dims(fₜ₀ᵥ, Vol))[p]
-    min, max = extrema(volumes)
-    y = collect(fₜ₀ᵥ)[p]
+    perm = sortperm(val(dims(fₜ₀ᵥ, Vol)))
+    volumes = val(dims(fₜ₀ᵥ, Vol))[perm]
+    ps = map(PressureEquation(param), volumes)
+    y = fₜ₀ᵥ[perm]
     return function (pressures)
-        fₜ₀ₚ = map(pressures) do pressure
-            v = inverse(PressureEquation(param))(pressure)
-            if min <= v <= max
-                interpolate((volumes,), y, Gridded(Linear()))(v)
-            else
-                extrapolate(interpolate((volumes,), fₜ₀ᵥ, Gridded(Linear())), Periodic())(v)
-            end
+        pmin, pmax = extrema(pressures)
+        interp = if minimum(ps) < pmin <= pmax < maximum(ps)
+            interpolate((ps,), y, Gridded(Linear()))
+        else
+            extrapolate(interpolate((ps,), y, Gridded(Linear())), Periodic())
         end
+        fₜ₀ₚ = map(interp, pressures)
         return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
     end
 end
