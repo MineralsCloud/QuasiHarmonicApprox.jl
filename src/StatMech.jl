@@ -1,7 +1,7 @@
 module StatMech
 
 using OptionalArgChecks: @argcheck
-using Unitful: Frequency, Energy, Wavenumber, NoUnits, ħ, k, c0, upreferred
+using Unitful: Frequency, Energy, Wavenumber, NoUnits, J, ħ, k, c0, upreferred
 
 export bose_einstein,
     partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
@@ -26,7 +26,7 @@ partition_function(t, x) = partition_function(t, tofreq(x))
 function ho_free_energy(t, ω::Frequency)
     @argcheck checkfreq(ω)
     if iszero(ω)
-        return upreferred(zero(ħ * ω))
+        return 0 * upreferred(J)  # `upreferred` is required to make it fast for arrays
     else
         ħω, kt = ħ * ω, k * t
         # return -ħω / 2 + kt * log(expm1(ħω / kt))
