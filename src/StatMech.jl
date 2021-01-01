@@ -14,12 +14,7 @@ bose_einstein(t, x) = bose_einstein(t, tofreq(x))
 
 function partition_function(t, ω::Frequency{<:Real})
     @argcheck isnonnegative(ω)
-    if iszero(ω)
-        return 1
-    else
-        x = ħ * ω / (k * t)
-        return exp(x / 2) / expm1(x)
-    end
+    return iszero(ω) ? 1 : csch(ħ * ω / (2k * t)) / 2
 end
 partition_function(t, x) = partition_function(t, tofreq(x))
 
