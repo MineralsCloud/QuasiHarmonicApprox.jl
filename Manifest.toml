@@ -28,9 +28,9 @@ version = "0.0.2"
 
 [[ArrayInterface]]
 deps = ["LinearAlgebra", "Requires", "SparseArrays"]
-git-tree-sha1 = "3b5bd474a90bee86b50f26268bbb044bb4d9ef83"
+git-tree-sha1 = "b6ea8a312b6747ffcf46e1200d91b19d2e1dc1d6"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "2.14.9"
+version = "2.14.12"
 
 [[ArrayLayouts]]
 deps = ["Compat", "FillArrays", "LinearAlgebra", "SparseArrays"]
@@ -131,9 +131,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
 deps = ["ArrayInterface", "ChainRulesCore", "DataStructures", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LabelledArrays", "LinearAlgebra", "Logging", "MuladdMacro", "NonlinearSolve", "Parameters", "Printf", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "Tables", "TreeViews", "ZygoteRules"]
-git-tree-sha1 = "3e1d6b1d9c93ca0c572aca0ba0cbd443184fde58"
+git-tree-sha1 = "4c428152dd57dc96f8b24d404b26b4ed1547f5c5"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.53.0"
+version = "6.53.3"
 
 [[DiffEqJump]]
 deps = ["ArrayInterface", "Compat", "DataStructures", "DiffEqBase", "FunctionWrappers", "LinearAlgebra", "PoissonRandom", "Random", "RandomNumbers", "RecursiveArrayTools", "StaticArrays", "TreeViews", "UnPack"]
@@ -366,9 +366,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[LoopVectorization]]
 deps = ["ArrayInterface", "DocStringExtensions", "IfElse", "LinearAlgebra", "OffsetArrays", "SLEEFPirates", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "4fb86de1b40bdbda10c069ecee826b660309adac"
+git-tree-sha1 = "0e2521a0baeeb8a4abe114055f678ccc90fbced7"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.9.13"
+version = "0.9.14"
 
 [[LsqFit]]
 deps = ["Distributions", "ForwardDiff", "LinearAlgebra", "NLSolversBase", "OptimBase", "Random", "StatsBase"]
@@ -413,9 +413,9 @@ version = "0.7.1"
 
 [[ModelingToolkit]]
 deps = ["ArrayInterface", "DataStructures", "DiffEqBase", "DiffEqJump", "DiffRules", "Distributed", "Distributions", "DocStringExtensions", "IfElse", "LabelledArrays", "Latexify", "Libdl", "LightGraphs", "LinearAlgebra", "MacroTools", "NaNMath", "RecursiveArrayTools", "Requires", "RuntimeGeneratedFunctions", "SafeTestsets", "SparseArrays", "SpecialFunctions", "StaticArrays", "SymbolicUtils", "TreeViews", "UnPack", "Unitful"]
-git-tree-sha1 = "a2fa324400de2acb14da3c8f8aef1be9043c6ea4"
+git-tree-sha1 = "e145287dc2ba41d9619dbba447eee840d68df1d6"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
-version = "4.3.4"
+version = "4.4.2"
 
 [[MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
@@ -606,9 +606,9 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[SLEEFPirates]]
 deps = ["IfElse", "Libdl", "VectorizationBase"]
-git-tree-sha1 = "40d1fb2c97ddc50a74fa57eaad09d62bca391aae"
+git-tree-sha1 = "d6614c338e6f245f260abb8e50cee51da436a6d2"
 uuid = "476501e8-09a2-5ece-8869-fb82de89a1fa"
-version = "0.6.2"
+version = "0.6.3"
 
 [[SafeTestsets]]
 deps = ["Test"]
@@ -748,9 +748,9 @@ version = "1.5.0"
 
 [[VectorizationBase]]
 deps = ["ArrayInterface", "Hwloc", "IfElse", "Libdl", "LinearAlgebra"]
-git-tree-sha1 = "cbb26e90efffd3b71ad0bcb99f5e7a7b49b637e8"
+git-tree-sha1 = "7e52e260a7ecf57d4a11f93282f1e0360d9fb0c1"
 uuid = "3d5dd08c-fd9d-11e8-17fa-ed2836048c2f"
-version = "0.14.10"
+version = "0.14.11"
 
 [[WoodburyMatrices]]
 deps = ["LinearAlgebra", "SparseArrays"]
