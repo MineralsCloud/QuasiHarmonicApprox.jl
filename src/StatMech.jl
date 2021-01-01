@@ -29,7 +29,7 @@ function ho_free_energy(t, ω::Frequency{<:Real})
         return 0 * upreferred(J)  # `upreferred` is required to make it fast for arrays
     else
         ħω, kt = ħ * ω, k * t
-        return -ħω / 2 + kt * log(expm1(ħω / kt))
+        return ħω / 2 + kt * log(-expm1(-ħω / kt))
     end
 end
 ho_free_energy(t, x) = ho_free_energy(t, tofreq(x))
