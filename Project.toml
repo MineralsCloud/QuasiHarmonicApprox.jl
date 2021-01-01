@@ -4,8 +4,10 @@ authors = ["Qi Zhang <singularitti@outlook.com>"]
 version = "0.1.0"
 
 [deps]
+DiffEqOperators = "9fdde737-9c7f-55bf-ade8-46b3f136cc48"
 DimensionalData = "0703355e-b756-11e9-17c0-8b28908087d0"
 EquationsOfStateOfSolids = "1eaa2786-f833-4167-8397-974edad0881e"
+Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
 OptionalArgChecks = "dfbeeb84-381a-44da-9ec9-a723abf299c7"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 

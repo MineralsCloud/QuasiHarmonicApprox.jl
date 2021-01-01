@@ -26,11 +26,11 @@ export Wv,
     collectmodes,
     sample_bz
 
-const Wv = Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
-const Br = Branch = Dim{:Branch}
-const Temp = Temperature = Dim{:Temperature}
-const Vol = Volume = Dim{:Volume}
-const Press = Pressure = Dim{:Pressure}
+const Wv = const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
+const Br = const Branch = Dim{:Branch}
+const Temp = const Temperature = Dim{:Temperature}
+const Vol = const Volume = Dim{:Volume}
+const Press = const Pressure = Dim{:Pressure}
 const NormalModes = AbstractDimMatrix{T,<:Union{Tuple{Wv,Br},Tuple{Br,Wv}}} where {T}
 const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
 const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
