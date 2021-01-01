@@ -1,20 +1,19 @@
 module StatMech
 
 using OptionalArgChecks: @argcheck
-using Unitful: Frequency, Energy, Wavenumber, NoUnits, ħ, k, c0, upreferred
+using Unitful: Frequency, Energy, Wavenumber, NoUnits, J, ħ, k, c0, upreferred
 
 export bose_einstein,
     partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
-function bose_einstein(t, ω::Frequency)
-    @argcheck isreal(ω)
+function bose_einstein(t, ω::Frequency{<:Real})
+    @argcheck isnonnegative(ω)
     return 1 / expm1(ħ * ω / (k * t))
 end
-bose_einstein(t, e::Energy) = bose_einstein(t, e2ω(e))
-bose_einstein(t, ṽ::Wavenumber) = bose_einstein(t, ṽ2ω(ṽ))
+bose_einstein(t, x) = bose_einstein(t, tofreq(x))
 
-function partition_function(t, ω::Frequency)
-    @argcheck isreal(ω)
+function partition_function(t, ω::Frequency{<:Real})
+    @argcheck isnonnegative(ω)
     if iszero(ω)
         return 1
     else
@@ -22,42 +21,38 @@ function partition_function(t, ω::Frequency)
         return exp(x / 2) / expm1(x)
     end
 end
-partition_function(t, e::Energy) = partition_function(t, e2ω(e))
-partition_function(t, ṽ::Wavenumber) = partition_function(t, ṽ2ω(ṽ))
+partition_function(t, x) = partition_function(t, tofreq(x))
 
-function ho_free_energy(t, ω::Frequency)
-    @argcheck isreal(ω)
+function ho_free_energy(t, ω::Frequency{<:Real})
+    @argcheck isnonnegative(ω)
     if iszero(ω)
-        return upreferred(zero(ħ * ω))
+        return 0 * upreferred(J)  # `upreferred` is required to make it fast for arrays
     else
         ħω, kt = ħ * ω, k * t
         return -ħω / 2 + kt * log(expm1(ħω / kt))
     end
 end
-ho_free_energy(t, e::Energy) = ho_free_energy(t, e2ω(e))
-ho_free_energy(t, ṽ::Wavenumber) = ho_free_energy(t, ṽ2ω(ṽ))
+ho_free_energy(t, x) = ho_free_energy(t, tofreq(x))
 
-function ho_internal_energy(t, ω::Frequency)
-    @argcheck isreal(ω)
+function ho_internal_energy(t, ω::Frequency{<:Real})
+    @argcheck isnonnegative(ω)
     if iszero(ω)
         return k * t
     else
         ħω = ħ * ω / 2
-        return ħω * coth(NoUnits(ħω / (k * t)))  # Can't use `ustrip`!
+        return ħω * coth(ħω / (k * t))
     end
 end
-ho_internal_energy(t, e::Energy) = ho_internal_energy(t, e2ω(e))
-ho_internal_energy(t, ṽ::Wavenumber) = ho_internal_energy(t, ṽ2ω(ṽ))
+ho_internal_energy(t, x) = ho_internal_energy(t, tofreq(x))
 
-function ho_entropy(t, ω::Frequency)
+function ho_entropy(t, ω::Frequency{<:Real})
     n = bose_einstein(t, ω)
     return k * ((1 + n) * log1p(n) - n * log(n))
 end
-ho_entropy(t, e::Energy) = ho_entropy(t, e2ω(e))
-ho_entropy(t, ṽ::Wavenumber) = ho_entropy(t, ṽ2ω(ṽ))
+ho_entropy(t, x) = ho_entropy(t, tofreq(x))
 
-function ho_vol_sp_ht(t, ω::Frequency)
-    @argcheck isreal(ω)
+function ho_vol_sp_ht(t, ω::Frequency{<:Real})
+    @argcheck isnonnegative(ω)
     if iszero(ω)
         return k
     else
@@ -65,11 +60,11 @@ function ho_vol_sp_ht(t, ω::Frequency)
         return k * (x * csch(x))^2
     end
 end
-ho_vol_sp_ht(t, e::Energy) = ho_vol_sp_ht(t, e2ω(e))
-ho_vol_sp_ht(t, ṽ::Wavenumber) = ho_vol_sp_ht(t, ṽ2ω(ṽ))
+ho_vol_sp_ht(t, x) = ho_vol_sp_ht(t, tofreq(x))
 
-e2ω(e::Energy) = e / ħ  # Do not export!
+tofreq(e::Energy) = e / ħ  # Do not export!
+tofreq(k::Wavenumber) = k * c0  # Do not export!
 
-ṽ2ω(ṽ::Wavenumber) = ṽ * c0  # Do not export!
+isnonnegative(ω) = ω >= zero(ω)
 
 end
