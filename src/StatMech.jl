@@ -7,14 +7,14 @@ export bose_einstein,
     partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
 function bose_einstein(t, ω::Frequency)
-    @argcheck isreal(ω)
+    @argcheck checkfreq(ω)
     return 1 / expm1(ħ * ω / (k * t))
 end
 bose_einstein(t, e::Energy) = bose_einstein(t, e2ω(e))
 bose_einstein(t, ṽ::Wavenumber) = bose_einstein(t, ṽ2ω(ṽ))
 
 function partition_function(t, ω::Frequency)
-    @argcheck isreal(ω)
+    @argcheck checkfreq(ω)
     if iszero(ω)
         return 1
     else
@@ -26,19 +26,20 @@ partition_function(t, e::Energy) = partition_function(t, e2ω(e))
 partition_function(t, ṽ::Wavenumber) = partition_function(t, ṽ2ω(ṽ))
 
 function ho_free_energy(t, ω::Frequency)
-    @argcheck isreal(ω)
+    @argcheck checkfreq(ω)
     if iszero(ω)
         return upreferred(zero(ħ * ω))
     else
         ħω, kt = ħ * ω, k * t
-        return -ħω / 2 + kt * log(expm1(ħω / kt))
+        # return -ħω / 2 + kt * log(expm1(ħω / kt))
+        return 1 / 2 * ħω + kt * log(1 - exp(-ħω / kt))
     end
 end
 ho_free_energy(t, e::Energy) = ho_free_energy(t, e2ω(e))
 ho_free_energy(t, ṽ::Wavenumber) = ho_free_energy(t, ṽ2ω(ṽ))
 
 function ho_internal_energy(t, ω::Frequency)
-    @argcheck isreal(ω)
+    @argcheck checkfreq(ω)
     if iszero(ω)
         return k * t
     else
@@ -57,7 +58,7 @@ ho_entropy(t, e::Energy) = ho_entropy(t, e2ω(e))
 ho_entropy(t, ṽ::Wavenumber) = ho_entropy(t, ṽ2ω(ṽ))
 
 function ho_vol_sp_ht(t, ω::Frequency)
-    @argcheck isreal(ω)
+    @argcheck checkfreq(ω)
     if iszero(ω)
         return k
     else
@@ -71,5 +72,7 @@ ho_vol_sp_ht(t, ṽ::Wavenumber) = ho_vol_sp_ht(t, ṽ2ω(ṽ))
 e2ω(e::Energy) = e / ħ  # Do not export!
 
 ṽ2ω(ṽ::Wavenumber) = ṽ * c0  # Do not export!
+
+checkfreq(ω) = isreal(ω) && ω >= zero(ω)
 
 end
