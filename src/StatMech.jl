@@ -63,7 +63,7 @@ end
 ho_vol_sp_ht(t, x) = ho_vol_sp_ht(t, tofreq(x))
 
 tofreq(e::Energy) = e / ħ  # Do not export!
-tofreq(ṽ::Wavenumber) = ṽ * c0  # Do not export!
+tofreq(k::Wavenumber) = k * c0  # Do not export!
 
 isnonnegative(ω) = ω >= zero(ω)
 
