@@ -41,7 +41,7 @@ function ho_internal_energy(t, ω::Frequency)
         return k * t
     else
         ħω = ħ * ω / 2
-        return ħω * coth(NoUnits(ħω / (k * t)))  # Can't use `ustrip`!
+        return ħω * coth(ħω / (k * t))
     end
 end
 ho_internal_energy(t, x) = ho_internal_energy(t, tofreq(x))
