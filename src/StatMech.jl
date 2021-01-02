@@ -48,11 +48,15 @@ ho_entropy(t, x) = ho_entropy(t, tofreq(x))
 
 function ho_vol_sp_ht(t, ω::Frequency{<:Real})
     @argcheck isnonnegative(ω)
-    if iszero(ω)
-        return k
+    if iszero(t)
+        return zero(k)
     else
-        x = NoUnits(ħ * ω / (2k * t))
-        return k * (x * csch(x))^2
+        if iszero(ω)
+            return k
+        else
+            x = NoUnits(ħ * ω / (k * 2t))
+            return k * (x * csch(x))^2
+        end
     end
 end
 ho_vol_sp_ht(t, x) = ho_vol_sp_ht(t, tofreq(x))
