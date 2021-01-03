@@ -1,24 +1,22 @@
 module StatMech
 
 using OptionalArgChecks: @argcheck
-using Unitful: Frequency, Energy, Wavenumber, NoUnits, J, ħ, k, c0, upreferred
+using Unitful: Temperature, Frequency, Energy, Wavenumber, NoUnits, J, ħ, k, c0, upreferred
 
 export bose_einstein,
     partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
-function bose_einstein(t, ω::Frequency{<:Real})
+function bose_einstein(t::Temperature, ω::Frequency{<:Real})
     @argcheck isnonnegative(ω)
     return 1 / expm1(ħ * ω / (k * t))
 end
-bose_einstein(t, x) = bose_einstein(t, tofreq(x))
 
-function partition_function(t, ω::Frequency{<:Real})
+function partition_function(t::Temperature, ω::Frequency{<:Real})
     @argcheck isnonnegative(ω)
     return iszero(ω) ? 1 : csch(ħ * ω / (2k * t)) / 2
 end
-partition_function(t, x) = partition_function(t, tofreq(x))
 
-function ho_free_energy(t, ω::Frequency{<:Real})
+function ho_free_energy(t::Temperature, ω::Frequency{<:Real})
     @argcheck isnonnegative(ω)
     if iszero(ω)
         return 0 * upreferred(J)  # `upreferred` is required to make it fast for arrays
@@ -27,9 +25,8 @@ function ho_free_energy(t, ω::Frequency{<:Real})
         return ħω / 2 + kt * log(-expm1(-ħω / kt))
     end
 end
-ho_free_energy(t, x) = ho_free_energy(t, tofreq(x))
 
-function ho_internal_energy(t, ω::Frequency{<:Real})
+function ho_internal_energy(t::Temperature, ω::Frequency{<:Real})
     @argcheck isnonnegative(ω)
     if iszero(ω)
         return k * t
@@ -38,9 +35,8 @@ function ho_internal_energy(t, ω::Frequency{<:Real})
         return ħω * coth(ħω / (k * t))
     end
 end
-ho_internal_energy(t, x) = ho_internal_energy(t, tofreq(x))
 
-function ho_entropy(t, ω::Frequency{<:Real})
+function ho_entropy(t::Temperature, ω::Frequency{<:Real})
     if iszero(t) || iszero(ω)
         return zero(k)
     else
@@ -48,9 +44,8 @@ function ho_entropy(t, ω::Frequency{<:Real})
         return k * ((1 + n) * log1p(n) - n * log(n))
     end
 end
-ho_entropy(t, x) = ho_entropy(t, tofreq(x))
 
-function ho_vol_sp_ht(t, ω::Frequency{<:Real})
+function ho_vol_sp_ht(t::Temperature, ω::Frequency{<:Real})
     @argcheck isnonnegative(ω)
     if iszero(t)
         return zero(k)
@@ -63,10 +58,22 @@ function ho_vol_sp_ht(t, ω::Frequency{<:Real})
         end
     end
 end
-ho_vol_sp_ht(t, x) = ho_vol_sp_ht(t, tofreq(x))
 
 tofreq(e::Energy) = e / ħ  # Do not export!
 tofreq(k::Wavenumber) = k * c0  # Do not export!
+
+foreach((
+    :bose_einstein,
+    :partition_function,
+    :ho_free_energy,
+    :ho_internal_energy,
+    :ho_entropy,
+    :ho_vol_sp_ht,
+)) do f
+    quote
+        $f(t::Temperature, x) = $f(t, tofreq(x))
+    end |> eval
+end
 
 isnonnegative(ω) = ω >= zero(ω)
 
