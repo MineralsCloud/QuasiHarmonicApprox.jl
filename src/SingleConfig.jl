@@ -10,6 +10,7 @@ using DimensionalData:
     swapdims,
     hasdim
 using OptionalArgChecks: @argcheck
+import Unitful
 
 import DimensionalData
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
@@ -54,6 +55,20 @@ function collectmodes(ω::AbstractDimArray{T,4})::TempDepNormalModes where {T}
     return DimArray([ω[Temp(i), Vol(j)] for i in 1:M, j in 1:N], dims(ω, (Temp, Vol)))
 end
 
+foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
+    quote
+        # Relax the constraint on wₖ, it can even be a 2×1 matrix!
+        function $f(t::Unitful.Temperature, ω::NormalModes, wₖ)  # Scalar
+            if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
+                throw(DomainError("all weights should be greater than 0!"))
+            end
+            wₖ = wₖ ./ sum(wₖ)  # Normalize weights
+            fₙₖ = map(Base.Fix1($f, t), ω)  # Physical property on each harmonic oscillator
+            return _sample_bz(fₙₖ, wₖ)  # Scalar
+        end
+    end |> eval
+end
+
 for (T, f) in zip(
     (:HoFreeEnergy, :HoInternalEnergy, :HoEntropy, :HoVolSpHt),
     (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
@@ -76,20 +91,9 @@ for (T, f) in zip(
     eval(expr)
 end
 
-# Relax the constraint on wₖ, it can even be a 2×1 matrix!
-function sample_bz(f, ω::NormalModes, wₖ)  # Scalar
-    wₖ = wₖ ./ sum(wₖ)  # Normalize weights
-    fₙₖ = f.(ω)  # Physical property on each harmonic oscillator
-    return sample_bz(fₙₖ, wₖ)  # Scalar
-end
-function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T}
-    if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
-        throw(DomainError("All the values of the weights should be greater than 0!"))
-    end
-    return sum(fₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
-end
-sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T} =
-    sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
+_sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T} = sum(fₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
+_sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T} =
+    _sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
 
 DimensionalData.name(::Type{<:Wv}) = "Wavevector"
 DimensionalData.name(::Type{<:Br}) = "Branch"
