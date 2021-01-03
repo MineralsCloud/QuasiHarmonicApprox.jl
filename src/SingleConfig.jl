@@ -80,16 +80,16 @@ end
 function sample_bz(f, ω::NormalModes, wₖ)  # Scalar
     wₖ = wₖ ./ sum(wₖ)  # Normalize weights
     fₙₖ = f.(ω)  # Physical property on each harmonic oscillator
-    return sample_bz(fₙₖ, wₖ)  # Scalar
+    return _sample_bz(fₙₖ, wₖ)  # Scalar
 end
-function sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T}
+function _sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T}
     if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
         throw(DomainError("All the values of the weights should be greater than 0!"))
     end
     return sum(fₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
 end
-sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T} =
-    sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
+_sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T} =
+    _sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
 
 DimensionalData.name(::Type{<:Wv}) = "Wavevector"
 DimensionalData.name(::Type{<:Br}) = "Branch"
