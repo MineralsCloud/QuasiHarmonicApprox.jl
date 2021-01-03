@@ -41,8 +41,12 @@ end
 ho_internal_energy(t, x) = ho_internal_energy(t, tofreq(x))
 
 function ho_entropy(t, ω::Frequency{<:Real})
-    n = bose_einstein(t, ω)
-    return k * ((1 + n) * log1p(n) - n * log(n))
+    if iszero(t) || iszero(ω)
+        return zero(k)
+    else
+        n = bose_einstein(t, ω)
+        return k * ((1 + n) * log1p(n) - n * log(n))
+    end
 end
 ho_entropy(t, x) = ho_entropy(t, tofreq(x))
 
