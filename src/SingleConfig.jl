@@ -12,8 +12,8 @@ using DimensionalData:
 using OptionalArgChecks: @argcheck
 import Unitful
 
-import DimensionalData
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
+import DimensionalData: name
 
 export Wv,
     Br,
@@ -95,10 +95,10 @@ _sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T} = sum(f
 _sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T} =
     _sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
 
-DimensionalData.name(::Type{<:Wv}) = "Wavevector"
-DimensionalData.name(::Type{<:Br}) = "Branch"
-DimensionalData.name(::Type{<:Vol}) = "Volume"
-DimensionalData.name(::Type{<:Temp}) = "Temperature"
-DimensionalData.name(::Type{<:Press}) = "Pressure"
+name(::Type{<:Wv}) = "Wavevector"
+name(::Type{<:Br}) = "Branch"
+name(::Type{<:Vol}) = "Volume"
+name(::Type{<:Temp}) = "Temperature"
+name(::Type{<:Press}) = "Pressure"
 
 end
