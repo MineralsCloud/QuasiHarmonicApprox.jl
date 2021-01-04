@@ -7,7 +7,7 @@ using DimensionalData:
     DimArray,
     Dim,
     dims,
-    swapdims,
+    dimnum,
     hasdim
 using OptionalArgChecks: @argcheck
 import Unitful
@@ -81,15 +81,15 @@ for (T, f) in zip(
         end
         $T(ω::TempIndepNormalModes, wₖ, t::Union{Temp,Tuple{<:Temp}}) =
             $T(ω, wₖ, (t, dims(ω, Vol)...))
-        function $T(
-            ω::TempDepNormalModes,
-            wₖ,
-            ax::TempVolOrVolTemp = dims(ω, (Temp, Vol)),
-        )
-            t, v = dims(axes, (Temp, Vol))
+        function $T(ω::TempDepNormalModes, wₖ, ax::TempVolOrVolTemp = dims(ω))
             M, N = size(ω)
-            arr = [$f(t[i], ω[i, j], wₖ) for i in 1:M, j in 1:N]  # `eachslice` is not easy to use here
-            return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
+            t = dims(ax, Temp)
+            arr = if dimnum(ω, Temp) == 1
+                [$f(t[i], ω[i, j], wₖ) for i in 1:M, j in 1:N]
+            else
+                [$f(t[j], ω[i, j], wₖ) for i in 1:M, j in 1:N]
+            end
+            return DimArray(arr, ax)
         end
     end |> eval
 end
