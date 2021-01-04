@@ -25,7 +25,6 @@ const Vol = const Volume = Dim{:Volume}
 const Press = const Pressure = Dim{:Pressure}
 const NormalModes = AbstractDimMatrix{T,<:Union{Tuple{Wv,Br},Tuple{Br,Wv}}} where {T}
 const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
-const TempIndepNormalModes = AbstractDimVector{<:NormalModes,<:Tuple{Vol}}
 const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
 
 function testconverge(t, ωs, wₖs, N = 3)
@@ -62,13 +61,10 @@ end
 
 for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
     quote
-        function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)
-            t, v = dims(ax, (Temp, Vol))
-            arr = [sample_bz(x -> $f(t₀, x), ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
-            return swapdims(DimArray(arr, (t, v)), map(typeof, ax))
+        function $f(t::Temp, ω::TempIndepNormalModes, wₖ)
+            arr = [$f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
+            return DimArray(arr, (t, dims(ω, Vol)))
         end
-        $T(ω::TempIndepNormalModes, wₖ, t::Union{Temp,Tuple{<:Temp}}) =
-            $T(ω, wₖ, (t, dims(ω, Vol)...))
         function $f(ω::TempDepNormalModes, wₖ)
             t = dims(ω, Temp)
             M, N = size(ω)
