@@ -45,13 +45,13 @@ function testconverge(t, ωs, wₖs, N = 3)
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
 end
 
-function collectmodes(ω::AbstractDimArray{T,3})::TempIndepNormalModes where {T}
+function collectmodes(ω::AbstractDimArray{T,3}) where {T}
     @argcheck all(hasdim(ω, (Branch, Wavevector, Vol)))
     return DimArray([ωᵥ for ωᵥ in eachslice(ω; dims = Vol)], dims(ω, Vol))
 end
-function collectmodes(ω::AbstractDimArray{T,4})::TempDepNormalModes where {T}
+function collectmodes(ω::AbstractDimArray{T,4}) where {T}
     @argcheck all(hasdim(ω, (Branch, Wavevector, Vol, Temp)))
-    M, N = map(Base.Fix1(size, ω), (Temp, Vol))
+    M, N = size(ω, Temp), size(ω, Vol)
     return DimArray([ω[Temp(i), Vol(j)] for i in 1:M, j in 1:N], dims(ω, (Temp, Vol)))
 end
 
