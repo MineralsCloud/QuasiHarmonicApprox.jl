@@ -25,7 +25,6 @@ const Vol = const Volume = Dim{:Volume}
 const Press = const Pressure = Dim{:Pressure}
 const NormalModes = AbstractDimMatrix{T,<:Union{Tuple{Wv,Br},Tuple{Br,Wv}}} where {T}
 const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
-const TempDepNormalModes = AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}
 
 function testconverge(t, ωs, wₖs, N = 3)
     perm = sortperm(wₖs; by = length)
@@ -56,11 +55,11 @@ foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
             fₙₖ = map(Base.Fix1($f, t), ω)  # Physical property on each harmonic oscillator
             return _sample_bz(fₙₖ, wₖ)  # Scalar
         end
-        function $f(t::Temp, ω::TempIndepNormalModes, wₖ)
+        function $f(t::Temp, ω::AbstractDimVector{<:NormalModes,<:Tuple{Vol}}, wₖ)
             arr = [$f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
             return DimArray(arr, (t, dims(ω, Vol)))
         end
-        function $f(ω::TempDepNormalModes, wₖ)
+        function $f(ω::AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}, wₖ)
             t = dims(ω, Temp)
             M, N = size(ω)
             arr =
