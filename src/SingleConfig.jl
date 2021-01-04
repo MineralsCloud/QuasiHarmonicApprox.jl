@@ -56,11 +56,6 @@ foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
             fₙₖ = map(Base.Fix1($f, t), ω)  # Physical property on each harmonic oscillator
             return _sample_bz(fₙₖ, wₖ)  # Scalar
         end
-    end |> eval
-end
-
-for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
-    quote
         function $f(t::Temp, ω::TempIndepNormalModes, wₖ)
             arr = [$f(t₀, ωᵥ, wₖ) for t₀ in t, ωᵥ in ω]  # Slower than `eachslice(ω; dims = Vol)`
             return DimArray(arr, (t, dims(ω, Vol)))
