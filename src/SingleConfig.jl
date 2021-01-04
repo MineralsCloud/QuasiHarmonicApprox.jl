@@ -8,24 +8,15 @@ using DimensionalData:
     Dim,
     dims,
     dimnum,
-    hasdim
+    hasdim,
+    set
 using OptionalArgChecks: @argcheck
 import Unitful
 
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 import DimensionalData: name
 
-export Wv,
-    Br,
-    Temp,
-    Vol,
-    Press,
-    HoFreeEnergy,
-    HoInternalEnergy,
-    HoEntropy,
-    HoVolSpHt,
-    collectmodes,
-    sample_bz
+export Wv, Br, Temp, Vol, Press, collectmodes
 
 const Wv = const Wavevector = Dim{:Wavevector}  # TODO: Should I add more constraints?
 const Br = const Branch = Dim{:Branch}
@@ -69,10 +60,7 @@ foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
     end |> eval
 end
 
-for (T, f) in zip(
-    (:HoFreeEnergy, :HoInternalEnergy, :HoEntropy, :HoVolSpHt),
-    (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht),
-)
+for f in (:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)
     quote
         function $T(ω::TempIndepNormalModes, wₖ, ax::TempVolOrVolTemp)
             t, v = dims(ax, (Temp, Vol))
@@ -81,15 +69,12 @@ for (T, f) in zip(
         end
         $T(ω::TempIndepNormalModes, wₖ, t::Union{Temp,Tuple{<:Temp}}) =
             $T(ω, wₖ, (t, dims(ω, Vol)...))
-        function $T(ω::TempDepNormalModes, wₖ, ax::TempVolOrVolTemp = dims(ω))
+        function $f(ω::TempDepNormalModes, wₖ)
+            t = dims(ω, Temp)
             M, N = size(ω)
-            t = dims(ax, Temp)
-            arr = if dimnum(ω, Temp) == 1
-                [$f(t[i], ω[i, j], wₖ) for i in 1:M, j in 1:N]
-            else
-                [$f(t[j], ω[i, j], wₖ) for i in 1:M, j in 1:N]
-            end
-            return DimArray(arr, ax)
+            arr =
+                [$f(t[dimnum(ω, Temp) == 1 ? i : j], ω[i, j], wₖ) for i in 1:M, j in 1:N]
+            return set(ω, arr)
         end
     end |> eval
 end
