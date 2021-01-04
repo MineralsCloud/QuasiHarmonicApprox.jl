@@ -59,7 +59,7 @@ foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
     quote
         # Relax the constraint on wₖ, it can even be a 2×1 matrix!
         function $f(t::Unitful.Temperature, ω::NormalModes, wₖ)  # Scalar
-            if any(wₖ .<= zero(eltype(wₖ)))  # Must hold, or else wₖ is already wrong
+            if any(wₖ .<= 0)  # Must hold, or else wₖ is already wrong
                 throw(DomainError("all weights should be greater than 0!"))
             end
             wₖ = wₖ ./ sum(wₖ)  # Normalize weights
