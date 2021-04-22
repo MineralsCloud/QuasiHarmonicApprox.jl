@@ -70,9 +70,8 @@ foreach((
     :ho_entropy,
     :ho_vol_sp_ht,
 )) do f
-    quote
-        $f(t::Temperature, x) = $f(t, tofreq(x))
-    end |> eval
+    # See https://docs.julialang.org/en/v1/manual/metaprogramming/#Code-Generation
+    @eval $f(t::Temperature, x) = $f(t, tofreq(x))
 end
 
 isnonnegative(ω) = ω >= zero(ω)
