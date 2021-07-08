@@ -9,3 +9,4 @@
 [![Build Status](https://api.cirrus-ci.com/github/MineralsCloud/QuasiHarmonicApprox.jl.svg)](https://cirrus-ci.com/github/MineralsCloud/QuasiHarmonicApprox.jl)
 [![Coverage](https://codecov.io/gh/MineralsCloud/QuasiHarmonicApprox.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/QuasiHarmonicApprox.jl)
 [![Coverage](https://coveralls.io/repos/github/MineralsCloud/QuasiHarmonicApprox.jl/badge.svg?branch=master)](https://coveralls.io/github/MineralsCloud/QuasiHarmonicApprox.jl?branch=master)
+[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
