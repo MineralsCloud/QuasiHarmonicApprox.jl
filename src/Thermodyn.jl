@@ -6,7 +6,6 @@ using DiffEqOperators: CenteredDifference
 using EquationsOfStateOfSolids:
     Parameters, EnergyEquation, PressureEquation, BulkModulusEquation, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
-using EquationsOfStateOfSolids.Inverse: inverse
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 using Unitful: Energy, Volume
 
@@ -17,10 +16,12 @@ export v2p, volume, alpha, bulkmoduli
 function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
     param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
+    eosₚ⁻¹ = PressureEquation(param)^(-1)
+    eosₑ = EnergyEquation(param)
     return function (pressures)
         fₜ₀ₚ = map(pressures) do pressure
-            v = inverse(PressureEquation(param))(pressure)
-            EnergyEquation(param)(v)
+            v = eosₚ⁻¹(pressure)
+            eosₑ(v)
         end
         return DimArray(fₜ₀ₚ, (Press(pressures),))
     end
@@ -54,11 +55,12 @@ end
 function bulkmoduli(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
     param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
-    println(param)
+    eosₚ⁻¹ = PressureEquation(param)^(-1)
+    eosₖ = BulkModulusEquation(param)
     return function (pressures)
         bₜ₀ₚ = map(pressures) do pressure
-            v = inverse(PressureEquation(param))(pressure)
-            BulkModulusEquation(param)(v)
+            v = eosₚ⁻¹(pressure)
+            eosₖ(v)
         end
         return DimArray(bₜ₀ₚ, (Press(pressures),))
     end
@@ -82,8 +84,9 @@ end
 function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
     param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
+    eos⁻¹ = PressureEquation(param)^(-1)
     return function (pressures)
-        vₜ₀ₚ = map(inverse(PressureEquation(param)), pressures)
+        vₜ₀ₚ = map(eos⁻¹, pressures)
         return DimArray(vₜ₀ₚ, (Press(pressures),))
     end
 end
