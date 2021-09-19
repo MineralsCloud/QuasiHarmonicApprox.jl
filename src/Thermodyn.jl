@@ -3,7 +3,8 @@ module Thermodyn
 using DimensionalData:
     AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild, val
 using DiffEqOperators: CenteredDifference
-using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, getparam
+using EquationsOfStateOfSolids:
+    Parameters, EnergyEquation, PressureEquation, BulkModulusEquation, getparam
 using EquationsOfStateOfSolids.Fitting: eosfit
 using EquationsOfStateOfSolids.Inverse: inverse
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
@@ -11,7 +12,7 @@ using Unitful: Energy, Volume
 
 using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTemp
 
-export v2p, volume, alpha
+export v2p, volume, alpha, bulkmoduli
 
 function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
     volumes = dims(fₜ₀ᵥ, Vol)
@@ -40,9 +41,37 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) w
         return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
     end
 end
-function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, param::Parameters) where {T}
+function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, init_param::Parameters) where {T}
     return function (pressures)
-        arr = map(fₜ₀ᵥ -> v2p(fₜ₀ᵥ, param)(pressures), eachslice(fₜᵥ; dims = Temp))
+        arr = map(fₜ₀ᵥ -> v2p(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims = Temp))
+        mat = hcat(arr...)'
+        ax = dims(fₜᵥ)
+        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
+        return set(x, Vol => Press(pressures))
+    end
+end
+
+function bulkmoduli(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
+    volumes = dims(fₜ₀ᵥ, Vol)
+    param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
+    println(param)
+    return function (pressures)
+        bₜ₀ₚ = map(pressures) do pressure
+            v = inverse(PressureEquation(param))(pressure)
+            BulkModulusEquation(param)(v)
+        end
+        return DimArray(bₜ₀ₚ, (Press(pressures),))
+    end
+end
+function bulkmoduli(
+    fₜᵥ::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp},
+    init_param::Parameters,
+)
+    return function (pressures)
+        arr = map(
+            fₜ₀ᵥ -> bulkmoduli(fₜ₀ᵥ, init_param)(pressures),
+            eachslice(fₜᵥ; dims = Temp),
+        )
         mat = hcat(arr...)'
         ax = dims(fₜᵥ)
         x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
@@ -58,9 +87,9 @@ function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param
         return DimArray(vₜ₀ₚ, (Press(pressures),))
     end
 end
-function volume(fₜᵥ::AbstractDimMatrix, param::Parameters)
+function volume(fₜᵥ::AbstractDimMatrix, init_param::Parameters)
     return function (pressures)
-        arr = map(fₜ₀ᵥ -> volume(fₜ₀ᵥ, param)(pressures), eachslice(fₜᵥ; dims = Temp))
+        arr = map(fₜ₀ᵥ -> volume(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims = Temp))
         mat = hcat(arr...)'
         ax = dims(fₜᵥ)
         x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
