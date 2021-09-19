@@ -1,3 +1,3 @@
 var documenterSearchIndex = {"docs":
-[{"location":"index.html#","page":"Home","title":"Home","text":"CurrentModule = QuasiHarmonicApproximation","category":"page"},{"location":"index.html#QuasiHarmonicApproximation-1","page":"Home","title":"QuasiHarmonicApproximation","text":"","category":"section"},{"location":"index.html#","page":"Home","title":"Home","text":"","category":"page"},{"location":"index.html#","page":"Home","title":"Home","text":"Modules = [QuasiHarmonicApproximation]","category":"page"}]
+[{"location":"","page":"Home","title":"Home","text":"CurrentModule = QuasiHarmonicApprox","category":"page"},{"location":"#QuasiHarmonicApprox","page":"Home","title":"QuasiHarmonicApprox","text":"","category":"section"},{"location":"","page":"Home","title":"Home","text":"","category":"page"},{"location":"","page":"Home","title":"Home","text":"Modules = [QuasiHarmonicApprox]","category":"page"}]
 }
