@@ -45,7 +45,7 @@ function collectmodes(ω::AbstractDimArray{T,4}) where {T}
 end
 
 foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
-    quote
+    @eval begin
         # Relax the constraint on wₖ, it can even be a 2×1 matrix!
         function $f(t::Unitful.Temperature, ω::NormalModes, wₖ)  # Scalar
             if any(wₖ .<= 0)  # Must hold, or else wₖ is already wrong
@@ -62,11 +62,10 @@ foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
         function $f(ω::AbstractDimMatrix{<:NormalModes,<:TempVolOrVolTemp}, wₖ)
             t = dims(ω, Temp)
             M, N = size(ω)
-            arr =
-                [$f(t[dimnum(ω, Temp) == 1 ? i : j], ω[i, j], wₖ) for i in 1:M, j in 1:N]
+            arr = [$f(t[dimnum(ω, Temp) == 1 ? i : j], ω[i, j], wₖ) for i in 1:M, j in 1:N]
             return set(ω, arr)
         end
-    end |> eval
+    end
 end
 
 _sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T} = sum(fₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
