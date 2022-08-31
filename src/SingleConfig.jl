@@ -10,7 +10,6 @@ using DimensionalData:
     dimnum,
     hasdim,
     set
-using OptionalArgChecks: @argcheck
 import Unitful
 
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
@@ -35,11 +34,11 @@ function testconverge(t, ωs, wₖs, N = 3)
 end
 
 function collectmodes(ω::AbstractDimArray{T,3}) where {T}
-    @argcheck all(hasdim(ω, (Branch, Wavevector, Vol)))
+    @assert all(hasdim(ω, (Branch, Wavevector, Vol)))
     return DimArray([ωᵥ for ωᵥ in eachslice(ω; dims = Vol)], dims(ω, Vol))
 end
 function collectmodes(ω::AbstractDimArray{T,4}) where {T}
-    @argcheck all(hasdim(ω, (Branch, Wavevector, Vol, Temp)))
+    @assert all(hasdim(ω, (Branch, Wavevector, Vol, Temp)))
     M, N = size(ω, Temp), size(ω, Vol)
     return DimArray([ω[Temp(i), Vol(j)] for i in 1:M, j in 1:N], dims(ω, (Temp, Vol)))
 end

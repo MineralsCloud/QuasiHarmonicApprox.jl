@@ -1,23 +1,22 @@
 module StatMech
 
-using OptionalArgChecks: @argcheck
 using Unitful: Temperature, Frequency, Energy, Wavenumber, NoUnits, J, ħ, k, c0, upreferred
 
 export bose_einstein,
     partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 
 function bose_einstein(t::Temperature, ω::Frequency{<:Real})
-    @argcheck isnonnegative(ω)
+    @assert isnonnegative(ω)
     return 1 / expm1(ħ * ω / (k * t))
 end
 
 function partition_function(t::Temperature, ω::Frequency{<:Real})
-    @argcheck isnonnegative(ω)
+    @assert isnonnegative(ω)
     return iszero(ω) ? 1 : csch(ħ * ω / (2k * t)) / 2
 end
 
 function ho_free_energy(t::Temperature, ω::Frequency{<:Real})
-    @argcheck isnonnegative(ω)
+    @assert isnonnegative(ω)
     if iszero(ω)
         return 0 * upreferred(J)  # `upreferred` is required to make it fast for arrays
     else
@@ -27,7 +26,7 @@ function ho_free_energy(t::Temperature, ω::Frequency{<:Real})
 end
 
 function ho_internal_energy(t::Temperature, ω::Frequency{<:Real})
-    @argcheck isnonnegative(ω)
+    @assert isnonnegative(ω)
     if iszero(ω)
         return k * t
     else
@@ -46,7 +45,7 @@ function ho_entropy(t::Temperature, ω::Frequency{<:Real})
 end
 
 function ho_vol_sp_ht(t::Temperature, ω::Frequency{<:Real})
-    @argcheck isnonnegative(ω)
+    @assert isnonnegative(ω)
     if iszero(t)
         return zero(k)
     else
