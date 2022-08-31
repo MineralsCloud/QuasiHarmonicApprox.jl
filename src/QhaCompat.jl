@@ -23,7 +23,7 @@ function readinputfile(file)
                 volumes[i], static_energies[i] = match.groups()
                 i += 1
                 j = 0
-            continue
+                continue
             end
         end
         sp = line.split()
@@ -32,8 +32,8 @@ function readinputfile(file)
                 line = next(gen)
                 frequencies[i - 1, j, k] = line
 
-            j += 1
-            continue
+                j += 1
+                continue
             end
         end
 

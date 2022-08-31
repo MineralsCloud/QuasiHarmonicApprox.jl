@@ -44,7 +44,7 @@ function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) w
 end
 function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, init_param::Parameters) where {T}
     return function (pressures)
-        arr = map(fₜ₀ᵥ -> v2p(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims = Temp))
+        arr = map(fₜ₀ᵥ -> v2p(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims=Temp))
         mat = hcat(arr...)'
         ax = dims(fₜᵥ)
         x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
@@ -66,13 +66,11 @@ function bulkmoduli(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_p
     end
 end
 function bulkmoduli(
-    fₜᵥ::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp},
-    init_param::Parameters,
+    fₜᵥ::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp}, init_param::Parameters
 )
     return function (pressures)
         arr = map(
-            fₜ₀ᵥ -> bulkmoduli(fₜ₀ᵥ, init_param)(pressures),
-            eachslice(fₜᵥ; dims = Temp),
+            fₜ₀ᵥ -> bulkmoduli(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims=Temp)
         )
         mat = hcat(arr...)'
         ax = dims(fₜᵥ)
@@ -92,7 +90,7 @@ function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param
 end
 function volume(fₜᵥ::AbstractDimMatrix, init_param::Parameters)
     return function (pressures)
-        arr = map(fₜ₀ᵥ -> volume(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims = Temp))
+        arr = map(fₜ₀ᵥ -> volume(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims=Temp))
         mat = hcat(arr...)'
         ax = dims(fₜᵥ)
         x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
@@ -103,22 +101,19 @@ end
 function alpha(vₜₚ₀::AbstractDimVector{<:Volume,<:Tuple{Temp}})
     temp = val(dims(vₜₚ₀, Temp))
     Dₜ = CenteredDifference{1}(
-        1,
-        2,
-        (maximum(temp) - minimum(temp)) / (length(temp)),
-        length(temp) - 2,
+        1, 2, (maximum(temp) - minimum(temp)) / (length(temp)), length(temp) - 2
     )  # Derivative operator
     dvdt = Matrix(Dₜ) * vₜₚ₀
-    return dvdt ./ vₜₚ₀[2:(end-1)]
+    return dvdt ./ vₜₚ₀[2:(end - 1)]
 end
 function alpha(vₜₚ)
-    arr = map(enumerate(eachslice(vₜₚ; dims = Press))) do (i, vₜₚ₀)
+    arr = map(enumerate(eachslice(vₜₚ; dims=Press))) do (i, vₜₚ₀)
         alpha(vₜₚ₀)
     end
     mat = hcat(arr...)
     ax = dims(vₜₚ)
-    x = swapdims(
-        DimArray(mat, (Temp(dims(vₜₚ, Temp)[2:(end-1)]), dims(vₜₚ, Press))),
+    return x = swapdims(
+        DimArray(mat, (Temp(dims(vₜₚ, Temp)[2:(end - 1)]), dims(vₜₚ, Press))),
         map(typeof, ax),
     )
 end

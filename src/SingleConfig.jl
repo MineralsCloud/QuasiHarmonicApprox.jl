@@ -10,7 +10,7 @@ using DimensionalData:
     dimnum,
     hasdim,
     set
-import Unitful
+using Unitful: Unitful
 
 import ..StatMech: ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
 import DimensionalData: name
@@ -25,9 +25,9 @@ const Press = const Pressure = Dim{:Pressure}
 const NormalModes = AbstractDimMatrix{T,<:Union{Tuple{Wv,Br},Tuple{Br,Wv}}} where {T}
 const TempVolOrVolTemp = Union{Tuple{Temp,Vol},Tuple{Vol,Temp}}
 
-function testconverge(t, ωs, wₖs, N = 3)
-    perm = sortperm(wₖs; by = length)
-    fe = map(ωs[perm[(end-N+1):end]], wₖs[perm[(end-N+1):end]]) do ω, wₖ
+function testconverge(t, ωs, wₖs, N=3)
+    perm = sortperm(wₖs; by=length)
+    fe = map(ωs[perm[(end - N + 1):end]], wₖs[perm[(end - N + 1):end]]) do ω, wₖ
         ho_free_energy(t, ω, wₖ)
     end
     return all(y / x < 1 for (x, y) in zip(fe, fe[2:end]))
@@ -35,7 +35,7 @@ end
 
 function collectmodes(ω::AbstractDimArray{T,3}) where {T}
     @assert all(hasdim(ω, (Branch, Wavevector, Vol)))
-    return DimArray([ωᵥ for ωᵥ in eachslice(ω; dims = Vol)], dims(ω, Vol))
+    return DimArray([ωᵥ for ωᵥ in eachslice(ω; dims=Vol)], dims(ω, Vol))
 end
 function collectmodes(ω::AbstractDimArray{T,4}) where {T}
     @assert all(hasdim(ω, (Branch, Wavevector, Vol, Temp)))
@@ -68,8 +68,9 @@ foreach((:ho_free_energy, :ho_internal_energy, :ho_entropy, :ho_vol_sp_ht)) do f
 end
 
 _sample_bz(fₙₖ::AbstractDimMatrix{T,<:Tuple{Br,Wv}}, wₖ) where {T} = sum(fₙₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
-_sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T} =
-    _sample_bz(transpose(fₖₙ), wₖ)  # Just want to align axis, `transpose` is enough.
+function _sample_bz(fₖₙ::AbstractDimMatrix{T,<:Tuple{Wv,Br}}, wₖ) where {T}
+    return _sample_bz(transpose(fₖₙ), wₖ)
+end  # Just want to align axis, `transpose` is enough.
 
 name(::Type{<:Wv}) = "Wavevector"
 name(::Type{<:Br}) = "Branch"
