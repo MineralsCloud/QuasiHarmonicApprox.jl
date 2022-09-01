@@ -7,13 +7,16 @@ export HarmonicOscillator
 export bose_einstein_dist,
     partition_function, free_energy, internal_energy, entropy, volumetric_heat_capacity
 
-struct HarmonicOscillator{T<:Frequency}
+struct HarmonicOscillator{T<:Number}
     ω::T
-    function HarmonicOscillator(ω)
+    function HarmonicOscillator{T}(ω) where {T<:Frequency}
         @assert ω >= zero(ω)
         return new(ω)
     end
 end
+HarmonicOscillator(ω::T) where {T<:Frequency} = HarmonicOscillator{T}(ω)
+HarmonicOscillator(e::Energy) = HarmonicOscillator(e / ħ)
+HarmonicOscillator(k::Wavenumber) = HarmonicOscillator(k * c0)
 @functor HarmonicOscillator
 
 bose_einstein_dist(ho::HarmonicOscillator, t) = 1 / expm1(ħ * ho.ω / (k * t))
