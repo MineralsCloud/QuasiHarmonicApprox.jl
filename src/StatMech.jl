@@ -1,78 +1,80 @@
 module StatMech
 
-using Unitful: Temperature, Frequency, Energy, Wavenumber, NoUnits, J, ħ, k, c0, upreferred
+using Functors: fmap, @functor
+using Unitful: Frequency, Energy, Wavenumber, NoUnits, ħ, k, c0
 
-export bose_einstein,
-    partition_function, ho_free_energy, ho_internal_energy, ho_entropy, ho_vol_sp_ht
+export HarmonicOscillator
+export bose_einstein_dist,
+    partition_function, free_energy, internal_energy, entropy, volumetric_heat_capacity
 
-function bose_einstein(t::Temperature, ω::Frequency{<:Real})
-    @assert isnonnegative(ω)
-    return 1 / expm1(ħ * ω / (k * t))
+struct HarmonicOscillator{T<:Frequency}
+    ω::T
+    function HarmonicOscillator(ω)
+        @assert ω >= zero(ω)
+        return new(ω)
+    end
+end
+@functor HarmonicOscillator
+
+bose_einstein_dist(ho::HarmonicOscillator, t) = 1 / expm1(ħ * ho.ω / (k * t))
+
+function partition_function(ho::HarmonicOscillator, t)
+    return iszero(ho.ω) ? 1 : csch(ħ * ho.ω / (2k * t)) / 2
 end
 
-function partition_function(t::Temperature, ω::Frequency{<:Real})
-    @assert isnonnegative(ω)
-    return iszero(ω) ? 1 : csch(ħ * ω / (2k * t)) / 2
-end
-
-function ho_free_energy(t::Temperature, ω::Frequency{<:Real})
-    @assert isnonnegative(ω)
-    if iszero(ω)
-        return 0 * upreferred(J)  # `upreferred` is required to make it fast for arrays
+function free_energy(ho::HarmonicOscillator, t)
+    if iszero(ho.ω)
+        return zero(k * t)
     else
-        ħω, kt = ħ * ω, k * t
+        ħω, kt = ħ * ho.ω, k * t
         return ħω / 2 + kt * log(-expm1(-ħω / kt))
     end
 end
 
-function ho_internal_energy(t::Temperature, ω::Frequency{<:Real})
-    @assert isnonnegative(ω)
-    if iszero(ω)
+function internal_energy(ho::HarmonicOscillator, t)
+    if iszero(ho.ω)
         return k * t
     else
-        ħω = ħ * ω / 2
+        ħω = ħ * ho.ω / 2
         return ħω * coth(ħω / (k * t))
     end
 end
 
-function ho_entropy(t::Temperature, ω::Frequency{<:Real})
-    if iszero(t) || iszero(ω)
+function entropy(ho::HarmonicOscillator, t)
+    if iszero(t) || iszero(ho.ω)
         return zero(k)
     else
-        n = bose_einstein(t, ω)
+        n = bose_einstein_dist(t, ho.ω)
         return k * ((1 + n) * log1p(n) - n * log(n))
     end
 end
 
-function ho_vol_sp_ht(t::Temperature, ω::Frequency{<:Real})
-    @assert isnonnegative(ω)
+function volumetric_heat_capacity(ho::HarmonicOscillator, t)
     if iszero(t)
         return zero(k)
     else
-        if iszero(ω)
+        if iszero(ho.ω)
             return k
         else
-            x = NoUnits(ħ * ω / (k * 2t))
+            x = NoUnits(ħ * ho.ω / (k * 2t))
             return k * (x * csch(x))^2
         end
     end
 end
 
-tofreq(e::Energy) = e / ħ  # Do not export!
-tofreq(k::Wavenumber) = k * c0  # Do not export!
+to_ω(e::Energy) = e / ħ  # Do not export!
+to_ω(k::Wavenumber) = k * c0  # Do not export!
 
 foreach((
-    :bose_einstein,
+    :bose_einstein_dist,
     :partition_function,
-    :ho_free_energy,
-    :ho_internal_energy,
-    :ho_entropy,
-    :ho_vol_sp_ht,
-)) do f
+    :free_energy,
+    :internal_energy,
+    :entropy,
+    :volumetric_heat_capacity,
+)) do func
     # See https://docs.julialang.org/en/v1/manual/metaprogramming/#Code-Generation
-    @eval $f(t::Temperature, x) = $f(t, tofreq(x))
+    @eval $func(ho::HarmonicOscillator, t) = $func(fmap(to_ω, ho.ω), t)
 end
-
-isnonnegative(ω) = ω >= zero(ω)
 
 end
