@@ -62,9 +62,6 @@ function volumetric_heat_capacity(ho::HarmonicOscillator, t)
     end
 end
 
-to_ω(e::Energy) = e / ħ  # Do not export!
-to_ω(k::Wavenumber) = k * c0  # Do not export!
-
 foreach((
     :bose_einstein_dist,
     :partition_function,
