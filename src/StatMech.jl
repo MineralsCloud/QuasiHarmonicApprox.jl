@@ -65,16 +65,4 @@ function volumetric_heat_capacity(ho::HarmonicOscillator, t)
     end
 end
 
-foreach((
-    :bose_einstein_dist,
-    :partition_function,
-    :free_energy,
-    :internal_energy,
-    :entropy,
-    :volumetric_heat_capacity,
-)) do func
-    # See https://docs.julialang.org/en/v1/manual/metaprogramming/#Code-Generation
-    @eval $func(ho::HarmonicOscillator, t) = $func(fmap(to_ω, ho.ω), t)
-end
-
 end
