@@ -1,6 +1,6 @@
 name = "QuasiHarmonicApprox"
 uuid = "ad1dadc2-b711-4cea-a890-68b28ba296e8"
-authors = ["Qi Zhang <singularitti@outlook.com>"]
+authors = ["singularitti <singularitti@outlook.com>"]
 version = "0.1.0"
 
 [deps]
