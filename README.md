@@ -1,12 +1,66 @@
 # QuasiHarmonicApprox
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://MineralsCloud.github.io/QuasiHarmonicApprox.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MineralsCloud.github.io/QuasiHarmonicApprox.jl/dev)
-[![Build Status](https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/workflows/CI/badge.svg)](https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/actions)
-[![Build Status](https://travis-ci.com/MineralsCloud/QuasiHarmonicApprox.jl.svg?branch=master)](https://travis-ci.com/MineralsCloud/QuasiHarmonicApprox.jl)
-[![Build Status](https://ci.appveyor.com/api/projects/status/github/singularitti/QuasiHarmonicApprox.jl?svg=true)](https://ci.appveyor.com/project/singularitti/QuasiHarmonicApprox-jl)
-[![Build Status](https://cloud.drone.io/api/badges/MineralsCloud/QuasiHarmonicApprox.jl/status.svg)](https://cloud.drone.io/MineralsCloud/QuasiHarmonicApprox.jl)
-[![Build Status](https://api.cirrus-ci.com/github/MineralsCloud/QuasiHarmonicApprox.jl.svg)](https://cirrus-ci.com/github/MineralsCloud/QuasiHarmonicApprox.jl)
-[![Coverage](https://codecov.io/gh/MineralsCloud/QuasiHarmonicApprox.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/MineralsCloud/QuasiHarmonicApprox.jl)
-[![Coverage](https://coveralls.io/repos/github/MineralsCloud/QuasiHarmonicApprox.jl/badge.svg?branch=master)](https://coveralls.io/github/MineralsCloud/QuasiHarmonicApprox.jl?branch=master)
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/organization/repository)
+|                                 **Documentation**                                  |                                                                                                 **Build Status**                                                                                                 |                                        **Others**                                         |
+| :--------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------: |
+| [![Stable][docs-stable-img]][docs-stable-url] [![Dev][docs-dev-img]][docs-dev-url] | [![Build Status][gha-img]][gha-url] [![Build Status][appveyor-img]][appveyor-url] [![Build Status][cirrus-img]][cirrus-url] [![pipeline status][gitlab-img]][gitlab-url] [![Coverage][codecov-img]][codecov-url] | [![GitHub license][license-img]][license-url] [![Code Style: Blue][style-img]][style-url] |
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://MineralsCloud.github.io/QuasiHarmonicApprox.jl/stable
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://MineralsCloud.github.io/QuasiHarmonicApprox.jl/dev
+[gha-img]: https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/workflows/CI/badge.svg
+[gha-url]: https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/actions
+[appveyor-img]: https://ci.appveyor.com/api/projects/status/github/MineralsCloud/QuasiHarmonicApprox.jl?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/singularitti/QuasiHarmonicApprox-jl
+[cirrus-img]: https://api.cirrus-ci.com/github/MineralsCloud/QuasiHarmonicApprox.jl.svg
+[cirrus-url]: https://cirrus-ci.com/github/MineralsCloud/QuasiHarmonicApprox.jl
+[gitlab-img]: https://gitlab.com/singularitti/QuasiHarmonicApprox.jl/badges/main/pipeline.svg
+[gitlab-url]: https://gitlab.com/singularitti/QuasiHarmonicApprox.jl/-/pipelines
+[codecov-img]: https://codecov.io/gh/MineralsCloud/QuasiHarmonicApprox.jl/branch/main/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/MineralsCloud/QuasiHarmonicApprox.jl
+[license-img]: https://img.shields.io/github/license/MineralsCloud/QuasiHarmonicApprox.jl
+[license-url]: https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/blob/main/LICENSE
+[style-img]: https://img.shields.io/badge/code%20style-blue-4495d1.svg
+[style-url]: https://github.com/invenia/BlueStyle
+
+The code is [hosted on GitHub](https://github.com/MineralsCloud/QuasiHarmonicApprox.jl),
+with some continuous integration services to test its validity.
+
+This repository is created and maintained by [@singularitti](https://github.com/singularitti).
+You are very welcome to contribute.
+
+## Installation
+
+The package can be installed with the Julia package manager.
+From the Julia REPL, type `]` to enter the Pkg REPL mode and run:
+
+```
+pkg> add QuasiHarmonicApprox
+```
+
+Or, equivalently, via the [`Pkg` API](https://pkgdocs.julialang.org/v1/getting-started/):
+
+```julia
+julia> import Pkg; Pkg.add("QuasiHarmonicApprox")
+```
+
+## Documentation
+
+- [**STABLE**][docs-stable-url] — **documentation of the most recently tagged version.**
+- [**DEV**][docs-dev-url] — _documentation of the in-development version._
+
+## Project status
+
+The package is tested against, and being developed for, Julia `1.6` and above on Linux,
+macOS, and Windows.
+
+## Questions and contributions
+
+Usage questions can be posted on [our discussion page][discussions-url].
+
+Contributions are very welcome, as are feature requests and suggestions. Please open an
+[issue][issues-url] if you encounter any problems. The [contributing](@ref) page has
+a few guidelines that should be followed when opening pull requests and contributing code.
+
+[discussions-url]: https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/discussions
+[issues-url]: https://github.com/MineralsCloud/QuasiHarmonicApprox.jl/issues
