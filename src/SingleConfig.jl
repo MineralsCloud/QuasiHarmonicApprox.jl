@@ -23,8 +23,8 @@ export Wavevector,
 @dim Volume "Volume"
 @dim Pressure "Pressure"
 const NormalModes = Union{
-    AbstractDimMatrix{<:HarmonicOscillator,Tuple{Wavevector,Branch}},
-    AbstractDimMatrix{<:HarmonicOscillator,Tuple{Branch,Wavevector}},
+    AbstractDimMatrix{<:HarmonicOscillator,<:Tuple{Wavevector,Branch}},
+    AbstractDimMatrix{<:HarmonicOscillator,<:Tuple{Branch,Wavevector}},
 }
 
 foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) do func
@@ -41,14 +41,10 @@ foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) d
     end
 end
 
-function sample_bz(
-    fₛₖ::AbstractDimMatrix{<:HarmonicOscillator,Tuple{Branch,Wavevector}}, wₖ
-)
+function sample_bz(fₛₖ::AbstractDimMatrix{T,<:Tuple{Branch,Wavevector}}, wₖ) where {T}
     return sum(fₛₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
 end
-function sample_bz(
-    fₖₛ::AbstractDimMatrix{<:HarmonicOscillator,Tuple{Wavevector,Branch}}, wₖ
-)
+function sample_bz(fₖₛ::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, wₖ) where {T}
     return sample_bz(transpose(fₖₛ), wₖ)
 end
 
