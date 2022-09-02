@@ -1,10 +1,21 @@
 module SingleConfig
 
-using DimensionalData: AbstractDimMatrix, @dim
+using DimensionalData: DimensionalData, Dimensions, AbstractDimMatrix, @dim
 using Unitful: Unitful
 
 import ..StatMech:
     HarmonicOscillator, free_energy, internal_energy, entropy, volumetric_heat_capacity
+
+export Wavevector,
+    Branch,
+    Temperature,
+    Volume,
+    Pressure,
+    NormalModes,
+    free_energy,
+    internal_energy,
+    entropy,
+    volumetric_heat_capacity
 
 @dim Wavevector "Wavevector"
 @dim Branch "Branch"
