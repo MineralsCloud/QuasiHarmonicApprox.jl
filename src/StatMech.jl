@@ -3,9 +3,13 @@ module StatMech
 using Functors: fmap, @functor
 using Unitful: Frequency, Energy, Wavenumber, NoUnits, ħ, k, c0
 
-export HarmonicOscillator
-export bose_einstein_dist,
-    partition_function, free_energy, internal_energy, entropy, volumetric_heat_capacity
+export HarmonicOscillator,
+    bose_einstein_dist,
+    partition_function,
+    free_energy,
+    internal_energy,
+    entropy,
+    volumetric_heat_capacity
 
 struct HarmonicOscillator{T<:Number}
     ω::T
@@ -64,5 +68,7 @@ function volumetric_heat_capacity(ho::HarmonicOscillator, t)
         end
     end
 end
+
+Base.show(io::IO, ho::HarmonicOscillator) = print(io, "HO(ω=", ho.ω, ')')
 
 end
