@@ -240,9 +240,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "7fe76d94700a1e29a06509322fd114460bd92bb9"
+git-tree-sha1 = "8579b5cdae93e55c0cff50fbb0c2d1220efd5beb"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.69"
+version = "0.25.70"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -660,7 +660,7 @@ version = "2.5.0"
 
 [[deps.QuasiHarmonicApprox]]
 deps = ["DiffEqOperators", "DimensionalData", "EquationsOfStateOfSolids", "Functors", "Interpolations", "Unitful"]
-git-tree-sha1 = "7c3833cccd8a0a560a06b16c8d0e4441e4c19a03"
+git-tree-sha1 = "0ce7a30ebc4e0428f81f221f28927998cde824c7"
 repo-rev = "main"
 repo-url = "https://github.com/MineralsCloud/QuasiHarmonicApprox.jl"
 uuid = "ad1dadc2-b711-4cea-a890-68b28ba296e8"
