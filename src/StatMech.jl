@@ -9,7 +9,7 @@ export bose_einstein_dist,
 
 struct HarmonicOscillator{T<:Number}
     ω::T
-    function HarmonicOscillator{T}(ω) where {T<:Frequency}
+    function HarmonicOscillator{T}(ω) where {T}
         @assert ω >= zero(ω)
         return new(ω)
     end
