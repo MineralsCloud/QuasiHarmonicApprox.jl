@@ -6,7 +6,6 @@ using EquationsOfStateOfSolids.Fitting: eosfit
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 
 abstract type Variable{T} <: AbstractVector{T} end
-abstract type ThermodynamicFunction{T} <: AbstractMatrix{T} end
 struct Volume{T} <: Variable{T}
     data::T
 end
@@ -16,15 +15,23 @@ end
 struct Pressure{T} <: Variable{T}
     data::T
 end
-struct FreeEnergy{X<:Variable,Y<:Variable,T<:AbstractMatrix} <: ThermodynamicFunction{T}
+abstract type ThermodynamicFunction{T} <: AbstractMatrix{T} end
+(func::Type{<:ThermodynamicFunction})(x::X, y::Y, z::Z) where {X,Y,Z} = func{X,Y,Z}(x, y, z)
+struct FreeEnergy{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFunction{Z}
     x::X
     y::Y
-    z::T
+    z::Z
+    function FreeEnergy{X,Y,Z}(x, y, z) where {X,Y,Z}
+        if size(z) != (length(x), length(y))
+            throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
+        end
+        return new(x, y, z)
+    end
 end
-struct BulkModulus{X<:Variable,Y<:Variable,T<:AbstractMatrix} <: ThermodynamicFunction{T}
+struct BulkModulus{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFunction{Z}
     x::X
     y::Y
-    z::T
+    z::Z
 end
 
 function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
