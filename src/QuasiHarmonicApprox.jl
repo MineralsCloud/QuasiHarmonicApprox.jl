@@ -2,6 +2,6 @@ module QuasiHarmonicApprox
 
 include("StatMech.jl")
 include("SingleConfig.jl")
-include("Thermodyn.jl")
+include("Thermodynamics.jl")
 
 end

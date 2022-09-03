@@ -1,4 +1,4 @@
-module Thermodyn
+module Thermodynamics
 
 using ConstructionBase: constructorof
 using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, vsolve
