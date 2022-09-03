@@ -30,13 +30,15 @@ const NormalModes = Union{
 
 foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) do func
     @eval begin
-        function $func(ω::AbstractVector{<:HarmonicOscillator}, wₖ, t)  # Scalar
+        function $func(ω::AbstractVector{<:HarmonicOscillator}, wₖ, t)
+            checksize(ω, wₖ)
             wₖ = normalize_weights(wₖ)
             fₖ = map(Base.Fix2($func, t), ω)  # Physical property on each harmonic oscillator
             return sum(fₖ ⋅ wₖ)  # Scalar
         end
         # Relax the constraint on wₖ, it can even be a 2×1 matrix!
-        function $func(ω::NormalModes, wₖ, t)  # Scalar
+        function $func(ω::NormalModes, wₖ, t)
+            checksize(ω, wₖ)
             wₖ = normalize_weights(wₖ)
             fₛₖ = map(Base.Fix2($func, t), ω)  # Physical property on each harmonic oscillator
             return sample_bz(fₛₖ, wₖ)  # Scalar
@@ -56,6 +58,17 @@ function normalize_weights(wₖ)
         throw(DomainError("all weights should be greater than 0!"))
     end
     return wₖ ./ sum(wₖ)  # Normalize weights
+end
+
+function checksize(ω::AbstractVector{<:HarmonicOscillator}, wₖ)
+    if length(ω) != length(wₖ)
+        throw(DimensionMismatch("vectors `ω` and `wₖ` have different lengths!"))
+    end
+end
+function checksize(ω::NormalModes, wₖ)
+    if size(ω, Wavevector) != size(wₖ, 1)
+        throw(DimensionMismatch("arrays `ω` and `wₖ` have mismatched lengths!"))
+    end
 end
 
 end
