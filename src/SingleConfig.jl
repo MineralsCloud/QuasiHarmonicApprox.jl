@@ -48,4 +48,11 @@ function sample_bz(fₖₛ::AbstractDimMatrix{T,<:Tuple{Wavevector,Branch}}, w�
     return sample_bz(transpose(fₖₛ), wₖ)
 end
 
+function normalize_weights(wₖ)
+    if any(wₖ .<= 0)  # Must hold, or else wₖ is already wrong
+        throw(DomainError("all weights should be greater than 0!"))
+    end
+    return wₖ ./ sum(wₖ)  # Normalize weights
+end
+
 end
