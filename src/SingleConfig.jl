@@ -1,6 +1,7 @@
 module SingleConfig
 
 using DimensionalData: DimensionalData, Dimensions, AbstractDimMatrix, @dim
+using LinearAlgebra: ⋅
 using Unitful: Unitful
 
 import ..StatMech:
@@ -29,6 +30,11 @@ const NormalModes = Union{
 
 foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) do func
     @eval begin
+        function $func(ω::AbstractVector{<:HarmonicOscillator}, wₖ, t)  # Scalar
+            wₖ = normalize_weights(wₖ)
+            fₖ = map(Base.Fix2($func, t), ω)  # Physical property on each harmonic oscillator
+            return sum(fₖ ⋅ wₖ)  # Scalar
+        end
         # Relax the constraint on wₖ, it can even be a 2×1 matrix!
         function $func(ω::NormalModes, wₖ, t)  # Scalar
             if any(wₖ .<= 0)  # Must hold, or else wₖ is already wrong
