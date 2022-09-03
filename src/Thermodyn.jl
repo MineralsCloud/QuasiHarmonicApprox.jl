@@ -1,5 +1,6 @@
 module Thermodyn
 
+using ConstructionBase: constructorof
 using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, vsolve
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
@@ -50,7 +51,7 @@ function v2p(fₜᵥ::ThermodynamicFunction{<:Temperature,<:Volume}, param::Para
             extrapolate(interpolate((ps,), fₜᵥ, Gridded(Linear())), Periodic())
         end
         fₜₚ = map(interp, pressures)
-        return typeof(fₜᵥ)(temperatures, pressures, vcat(fₜₚ))
+        return constructorof(typeof(fₜᵥ))(temperatures, pressures, vcat(fₜₚ))
     end
 end
 function v2p(fᵥₜ::ThermodynamicFunction{<:Volume,<:Temperature}, guess::Parameters)
