@@ -37,10 +37,7 @@ foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) d
         end
         # Relax the constraint on wₖ, it can even be a 2×1 matrix!
         function $func(ω::NormalModes, wₖ, t)  # Scalar
-            if any(wₖ .<= 0)  # Must hold, or else wₖ is already wrong
-                throw(DomainError("all weights should be greater than 0!"))
-            end
-            wₖ = wₖ ./ sum(wₖ)  # Normalize weights
+            wₖ = normalize_weights(wₖ)
             fₛₖ = map(Base.Fix2($func, t), ω)  # Physical property on each harmonic oscillator
             return sample_bz(fₛₖ, wₖ)  # Scalar
         end
