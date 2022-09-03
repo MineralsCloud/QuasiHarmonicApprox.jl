@@ -1,121 +1,60 @@
 module Thermodyn
 
-using DimensionalData:
-    AbstractDimMatrix, AbstractDimVector, DimArray, dims, swapdims, set, rebuild, val
-using DiffEqOperators: CenteredDifference
-using EquationsOfStateOfSolids:
-    Parameters, EnergyEquation, PressureEquation, BulkModulusEquation, getparam
+using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, vsolve
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
-using Unitful: Energy, Volume
 
-using ..SingleConfig: Temp, Vol, Press, TempVolOrVolTemp
+abstract type Variable{T} <: AbstractVector{T} end
+abstract type ThermodynamicFunction{T} <: AbstractMatrix{T} end
+struct Volume{T} <: Variable{T}
+    data::T
+end
+struct Temperature{T} <: Variable{T}
+    data::T
+end
+struct Pressure{T} <: Variable{T}
+    data::T
+end
+struct FreeEnergy{X<:Variable,Y<:Variable,T<:AbstractMatrix} <: ThermodynamicFunction{T}
+    x::X
+    y::Y
+    z::T
+end
+struct BulkModulus{X<:Variable,Y<:Variable,T<:AbstractMatrix} <: ThermodynamicFunction{T}
+    x::X
+    y::Y
+    z::T
+end
 
-export v2p, volume, alpha, bulkmoduli
-
-function v2p(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
-    volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
-    eosₚ⁻¹ = PressureEquation(param)^(-1)
-    eosₑ = EnergyEquation(param)
-    return function (pressures)
-        fₜ₀ₚ = map(pressures) do pressure
-            v = eosₚ⁻¹(pressure)
-            eosₑ(v)
+function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
+    temperatures, volumes = fₜᵥ.x, fₜᵥ.y
+    return function (pressures::Pressure)
+        fₜₚ = map(eachrow(fₜᵥ)) do energies  # For each temperature T=T₀
+            eos = EnergyEquation(eosfit(EnergyEquation(guess), volumes, energies))
+            map(pressures) do pressure
+                v = vsolve(PressureEquation(eos), pressure)
+                eos(v)  # Calculate F(T=T₀, P=P₀)
+            end
         end
-        return DimArray(fₜ₀ₚ, (Press(pressures),))
+        return FreeEnergy(temperatures, pressures, vcat(fₜₚ))
     end
 end
-function v2p(fₜ₀ᵥ::AbstractDimVector{T,<:Tuple{Vol}}, param::Parameters) where {T}
-    perm = sortperm(val(dims(fₜ₀ᵥ, Vol)))
-    volumes = val(dims(fₜ₀ᵥ, Vol))[perm]
+function v2p(fₜᵥ::ThermodynamicFunction{<:Temperature,<:Volume}, param::Parameters)
+    temperatures, volumes = fₜᵥ.x, fₜᵥ.y
     ps = map(PressureEquation(param), volumes)
-    y = fₜ₀ᵥ[perm]
-    return function (pressures)
-        pmin, pmax = extrema(pressures)
-        interp = if minimum(ps) < pmin <= pmax < maximum(ps)
-            interpolate((ps,), y, Gridded(Linear()))
+    return function (pressures::Pressure)
+        pₘᵢₙ, pₘₐₓ = extrema(pressures)
+        interp = if minimum(ps) < pₘᵢₙ <= pₘₐₓ < maximum(ps)
+            interpolate((ps,), fₜᵥ, Gridded(Linear()))
         else
-            extrapolate(interpolate((ps,), y, Gridded(Linear())), Periodic())
+            extrapolate(interpolate((ps,), fₜᵥ, Gridded(Linear())), Periodic())
         end
-        fₜ₀ₚ = map(interp, pressures)
-        return rebuild(fₜ₀ᵥ, fₜ₀ₚ, (Press(pressures),))
+        fₜₚ = map(interp, pressures)
+        return typeof(fₜᵥ)(temperatures, pressures, vcat(fₜₚ))
     end
 end
-function v2p(fₜᵥ::AbstractDimMatrix{T,<:TempVolOrVolTemp}, init_param::Parameters) where {T}
-    return function (pressures)
-        arr = map(fₜ₀ᵥ -> v2p(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims=Temp))
-        mat = hcat(arr...)'
-        ax = dims(fₜᵥ)
-        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
-        return set(x, Vol => Press(pressures))
-    end
-end
-
-function bulkmoduli(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
-    volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
-    eosₚ⁻¹ = PressureEquation(param)^(-1)
-    eosₖ = BulkModulusEquation(param)
-    return function (pressures)
-        bₜ₀ₚ = map(pressures) do pressure
-            v = eosₚ⁻¹(pressure)
-            eosₖ(v)
-        end
-        return DimArray(bₜ₀ₚ, (Press(pressures),))
-    end
-end
-function bulkmoduli(
-    fₜᵥ::AbstractDimMatrix{<:Energy,<:TempVolOrVolTemp}, init_param::Parameters
-)
-    return function (pressures)
-        arr = map(
-            fₜ₀ᵥ -> bulkmoduli(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims=Temp)
-        )
-        mat = hcat(arr...)'
-        ax = dims(fₜᵥ)
-        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
-        return set(x, Vol => Press(pressures))
-    end
-end
-
-function volume(fₜ₀ᵥ::AbstractDimVector{<:Energy,<:Tuple{Vol}}, init_param::Parameters)
-    volumes = dims(fₜ₀ᵥ, Vol)
-    param = eosfit(EnergyEquation(init_param), volumes, fₜ₀ᵥ)
-    eos⁻¹ = PressureEquation(param)^(-1)
-    return function (pressures)
-        vₜ₀ₚ = map(eos⁻¹, pressures)
-        return DimArray(vₜ₀ₚ, (Press(pressures),))
-    end
-end
-function volume(fₜᵥ::AbstractDimMatrix, init_param::Parameters)
-    return function (pressures)
-        arr = map(fₜ₀ᵥ -> volume(fₜ₀ᵥ, init_param)(pressures), eachslice(fₜᵥ; dims=Temp))
-        mat = hcat(arr...)'
-        ax = dims(fₜᵥ)
-        x = swapdims(DimArray(mat, (dims(fₜᵥ, Temp), Press(pressures))), map(typeof, ax))
-        return set(x, Vol => Press(pressures))
-    end
-end
-
-function alpha(vₜₚ₀::AbstractDimVector{<:Volume,<:Tuple{Temp}})
-    temp = val(dims(vₜₚ₀, Temp))
-    Dₜ = CenteredDifference{1}(
-        1, 2, (maximum(temp) - minimum(temp)) / (length(temp)), length(temp) - 2
-    )  # Derivative operator
-    dvdt = Matrix(Dₜ) * vₜₚ₀
-    return dvdt ./ vₜₚ₀[2:(end - 1)]
-end
-function alpha(vₜₚ)
-    arr = map(enumerate(eachslice(vₜₚ; dims=Press))) do (i, vₜₚ₀)
-        alpha(vₜₚ₀)
-    end
-    mat = hcat(arr...)
-    ax = dims(vₜₚ)
-    return x = swapdims(
-        DimArray(mat, (Temp(dims(vₜₚ, Temp)[2:(end - 1)]), dims(vₜₚ, Press))),
-        map(typeof, ax),
-    )
+function v2p(fᵥₜ::ThermodynamicFunction{<:Volume,<:Temperature}, guess::Parameters)
+    return v2p(transpose(fᵥₜ), guess)
 end
 
 end
