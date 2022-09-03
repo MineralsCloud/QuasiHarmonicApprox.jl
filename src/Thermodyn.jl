@@ -5,6 +5,8 @@ using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, vs
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 
+export Volume, Temperature, Pressure, FreeEnergy, BulkModulus
+
 abstract type Variable{T} <: AbstractVector{T} end
 struct Volume{T} <: Variable{T}
     data::T
