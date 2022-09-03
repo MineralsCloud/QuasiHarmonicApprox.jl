@@ -58,4 +58,11 @@ function v2p(fᵥₜ::ThermodynamicFunction{<:Volume,<:Temperature}, guess::Para
     return v2p(transpose(fᵥₜ), guess)
 end
 
+hasdim(A::ThermodynamicFunction, dim::Type{<:Variable}) = A.x isa dim || A.y isa dim
+
+function dimnum(A::ThermodynamicFunction, dim::Type{<:Variable})
+    @assert hasdim(A, dim)
+    return A.x isa dim ? 1 : 2
+end
+
 end
