@@ -17,9 +17,9 @@ end
 struct Pressure{T} <: Variable{T}
     data::T
 end
-abstract type ThermodynamicFunction{T} <: AbstractMatrix{T} end
+abstract type ThermodynamicFunction{X,Y,Z} <: AbstractMatrix{Z} end
 (func::Type{<:ThermodynamicFunction})(x::X, y::Y, z::Z) where {X,Y,Z} = func{X,Y,Z}(x, y, z)
-struct FreeEnergy{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFunction{Z}
+struct FreeEnergy{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFunction{X,Y,Z}
     x::X
     y::Y
     z::Z
@@ -29,11 +29,6 @@ struct FreeEnergy{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFun
         end
         return new(x, y, z)
     end
-end
-struct BulkModulus{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFunction{Z}
-    x::X
-    y::Y
-    z::Z
 end
 
 function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
