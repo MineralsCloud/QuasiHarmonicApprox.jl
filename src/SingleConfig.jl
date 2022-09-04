@@ -1,8 +1,6 @@
 module SingleConfig
 
-using DimensionalData: DimensionalData, Dimensions, AbstractDimMatrix, @dim
 using LinearAlgebra: ⋅
-using Unitful: Unitful
 
 import ..StatMech:
     HarmonicOscillator, free_energy, internal_energy, entropy, volumetric_heat_capacity
