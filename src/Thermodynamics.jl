@@ -24,14 +24,15 @@ abstract type ThermodynamicFunction{X<:Variable,Y<:Variable,T,Z} <:
 struct FreeEnergy{X,Y,T,Z} <: ThermodynamicFunction{X,Y,T,Z}
     x::X
     y::Y
-    data::Z
-    function FreeEnergy{X,Y,T,Z}(x, y, data) where {X,Y,T,Z}
-        if size(data) != (length(x), length(y))
+    z::Z
+    function FreeEnergy{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
+        if size(z) != (length(x), length(y))
             throw(DimensionMismatch("`x`, `y`, and `data` have mismatched size!"))
         end
-        return new(x, y, data)
+        return new(x, y, z)
     end
 end
+FreeEnergy(x::X, y::Y, z::Z) where {X,Y,Z} = FreeEnergy{X,Y,eltype(Z),Z}(x, y, z)
 
 function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
     temperatures, volumes = fₜᵥ.x, fₜᵥ.y
