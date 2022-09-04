@@ -39,18 +39,19 @@ function isdimequal(A::BidimensionalData, Bs::BidimensionalData...)
     return foldl(&, all(hasdim(B, dim) for dim in dims(A)) for B in Bs; init=true)
 end
 
-Base.size(A::Dimension) = size(A.data)
-Base.size(A::BidimensionalData) = size(A.z)
 Base.size(A::BidimensionalData, dim::Type{<:Dimension}) = size(A.z, dimnum(A, dim))
+Base.size(A::Dimension) = size(parent(A))
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L67
+Base.size(A::BidimensionalData) = size(parent(A))
 
 Base.IndexStyle(::Type{<:Dimension}) = IndexLinear()
 Base.IndexStyle(::Type{<:BidimensionalData}) = IndexLinear()
 
-Base.getindex(A::Dimension, i...) = getindex(A.data, i...)
-Base.getindex(A::BidimensionalData, i...) = getindex(A.z, i...)
+Base.getindex(A::Dimension, i...) = getindex(parent(A), i...)
+Base.getindex(A::BidimensionalData, i...) = getindex(parent(A), i...)
 
 function Base.transpose(A::BidimensionalData)
-    return constructor(A)(A.y, A.x, transpose(A.z))  # `constructorof` is needed!
+    return constructor(A)(A.y, A.x, transpose(parent(A)))  # `constructorof` is needed!
 end
 
 Base.parent(A::Dimension) = A.data
