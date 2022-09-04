@@ -13,11 +13,9 @@ abstract type NormalModeIndex{T,A} <: Dimension{T,A} end
 struct Wavevector{T,A} <: NormalModeIndex{T,A}
     data::A
 end
-Wavevector(data::A) where {A} = Wavevector{eltype(A),A}(data)
 struct Branch{T,A} <: NormalModeIndex{T,A}
     data::A
 end
-Branch(data::A) where {A} = Branch{eltype(A),A}(data)
 struct NormalModes{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z} <:
        BidimensionalData{X,Y,T,Z}
     x::X
