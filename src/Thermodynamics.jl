@@ -5,31 +5,37 @@ using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, vs
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 
-export Volume, Temperature, Pressure, FreeEnergy, BulkModulus
+using ..QuasiHarmonicApprox: Dimension, BidimensionalData
 
-abstract type Variable{T} <: AbstractVector{T} end
-struct Volume{T} <: Variable{T}
-    data::T
+export Volume, Temperature, Pressure, FreeEnergy
+
+abstract type Variable{T,A} <: Dimension{T,A} end
+struct Volume{T,A} <: Variable{T,A}
+    data::A
 end
-struct Temperature{T} <: Variable{T}
-    data::T
+Volume(data::A) where {A} = Volume{eltype(A),A}(data)
+struct Temperature{T,A} <: Variable{T,A}
+    data::A
 end
-struct Pressure{T} <: Variable{T}
-    data::T
+Temperature(data::A) where {A} = Temperature{eltype(A),A}(data)
+struct Pressure{T,A} <: Variable{T,A}
+    data::A
 end
-abstract type ThermodynamicFunction{X,Y,Z} <: AbstractMatrix{Z} end
-(func::Type{<:ThermodynamicFunction})(x::X, y::Y, z::Z) where {X,Y,Z} = func{X,Y,Z}(x, y, z)
-struct FreeEnergy{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFunction{X,Y,Z}
+Pressure(data::A) where {A} = Pressure{eltype(A),A}(data)
+abstract type ThermodynamicFunction{X<:Variable,Y<:Variable,T,Z} <:
+              BidimensionalData{X,Y,T,Z} end
+struct FreeEnergy{X,Y,T,Z} <: ThermodynamicFunction{X,Y,T,Z}
     x::X
     y::Y
     z::Z
-    function FreeEnergy{X,Y,Z}(x, y, z) where {X,Y,Z}
+    function FreeEnergy{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
         if size(z) != (length(x), length(y))
             throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
         end
         return new(x, y, z)
     end
 end
+FreeEnergy(x::X, y::Y, z::Z) where {X,Y,Z} = FreeEnergy{X,Y,eltype(Z),Z}(x, y, z)
 
 function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
     temperatures, volumes = fₜᵥ.x, fₜᵥ.y
@@ -60,27 +66,6 @@ function v2p(fₜᵥ::ThermodynamicFunction{<:Temperature,<:Volume}, param::Para
 end
 function v2p(fᵥₜ::ThermodynamicFunction{<:Volume,<:Temperature}, guess::Parameters)
     return v2p(transpose(fᵥₜ), guess)
-end
-
-hasdim(A::ThermodynamicFunction, dim::Type{<:Variable}) = A.x isa dim || A.y isa dim
-
-function dimnum(A::ThermodynamicFunction, dim::Type{<:Variable})
-    @assert hasdim(A, dim)
-    return A.x isa dim ? 1 : 2
-end
-
-Base.size(A::Variable) = size(A.data)
-Base.size(A::ThermodynamicFunction) = size(A.z)
-Base.size(A::ThermodynamicFunction, dim::Type{<:Variable}) = size(A.z, dimnum(A, dim))
-
-Base.IndexStyle(::Type{<:Variable}) = IndexLinear()
-Base.IndexStyle(::Type{<:ThermodynamicFunction}) = IndexLinear()
-
-Base.getindex(A::Variable, i...) = getindex(A.data, i...)
-Base.getindex(A::ThermodynamicFunction, i...) = getindex(A.z, i...)
-
-function Base.transpose(A::ThermodynamicFunction)
-    return constructorof(typeof(A))(A.y, A.x, transpose(A.z))
 end
 
 end
