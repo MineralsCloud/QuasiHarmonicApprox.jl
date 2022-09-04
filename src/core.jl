@@ -7,10 +7,15 @@ abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}
               AbstractMatrix{T} end
 
 hasdim(A::BidimensionalData, dim::Type{<:Dimension}) = A.x isa dim || A.y isa dim
+hasdim(A::BidimensionalData, dim::Dimension) = A.x == dim || A.y == dim
 
 function dimnum(A::BidimensionalData, dim::Type{<:Dimension})
     @assert hasdim(A, dim)
     return A.x isa dim ? 1 : 2
+end
+function dimnum(A::BidimensionalData, dim::Dimension)
+    @assert hasdim(A, dim)
+    return A.x == dim ? 1 : 2
 end
 
 Base.size(A::Dimension) = size(A.data)
