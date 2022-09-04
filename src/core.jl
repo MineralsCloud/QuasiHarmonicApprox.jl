@@ -29,6 +29,7 @@ function dimnum(A::BidimensionalData, dim::Dimension)
 end
 
 dims(A::BidimensionalData) = (A.x, A.y)
+dims(A::BidimensionalData, dim) = dims(A)[dimnum(A, dim)]
 
 function isdimequal(A::BidimensionalData, Bs::BidimensionalData...)
     return foldl(&, all(hasdim(B, dim) for dim in dims(A)) for B in Bs; init=true)
