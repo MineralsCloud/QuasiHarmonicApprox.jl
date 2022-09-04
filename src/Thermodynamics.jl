@@ -5,29 +5,31 @@ using EquationsOfStateOfSolids: Parameters, EnergyEquation, PressureEquation, vs
 using EquationsOfStateOfSolids.Fitting: eosfit
 using Interpolations: interpolate, extrapolate, Gridded, Linear, Periodic
 
-export Volume, Temperature, Pressure, FreeEnergy, BulkModulus
+using ..QuasiHarmonicApprox: Dimension, BidimensionalData
 
-abstract type Variable{T} <: AbstractVector{T} end
-struct Volume{T} <: Variable{T}
-    data::T
+export Volume, Temperature, Pressure, FreeEnergy
+
+abstract type Variable{T,A} <: Dimension{T,A} end
+struct Volume{T,A} <: Variable{T,A}
+    data::A
 end
-struct Temperature{T} <: Variable{T}
-    data::T
+struct Temperature{T,A} <: Variable{T,A}
+    data::A
 end
-struct Pressure{T} <: Variable{T}
-    data::T
+struct Pressure{T,A} <: Variable{T,A}
+    data::A
 end
-abstract type ThermodynamicFunction{X,Y,Z} <: AbstractMatrix{Z} end
-(func::Type{<:ThermodynamicFunction})(x::X, y::Y, z::Z) where {X,Y,Z} = func{X,Y,Z}(x, y, z)
-struct FreeEnergy{X<:Variable,Y<:Variable,Z<:AbstractMatrix} <: ThermodynamicFunction{X,Y,Z}
+abstract type ThermodynamicFunction{X<:Variable,Y<:Variable,T,Z} <:
+              BidimensionalData{X,Y,T,Z} end
+struct FreeEnergy{X,Y,T,Z} <: ThermodynamicFunction{X,Y,T,Z}
     x::X
     y::Y
-    z::Z
-    function FreeEnergy{X,Y,Z}(x, y, z) where {X,Y,Z}
-        if size(z) != (length(x), length(y))
-            throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
+    data::Z
+    function FreeEnergy{X,Y,T,Z}(x, y, data) where {X,Y,T,Z}
+        if size(data) != (length(x), length(y))
+            throw(DimensionMismatch("`x`, `y`, and `data` have mismatched size!"))
         end
-        return new(x, y, z)
+        return new(x, y, data)
     end
 end
 
