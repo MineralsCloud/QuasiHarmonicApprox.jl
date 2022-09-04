@@ -6,14 +6,16 @@ abstract type Dimension{T,A<:AbstractVector{T}} <: AbstractVector{T} end
 abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}} <:
               AbstractMatrix{T} end
 
-hasdim(A::BidimensionalData, dim::Type{<:Dimension}) = A.x isa dim || A.y isa dim
+function hasdim(A::BidimensionalData, dim::Type{<:Dimension{<:T,<:S}}) where {T,S}
+    return A.x isa dim || A.y isa dim
+end
 hasdim(A::BidimensionalData, dim::Dimension) = A.x == dim || A.y == dim
 
 function dimnum(A::BidimensionalData, dim::Integer)
     @assert 0 < dim <= ndims(A) "A doesn't have $dim dimensions!"
     return dim
 end
-function dimnum(A::BidimensionalData, dim::Type)
+function dimnum(A::BidimensionalData, dim::Type{<:Dimension{<:T,<:S}}) where {T,S}
     if A.x isa dim
         return 1
     elseif A.y isa dim
