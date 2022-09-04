@@ -62,25 +62,4 @@ function v2p(fᵥₜ::ThermodynamicFunction{<:Volume,<:Temperature}, guess::Para
     return v2p(transpose(fᵥₜ), guess)
 end
 
-hasdim(A::ThermodynamicFunction, dim::Type{<:Variable}) = A.x isa dim || A.y isa dim
-
-function dimnum(A::ThermodynamicFunction, dim::Type{<:Variable})
-    @assert hasdim(A, dim)
-    return A.x isa dim ? 1 : 2
-end
-
-Base.size(A::Variable) = size(A.data)
-Base.size(A::ThermodynamicFunction) = size(A.z)
-Base.size(A::ThermodynamicFunction, dim::Type{<:Variable}) = size(A.z, dimnum(A, dim))
-
-Base.IndexStyle(::Type{<:Variable}) = IndexLinear()
-Base.IndexStyle(::Type{<:ThermodynamicFunction}) = IndexLinear()
-
-Base.getindex(A::Variable, i...) = getindex(A.data, i...)
-Base.getindex(A::ThermodynamicFunction, i...) = getindex(A.z, i...)
-
-function Base.transpose(A::ThermodynamicFunction)
-    return constructorof(typeof(A))(A.y, A.x, transpose(A.z))
-end
-
 end
