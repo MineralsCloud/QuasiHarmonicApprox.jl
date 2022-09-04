@@ -44,9 +44,6 @@ Base.size(A::Dimension) = size(parent(A))
 # See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L67
 Base.size(A::BidimensionalData) = size(parent(A))
 
-Base.IndexStyle(::Type{<:Dimension}) = IndexLinear()
-Base.IndexStyle(::Type{<:BidimensionalData}) = IndexLinear()
-
 Base.getindex(A::Dimension, i...) = getindex(parent(A), i...)
 Base.getindex(A::BidimensionalData, i...) = getindex(parent(A), i...)
 
