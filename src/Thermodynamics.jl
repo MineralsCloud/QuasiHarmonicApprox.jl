@@ -13,12 +13,15 @@ abstract type Variable{T,A} <: Dimension{T,A} end
 struct Volume{T,A} <: Variable{T,A}
     data::A
 end
+Volume(data::A) where {A} = Volume{eltype(A),A}(data)
 struct Temperature{T,A} <: Variable{T,A}
     data::A
 end
+Temperature(data::A) where {A} = Temperature{eltype(A),A}(data)
 struct Pressure{T,A} <: Variable{T,A}
     data::A
 end
+Pressure(data::A) where {A} = Pressure{eltype(A),A}(data)
 abstract type ThermodynamicFunction{X<:Variable,Y<:Variable,T,Z} <:
               BidimensionalData{X,Y,T,Z} end
 struct FreeEnergy{X,Y,T,Z} <: ThermodynamicFunction{X,Y,T,Z}
