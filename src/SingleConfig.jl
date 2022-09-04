@@ -69,11 +69,6 @@ function normalize_weights(wₖ)
     return wₖ ./ sum(wₖ)  # Normalize weights
 end
 
-function checksize(ω::AbstractVector{<:HarmonicOscillator}, wₖ)
-    if length(ω) != length(wₖ)
-        throw(DimensionMismatch("vectors `ω` and `wₖ` have different lengths!"))
-    end
-end
 function checksize(ω::NormalModes, wₖ)
     if size(ω, Wavevector) != size(wₖ, 1)
         throw(DimensionMismatch("arrays `ω` and `wₖ` have mismatched lengths!"))
