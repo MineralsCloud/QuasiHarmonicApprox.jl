@@ -65,4 +65,12 @@ function Base.map(f, As::BidimensionalData...)
     return constructor(A)(dims(A)..., newdata)  # `constructorof` is needed!
 end
 
+function Base.:(==)(A::Dimension, B::Dimension)
+    return constructor(A) == constructor(B) && parent(A) == parent(B)
+end
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L76-L77
+function Base.:(==)(A::BidimensionalData, B::BidimensionalData)
+    return dims(A) == dims(B) && parent(A) == parent(B)
+end
+
 constructor(x) = constructorof(typeof(x))
