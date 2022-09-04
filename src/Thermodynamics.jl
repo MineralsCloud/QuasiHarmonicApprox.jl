@@ -30,7 +30,7 @@ struct FreeEnergy{X,Y,T,Z} <: ThermodynamicFunction{X,Y,T,Z}
     z::Z
     function FreeEnergy{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
         if size(z) != (length(x), length(y))
-            throw(DimensionMismatch("`x`, `y`, and `data` have mismatched size!"))
+            throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
         end
         return new(x, y, z)
     end
