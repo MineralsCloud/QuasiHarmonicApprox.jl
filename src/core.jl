@@ -1,6 +1,6 @@
 using ConstructionBase: constructorof
 
-export Dimension, BidimensionalData
+export Dimension, BidimensionalData, hasdim, dimnum, dims, isdimequal
 
 abstract type Dimension{T,A<:AbstractVector{T}} <: AbstractVector{T} end
 abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}} <:
@@ -26,6 +26,17 @@ function dimnum(A::BidimensionalData, dim::Dimension)
     else
         return 0
     end
+end
+
+dims(A::BidimensionalData) = (A.x, A.y)
+
+isdimequal(A::Dimension, B::Dimension) = A == B
+isdimequal(A::Dimension, B::Dimension...) = foldl(&, map(==(A), B))
+function isdimequal(A::BidimensionalData, B::BidimensionalData)
+    return all(hasdim(B, dim) for dim in dims(A))
+end
+function isdimequal(A::BidimensionalData, Bs::BidimensionalData...)
+    return foldl(&, isdimequal(A, B) for B in Bs)
 end
 
 Base.size(A::Dimension) = size(A.data)
