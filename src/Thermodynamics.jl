@@ -19,13 +19,13 @@ end
 struct Pressure{T,A} <: Variable{T,A}
     data::A
 end
-abstract type ThermodynamicFunction{X<:Variable,Y<:Variable,T,Z} <:
-              BidimensionalData{X,Y,T,Z} end
-struct FreeEnergy{X,Y,T,Z} <: ThermodynamicFunction{X,Y,T,Z}
+abstract type ThermodynamicFunction{T,X<:Variable,Y<:Variable,Z} <:
+              BidimensionalData{T,X,Y,Z} end
+struct FreeEnergy{T,X,Y,Z} <: ThermodynamicFunction{T,X,Y,Z}
     x::X
     y::Y
     z::Z
-    function FreeEnergy{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
+    function FreeEnergy{T,X,Y,Z}(x, y, z) where {T,X,Y,Z}
         if size(z) != (length(x), length(y))
             throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
         end

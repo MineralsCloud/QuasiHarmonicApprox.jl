@@ -13,7 +13,7 @@ function (::Type{T})(data) where {S,A,T<:Dimension{<:S,<:A}}
     # You can't use `S` since `T` has no type parameter; therefore, `S` is not defined!
     return constructorof(T){eltype(data),typeof(data)}(data)
 end
-abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}} <:
+abstract type BidimensionalData{T,X<:Dimension,Y<:Dimension,Z<:AbstractMatrix{T}} <:
               AbstractMatrix{T} end
 
 function hasdim(A::BidimensionalData, dim::Type{<:Dimension{<:T,<:S}}) where {T,S}
