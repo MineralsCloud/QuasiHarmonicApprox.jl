@@ -6,14 +6,16 @@ abstract type Dimension{T,A<:AbstractVector{T}} <: AbstractVector{T} end
 abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}} <:
               AbstractMatrix{T} end
 
-hasdim(A::BidimensionalData, dim::Type{<:Dimension}) = A.x isa dim || A.y isa dim
+function hasdim(A::BidimensionalData, dim::Type{<:Dimension{<:T,<:S}}) where {T,S}
+    return A.x isa dim || A.y isa dim
+end
 hasdim(A::BidimensionalData, dim::Dimension) = A.x == dim || A.y == dim
 
 function dimnum(A::BidimensionalData, dim::Integer)
     @assert 0 < dim <= ndims(A) "A doesn't have $dim dimensions!"
     return dim
 end
-function dimnum(A::BidimensionalData, dim::Type)
+function dimnum(A::BidimensionalData, dim::Type{<:Dimension{<:T,<:S}}) where {T,S}
     if A.x isa dim
         return 1
     elseif A.y isa dim
@@ -39,18 +41,22 @@ function isdimequal(A::BidimensionalData, Bs::BidimensionalData...)
     return foldl(&, all(hasdim(B, dim) for dim in dims(A)) for B in Bs; init=true)
 end
 
-Base.size(A::Dimension) = size(A.data)
-Base.size(A::BidimensionalData) = size(A.z)
-Base.size(A::BidimensionalData, dim::Type{<:Dimension}) = size(A.z, dimnum(A, dim))
+Base.size(A::Dimension) = size(parent(A))
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L67
+Base.size(A::BidimensionalData) = size(parent(A))
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L74
+@inline Base.size(A::BidimensionalData, dim) = size(parent(A), dimnum(A, dim))  # Here, `parent(A)` is necessary to avoid `StackOverflowError`.
 
-Base.IndexStyle(::Type{<:Dimension}) = IndexLinear()
-Base.IndexStyle(::Type{<:BidimensionalData}) = IndexLinear()
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L68
+Base.axes(A::BidimensionalData) = axes(parent(A))
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L73
+@inline Base.axes(A::BidimensionalData, dim) = axes(parent(A), dimnum(A, dim))
 
-Base.getindex(A::Dimension, i...) = getindex(A.data, i...)
-Base.getindex(A::BidimensionalData, i...) = getindex(A.z, i...)
+Base.getindex(A::Dimension, i...) = getindex(parent(A), i...)
+Base.getindex(A::BidimensionalData, i...) = getindex(parent(A), i...)
 
 function Base.transpose(A::BidimensionalData)
-    return constructor(A)(A.y, A.x, transpose(A.z))  # `constructorof` is needed!
+    return constructor(A)(A.y, A.x, transpose(parent(A)))  # `constructorof` is needed!
 end
 
 Base.parent(A::Dimension) = A.data
