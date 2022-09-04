@@ -12,6 +12,7 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
+ConstructionBase = "1"
 EquationsOfStateOfSolids = "0.2, 0.3, 0.4"
 Functors = "0.3"
 Interpolations = "0.13, 0.14"
