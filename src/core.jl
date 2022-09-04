@@ -1,8 +1,10 @@
 using ConstructionBase: constructorof
 
-abstract type Dimension{T} <: AbstractVector{T} end
-abstract type BidimensionalData{X<:Dimension,Y<:Dimension,Z} <: AbstractMatrix{Z} end
-(func::Type{<:BidimensionalData})(x::X, y::Y, z::Z) where {X,Y,Z} = func{X,Y,Z}(x, y, z)
+export Dimension, BidimensionalData
+
+abstract type Dimension{T,A<:AbstractVector{T}} <: AbstractVector{T} end
+abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}} <:
+              AbstractMatrix{T} end
 
 hasdim(A::BidimensionalData, dim::Type{<:Dimension}) = A.x isa dim || A.y isa dim
 
