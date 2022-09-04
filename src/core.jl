@@ -12,15 +12,15 @@ function dimnum(A::BidimensionalData, dim::Type{<:Dimension})
 end
 
 Base.size(A::Dimension) = size(A.data)
-Base.size(A::BidimensionalData) = size(A.z)
-Base.size(A::BidimensionalData, dim::Type{<:Dimension}) = size(A.z, dimnum(A, dim))
+Base.size(A::BidimensionalData) = size(A.data)
+Base.size(A::BidimensionalData, dim::Type{<:Dimension}) = size(A.data, dimnum(A, dim))
 
 Base.IndexStyle(::Type{<:Dimension}) = IndexLinear()
 Base.IndexStyle(::Type{<:BidimensionalData}) = IndexLinear()
 
 Base.getindex(A::Dimension, i...) = getindex(A.data, i...)
-Base.getindex(A::BidimensionalData, i...) = getindex(A.z, i...)
+Base.getindex(A::BidimensionalData, i...) = getindex(A.data, i...)
 
 function Base.transpose(A::BidimensionalData)
-    return constructorof(typeof(A))(A.y, A.x, transpose(A.z))
+    return constructorof(typeof(A))(A.y, A.x, transpose(A.data))
 end
