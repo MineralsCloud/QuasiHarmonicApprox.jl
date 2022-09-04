@@ -45,7 +45,7 @@ Base.getindex(A::Dimension, i...) = getindex(A.data, i...)
 Base.getindex(A::BidimensionalData, i...) = getindex(A.z, i...)
 
 function Base.transpose(A::BidimensionalData)
-    return constructorof(typeof(A))(A.y, A.x, transpose(A.z))  # `constructorof` is needed!
+    return constructor(A)(A.y, A.x, transpose(A.z))  # `constructorof` is needed!
 end
 
 Base.parent(A::Dimension) = A.data
@@ -56,11 +56,13 @@ function Base.map(f, As::Dimension...)
     A = first(As)
     @assert foldl(&, map(==(A), As))
     newdata = map(f, map(parent, As)...)
-    return constructorof(typeof(A))(newdata)  # `constructorof` is needed!
+    return constructor(A)(newdata)  # `constructorof` is needed!
 end
 function Base.map(f, As::BidimensionalData...)
     A = first(As)
     @assert isdimequal(As...)
     newdata = map(f, map(parent, As)...)
-    return constructorof(typeof(A))(dims(A)..., newdata)  # `constructorof` is needed!
+    return constructor(A)(dims(A)..., newdata)  # `constructorof` is needed!
 end
+
+constructor(x) = constructorof(typeof(x))
