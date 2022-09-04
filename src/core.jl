@@ -74,4 +74,20 @@ function Base.:(==)(A::BidimensionalData, B::BidimensionalData)
     return dims(A) == dims(B) && parent(A) == parent(B)
 end
 
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/methods.jl#L101-L105
+function Base.mapslices(f, A::BidimensionalData; dims)
+    dimnums = collect(dimnum(A, dim) for dim in dims)
+    newdata = mapslices(f, parent(A); dims=dimnums)
+    return constructor(A)(dims(A)..., newdata)
+end
+
+function Base.eachslice(A::BidimensionalData; dims)
+    if dims isa Tuple && length(dims) != 1
+        throw(ArgumentError("only single dimensions are supported"))
+    end
+    dim = dimnum(A, dims)
+    idx1, idx2 = ntuple(d -> (:), dim - 1), ntuple(d -> (:), ndims(A) - dim)
+    return (view(A, idx1..., i, idx2...) for i in axes(A, dim))
+end
+
 constructor(x) = constructorof(typeof(x))
