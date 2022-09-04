@@ -30,13 +30,8 @@ end
 
 dims(A::BidimensionalData) = (A.x, A.y)
 
-isdimequal(A::Dimension, B::Dimension) = A == B
-isdimequal(A::Dimension, B::Dimension...) = foldl(&, map(==(A), B))
-function isdimequal(A::BidimensionalData, B::BidimensionalData)
-    return all(hasdim(B, dim) for dim in dims(A))
-end
 function isdimequal(A::BidimensionalData, Bs::BidimensionalData...)
-    return foldl(&, isdimequal(A, B) for B in Bs)
+    return foldl(&, all(hasdim(B, dim) for dim in dims(A)) for B in Bs; init=true)
 end
 
 Base.size(A::Dimension) = size(A.data)
