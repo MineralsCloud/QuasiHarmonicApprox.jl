@@ -5,8 +5,6 @@ version = "0.1.0"
 
 [deps]
 ConstructionBase = "187b0558-2788-49d3-abe0-74a17ed4e7c9"
-DiffEqOperators = "9fdde737-9c7f-55bf-ade8-46b3f136cc48"
-DimensionalData = "0703355e-b756-11e9-17c0-8b28908087d0"
 EquationsOfStateOfSolids = "1eaa2786-f833-4167-8397-974edad0881e"
 Functors = "d9f16b24-f501-4c13-a1f2-28368ffc5196"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
@@ -14,8 +12,6 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [compat]
-DiffEqOperators = "4.23"
-DimensionalData = "0.10, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.20, 0.21"
 EquationsOfStateOfSolids = "0.2, 0.3, 0.4"
 Functors = "0.3"
 Interpolations = "0.13, 0.14"
