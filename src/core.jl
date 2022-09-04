@@ -3,10 +3,15 @@ using ConstructionBase: constructorof
 export Dimension, BidimensionalData, hasdim, dimnum, dims, isdimequal
 
 abstract type Dimension{T,A<:AbstractVector{T}} <: AbstractVector{T} end
+# For constructors like `Volume{Float64}(1:10)`
+function (::Type{T})(data) where {S,A,T<:Dimension{S,<:A}}
+    data = map(Base.Fix1(convert, S), data)
+    return constructorof(T){S,typeof(data)}(data)
+end
+# For constructors like `Volume(1:10)`
 function (::Type{T})(data) where {S,A,T<:Dimension{<:S,<:A}}
-    # Can't use `S` since if `T` has no type parameter, `S` would not be defined!
-    data = map(Base.Fix1(convert, eltype(T)), data)
-    return constructorof(T){eltype(T),typeof(data)}(data)
+    # You can't use `S` since `T` has no type parameter; therefore, `S` is not defined!
+    return constructorof(T){eltype(data),typeof(data)}(data)
 end
 abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}} <:
               AbstractMatrix{T} end
