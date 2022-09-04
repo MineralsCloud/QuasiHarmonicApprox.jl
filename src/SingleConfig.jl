@@ -20,6 +20,32 @@ struct Branch{T,A} <: NormalModeIndex{T,A}
     data::A
 end
 Branch(data::A) where {A} = Branch{eltype(A),A}(data)
+struct NormalModes{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z} <:
+       BidimensionalData{X,Y,T,Z}
+    x::X
+    y::Y
+    z::Z
+    function NormalModes{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
+        if size(z) != (length(x), length(y))
+            throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
+        end
+        return new(x, y, z)
+    end
+end
+NormalModes(x::X, y::Y, z::Z) where {X,Y,Z} = NormalModes{X,Y,eltype(Z),Z}(x, y, z)
+struct BZProperty{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z} <:
+       BidimensionalData{X,Y,T,Z}
+    x::X
+    y::Y
+    z::Z
+    function BZProperty{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
+        if size(z) != (length(x), length(y))
+            throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
+        end
+        return new(x, y, z)
+    end
+end
+BZProperty(x::X, y::Y, z::Z) where {X,Y,Z} = BZProperty{X,Y,eltype(Z),Z}(x, y, z)
 
 foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) do func
     @eval begin
