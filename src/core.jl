@@ -47,6 +47,11 @@ Base.size(A::BidimensionalData) = size(parent(A))
 # See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L74
 @inline Base.size(A::BidimensionalData, dim) = size(parent(A), dimnum(A, dim))  # Here, `parent(A)` is necessary to avoid `StackOverflowError`.
 
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L68
+Base.axes(A::BidimensionalData) = axes(parent(A))
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L73
+@inline Base.axes(A::BidimensionalData, dim) = axes(parent(A), dimnum(A, dim))
+
 Base.getindex(A::Dimension, i...) = getindex(parent(A), i...)
 Base.getindex(A::BidimensionalData, i...) = getindex(parent(A), i...)
 
