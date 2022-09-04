@@ -41,10 +41,11 @@ function isdimequal(A::BidimensionalData, Bs::BidimensionalData...)
     return foldl(&, all(hasdim(B, dim) for dim in dims(A)) for B in Bs; init=true)
 end
 
-Base.size(A::BidimensionalData, dim::Type{<:Dimension}) = size(A.z, dimnum(A, dim))
 Base.size(A::Dimension) = size(parent(A))
 # See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L67
 Base.size(A::BidimensionalData) = size(parent(A))
+# See https://github.com/rafaqz/DimensionalData.jl/blob/bd28d08/src/array/array.jl#L74
+@inline Base.size(A::BidimensionalData, dim) = size(parent(A), dimnum(A, dim))  # Here, `parent(A)` is necessary to avoid `StackOverflowError`.
 
 Base.getindex(A::Dimension, i...) = getindex(parent(A), i...)
 Base.getindex(A::BidimensionalData, i...) = getindex(parent(A), i...)
