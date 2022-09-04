@@ -6,27 +6,20 @@ using Unitful: Unitful
 
 import ..StatMech:
     HarmonicOscillator, free_energy, internal_energy, entropy, volumetric_heat_capacity
+using ..QuasiHarmonicApprox: Dimension, BidimensionalData
 
 export Wavevector,
-    Branch,
-    Temperature,
-    Volume,
-    Pressure,
-    NormalModes,
-    free_energy,
-    internal_energy,
-    entropy,
-    volumetric_heat_capacity
+    Branch, NormalModes, free_energy, internal_energy, entropy, volumetric_heat_capacity
 
-@dim Wavevector "Wavevector"
-@dim Branch "Branch"
-@dim Temperature "Temperature"
-@dim Volume "Volume"
-@dim Pressure "Pressure"
-const NormalModes = Union{
-    AbstractDimMatrix{<:HarmonicOscillator,<:Tuple{Wavevector,Branch}},
-    AbstractDimMatrix{<:HarmonicOscillator,<:Tuple{Branch,Wavevector}},
-}
+abstract type NormalModeIndex{T,A} <: Dimension{T,A} end
+struct Wavevector{T,A} <: NormalModeIndex{T,A}
+    data::A
+end
+Wavevector(data::A) where {A} = Wavevector{eltype(A),A}(data)
+struct Branch{T,A} <: NormalModeIndex{T,A}
+    data::A
+end
+Branch(data::A) where {A} = Branch{eltype(A),A}(data)
 
 foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) do func
     @eval begin
