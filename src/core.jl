@@ -10,12 +10,22 @@ hasdim(A::BidimensionalData, dim::Type{<:Dimension}) = A.x isa dim || A.y isa di
 hasdim(A::BidimensionalData, dim::Dimension) = A.x == dim || A.y == dim
 
 function dimnum(A::BidimensionalData, dim::Type{<:Dimension})
-    @assert hasdim(A, dim)
-    return A.x isa dim ? 1 : 2
+    if A.x isa dim
+        return 1
+    elseif A.y isa dim
+        return 2
+    else
+        return 0
+    end
 end
 function dimnum(A::BidimensionalData, dim::Dimension)
-    @assert hasdim(A, dim)
-    return A.x == dim ? 1 : 2
+    if A.x == dim
+        return 1
+    elseif A.y == dim
+        return 2
+    else
+        return 0
+    end
 end
 
 Base.size(A::Dimension) = size(A.data)
