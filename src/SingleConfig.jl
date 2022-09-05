@@ -53,8 +53,10 @@ foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) d
     end
 end
 
-sample_bz(fₛₖ::BZProperty{<:Branch,<:Wavevector}, wₖ) = sum(fₛₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
-sample_bz(fₖₛ::BZProperty{<:Wavevector,<:Branch}, wₖ) = sample_bz(transpose(fₖₛ), wₖ)
+sample_bz(fₛₖ::BZProperty{T,<:Branch,<:Wavevector}, wₖ) where {T} = sum(fₛₖ * collect(wₖ))  # `collect` allows wₖ to be a tuple
+function sample_bz(fₖₛ::BZProperty{T,<:Wavevector,<:Branch}, wₖ) where {T}
+    return sample_bz(transpose(fₖₛ), wₖ)
+end
 
 function normalize_weights(wₖ)
     if any(wₖ .<= 0)  # Must hold, or else wₖ is already wrong
