@@ -406,7 +406,7 @@ version = "2.5.0"
 
 [[deps.QuasiHarmonicApprox]]
 deps = ["ConstructionBase", "EquationsOfStateOfSolids", "Functors", "Interpolations", "LinearAlgebra", "Unitful"]
-git-tree-sha1 = "e52c556c4485678997c287db2c6ccbd90bdc2557"
+git-tree-sha1 = "1ed006dc8d78afca8d0f7b3c890d6bcd89c6e4c5"
 repo-rev = "main"
 repo-url = "https://github.com/MineralsCloud/QuasiHarmonicApprox.jl"
 uuid = "ad1dadc2-b711-4cea-a890-68b28ba296e8"
