@@ -32,7 +32,6 @@ struct FreeEnergy{T,X,Y,Z} <: ThermodynamicFunction{T,X,Y,Z}
         return new(x, y, z)
     end
 end
-FreeEnergy(x::X, y::Y, z::Z) where {X,Y,Z} = FreeEnergy{X,Y,eltype(Z),Z}(x, y, z)
 
 function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
     temperatures, volumes = fₜᵥ.x, fₜᵥ.y

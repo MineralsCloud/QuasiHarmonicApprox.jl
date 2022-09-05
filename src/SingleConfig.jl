@@ -28,7 +28,6 @@ struct NormalModes{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z
         return new(x, y, z)
     end
 end
-NormalModes(x::X, y::Y, z::Z) where {X,Y,Z} = NormalModes{X,Y,eltype(Z),Z}(x, y, z)
 struct BZProperty{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z} <:
        BidimensionalData{X,Y,T,Z}
     x::X
@@ -41,7 +40,6 @@ struct BZProperty{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z}
         return new(x, y, z)
     end
 end
-BZProperty(x::X, y::Y, z::Z) where {X,Y,Z} = BZProperty{X,Y,eltype(Z),Z}(x, y, z)
 
 foreach((:free_energy, :internal_energy, :entropy, :volumetric_heat_capacity)) do func
     @eval begin
