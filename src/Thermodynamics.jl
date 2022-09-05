@@ -13,29 +13,25 @@ abstract type Variable{T,A} <: Dimension{T,A} end
 struct Volume{T,A} <: Variable{T,A}
     data::A
 end
-Volume(data::A) where {A} = Volume{eltype(A),A}(data)
 struct Temperature{T,A} <: Variable{T,A}
     data::A
 end
-Temperature(data::A) where {A} = Temperature{eltype(A),A}(data)
 struct Pressure{T,A} <: Variable{T,A}
     data::A
 end
-Pressure(data::A) where {A} = Pressure{eltype(A),A}(data)
-abstract type ThermodynamicFunction{X<:Variable,Y<:Variable,T,Z} <:
-              BidimensionalData{X,Y,T,Z} end
-struct FreeEnergy{X,Y,T,Z} <: ThermodynamicFunction{X,Y,T,Z}
+abstract type ThermodynamicFunction{T,X<:Variable,Y<:Variable,Z} <:
+              BidimensionalData{T,X,Y,Z} end
+struct FreeEnergy{T,X,Y,Z} <: ThermodynamicFunction{T,X,Y,Z}
     x::X
     y::Y
     z::Z
-    function FreeEnergy{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
+    function FreeEnergy{T,X,Y,Z}(x, y, z) where {T,X,Y,Z}
         if size(z) != (length(x), length(y))
             throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
         end
         return new(x, y, z)
     end
 end
-FreeEnergy(x::X, y::Y, z::Z) where {X,Y,Z} = FreeEnergy{X,Y,eltype(Z),Z}(x, y, z)
 
 function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
     temperatures, volumes = fₜᵥ.x, fₜᵥ.y

@@ -3,8 +3,45 @@ using ConstructionBase: constructorof
 export Dimension, BidimensionalData, hasdim, dimnum, dims, isdimequal
 
 abstract type Dimension{T,A<:AbstractVector{T}} <: AbstractVector{T} end
-abstract type BidimensionalData{X<:Dimension,Y<:Dimension,T,Z<:AbstractMatrix{T}} <:
+# For constructors like `Volume{Float64}(1:10)`
+function (::Type{T})(data) where {S,A,T<:Dimension{S,<:A}}
+    data = map(Base.Fix1(convert, S), data)
+    return constructorof(T){S,typeof(data)}(data)
+end
+# For constructors like `Volume(1:10)`
+function (::Type{T})(data) where {S,A,T<:Dimension{<:S,<:A}}
+    # You can't use `S` since `T` has no type parameter; therefore, `S` is not defined!
+    return constructorof(T){eltype(data),typeof(data)}(data)
+end
+abstract type BidimensionalData{T,X<:Dimension,Y<:Dimension,Z<:AbstractMatrix{T}} <:
               AbstractMatrix{T} end
+# For constructors like `FreeEnergy{Float32}(x, y, z)` and more
+function (::Type{T})(x::A, y::B, z) where {A,B,S,X,Y,Z,T<:BidimensionalData{S,<:X,<:Y,<:Z}}
+    if constructorof(T){S,A,B} <: T
+        z = map(Base.Fix1(convert, S), z)
+        return constructorof(T){S,A,B,typeof(z)}(x, y, z)
+    else
+        throw(
+            ArgumentError(
+                "when constructing `$T`, dimension types `($(typeof(x)), $(typeof(y)))` are different from expected!",
+            ),
+        )
+    end
+end
+# For constructors like `FreeEnergy(x, y, z)`
+function (::Type{T})(
+    x::A, y::B, z
+) where {A,B,S,X,Y,Z,T<:BidimensionalData{<:S,<:X,<:Y,<:Z}}
+    if constructorof(T){eltype(z),A,B} <: T
+        return constructorof(T){eltype(z),A,B,typeof(z)}(x, y, z)
+    else
+        throw(
+            ArgumentError(
+                "when constructing `$T`, dimension types `($(typeof(x)), $(typeof(y)))` are different from expected!",
+            ),
+        )
+    end
+end
 
 function hasdim(A::BidimensionalData, dim::Type{<:Dimension{<:T,<:S}}) where {T,S}
     return A.x isa dim || A.y isa dim
