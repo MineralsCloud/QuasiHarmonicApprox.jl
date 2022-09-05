@@ -16,24 +16,24 @@ end
 struct Branch{T,A} <: NormalModeIndex{T,A}
     data::A
 end
-struct NormalModes{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z} <:
-       BidimensionalData{X,Y,T,Z}
+struct NormalModes{T<:HarmonicOscillator,X<:NormalModeIndex,Y<:NormalModeIndex,Z} <:
+       BidimensionalData{T,X,Y,Z}
     x::X
     y::Y
     z::Z
-    function NormalModes{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
+    function NormalModes{T,X,Y,Z}(x, y, z) where {T,X,Y,Z}
         if size(z) != (length(x), length(y))
             throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
         end
         return new(x, y, z)
     end
 end
-struct BZProperty{X<:NormalModeIndex,Y<:NormalModeIndex,T<:HarmonicOscillator,Z} <:
-       BidimensionalData{X,Y,T,Z}
+struct BZProperty{T<:HarmonicOscillator,X<:NormalModeIndex,Y<:NormalModeIndex,Z} <:
+       BidimensionalData{T,X,Y,Z}
     x::X
     y::Y
     z::Z
-    function BZProperty{X,Y,T,Z}(x, y, z) where {X,Y,T,Z}
+    function BZProperty{T,X,Y,Z}(x, y, z) where {T,X,Y,Z}
         if size(z) != (length(x), length(y))
             throw(DimensionMismatch("`x`, `y`, and `z` have mismatched size!"))
         end
