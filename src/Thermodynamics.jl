@@ -33,7 +33,7 @@ struct FreeEnergy{T,X,Y,Z} <: ThermodynamicFunction{T,X,Y,Z}
     end
 end
 
-function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
+function v2p(fₜᵥ::FreeEnergy{T,<:Temperature,<:Volume}, guess::Parameters) where {T}
     temperatures, volumes = fₜᵥ.x, fₜᵥ.y
     return function (pressures::Pressure)
         fₜₚ = map(eachrow(fₜᵥ)) do energies  # For each temperature T=T₀
@@ -46,7 +46,9 @@ function v2p(fₜᵥ::FreeEnergy{<:Temperature,<:Volume}, guess::Parameters)
         return FreeEnergy(temperatures, pressures, vcat(fₜₚ))
     end
 end
-function v2p(fₜᵥ::ThermodynamicFunction{<:Temperature,<:Volume}, param::Parameters)
+function v2p(
+    fₜᵥ::ThermodynamicFunction{T,<:Temperature,<:Volume}, param::Parameters
+) where {T}
     temperatures, volumes = fₜᵥ.x, fₜᵥ.y
     ps = map(PressureEquation(param), volumes)
     return function (pressures::Pressure)
@@ -60,7 +62,9 @@ function v2p(fₜᵥ::ThermodynamicFunction{<:Temperature,<:Volume}, param::Para
         return constructorof(typeof(fₜᵥ))(temperatures, pressures, vcat(fₜₚ))
     end
 end
-function v2p(fᵥₜ::ThermodynamicFunction{<:Volume,<:Temperature}, guess::Parameters)
+function v2p(
+    fᵥₜ::ThermodynamicFunction{T,<:Volume,<:Temperature}, guess::Parameters
+) where {T}
     return v2p(transpose(fᵥₜ), guess)
 end
 
