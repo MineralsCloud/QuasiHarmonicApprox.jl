@@ -25,7 +25,7 @@ function readinput(file)
         energies = Vector{Float64}(undef, nv)  # Static
         frequencies = Array{Float64,3}(undef, nv, nq, nm)
         weights = Vector{Float64}(undef, nq)
-        i, j, isqpoint = 1, 1, false
+        i, isqpoint = 1, false
         reset(io)
         for line in eachline(io)
             line = strip(line)
@@ -41,18 +41,22 @@ function readinput(file)
                 if m !== nothing
                     volumes[i], energies[i] = parse.(Float64, m.captures)
                     i += 1  # Meet 1 volume
+                    j = 0
                 end
                 continue  # Next line
-            end
-            sp = split(line, r"[ \t]"; keepempty=false)
-            if length(sp) == 3
-                j, isqpoint = 1, true
-                continue
             end
             if isqpoint
                 for k in 1:nm  # Note `k` is the index of mode
                     frequencies[i - 1, j, k] = parse(Float64, line)
+                    line = readline(io)
                 end
+                isqpoint = false
+                continue
+            end
+            sp = split(line, r"[ \t]"; keepempty=false)
+            if length(sp) == 3
+                j += 1
+                isqpoint = true
                 continue
             end
         end
