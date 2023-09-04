@@ -4,92 +4,92 @@ juliaup default release</code></pre><p>to configure the <code>julia</code> comma
 
 julia&gt; Pkg.update()
 
-julia&gt; Pkg.add(&quot;QuasiHarmonicApprox&quot;)</code></pre></li><li><p>Run</p><pre><code class="language-julia-repl hljs">julia&gt; using QuasiHarmonicApprox</code></pre><p>and have fun!</p></li><li><p>While using, please keep this Julia session alive. Restarting might cost some time.</p></li></ol><p>If you want to install the latest in-development (probably buggy) version of <code>QuasiHarmonicApprox</code>, type</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update()</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General`
-    Updating git-repo `https://github.com/JuliaRegistries/General.git`
+julia&gt; Pkg.add(&quot;QuasiHarmonicApprox&quot;)</code></pre></li><li><p>Run</p><pre><code class="language-julia-repl hljs">julia&gt; using QuasiHarmonicApprox</code></pre><p>and have fun!</p></li><li><p>While using, please keep this Julia session alive. Restarting might cost some time.</p></li></ol><p>If you want to install the latest in-development (probably buggy) version of <code>QuasiHarmonicApprox</code>, type</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update()</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
   No Changes to `~/work/QuasiHarmonicApprox.jl/QuasiHarmonicApprox.jl/docs/build/developers/Project.toml`
   No Changes to `~/work/QuasiHarmonicApprox.jl/QuasiHarmonicApprox.jl/docs/build/developers/Manifest.toml`</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; pkg&quot;add https://github.com/MineralsCloud/QuasiHarmonicApprox.jl&quot;</code><code class="nohighlight hljs ansi" style="display:block;">┌ Warning: The Pkg REPL mode is intended for interactive use only, and should not be used from scripts. It is recommended to use the functional API instead.
-└ @ Pkg.REPLMode /cache/build/default-amdci4-3/julialang/julia-release-1-dot-8/usr/share/julia/stdlib/v1.8/Pkg/src/REPLMode/REPLMode.jl:379
+└ @ Pkg.REPLMode /opt/hostedtoolcache/julia/1.9.3/x64/share/julia/stdlib/v1.9/Pkg/src/REPLMode/REPLMode.jl:382
      Cloning git-repo `https://github.com/MineralsCloud/QuasiHarmonicApprox.jl`
     Updating git-repo `https://github.com/MineralsCloud/QuasiHarmonicApprox.jl`
    Resolving package versions...
     Updating `~/work/QuasiHarmonicApprox.jl/QuasiHarmonicApprox.jl/docs/build/developers/Project.toml`
   [ad1dadc2] + QuasiHarmonicApprox v0.1.0 `https://github.com/MineralsCloud/QuasiHarmonicApprox.jl#main`
     Updating `~/work/QuasiHarmonicApprox.jl/QuasiHarmonicApprox.jl/docs/build/developers/Manifest.toml`
-  [79e6a3ab] + Adapt v3.4.0
-  [30b0a656] + ArrayInterfaceCore v0.1.20
+  [79e6a3ab] + Adapt v3.6.2
+  [30b0a656] + ArrayInterfaceCore v0.1.29
   [13072b0f] + AxisAlgorithms v1.0.1
   [49dc2e85] + Calculus v0.5.1
-  [d360d2e6] + ChainRulesCore v1.15.3
-  [9e997f8a] + ChangesOfVariables v0.1.4
-  [38540f10] + CommonSolve v0.2.1
+  [d360d2e6] + ChainRulesCore v1.16.0
+  [38540f10] + CommonSolve v0.2.4
   [bbf7d656] + CommonSubexpressions v0.3.0
-  [187b0558] + ConstructionBase v1.4.1
-  [9a962f9c] + DataAPI v1.10.0
-  [b429d917] + DensityInterface v0.4.0
-  [163ba53b] + DiffResults v1.0.3
-  [b552c78f] + DiffRules v1.11.1
-  [31c24e10] + Distributions v0.25.70
-  [ffbed154] + DocStringExtensions v0.9.1
+  [187b0558] + ConstructionBase v1.5.3
+  [9a962f9c] + DataAPI v1.15.0
+  [163ba53b] + DiffResults v1.1.0
+  [b552c78f] + DiffRules v1.15.1
+  [31c24e10] + Distributions v0.25.100
+  [ffbed154] + DocStringExtensions v0.9.3
   [fa6b7ba4] + DualNumbers v0.6.8
   [0438fec6] + EquationsOfState v4.0.0
   [1eaa2786] + EquationsOfStateOfSolids v0.4.2
-  [1a297f60] + FillArrays v0.13.3
-  [6a86dc24] + FiniteDiff v2.15.0
-  [f6369f11] + ForwardDiff v0.10.32
-  [d9f16b24] + Functors v0.3.0
-  [34004b35] + HypergeometricFunctions v0.3.11
-  [a98d9a8b] + Interpolations v0.14.4
-  [3587e190] + InverseFunctions v0.1.7
-  [92d709cd] + IrrationalConstants v0.1.1
-  [692b3bcd] + JLLWrappers v1.4.1
-  [2ab3a3ac] + LogExpFunctions v0.3.18
+  [1a297f60] + FillArrays v1.6.1
+⌃ [6a86dc24] + FiniteDiff v2.17.0
+  [f6369f11] + ForwardDiff v0.10.36
+⌃ [d9f16b24] + Functors v0.3.0
+  [34004b35] + HypergeometricFunctions v0.3.23
+  [a98d9a8b] + Interpolations v0.14.7
+  [92d709cd] + IrrationalConstants v0.2.2
+  [692b3bcd] + JLLWrappers v1.5.0
+  [2ab3a3ac] + LogExpFunctions v0.3.26
 ⌅ [2fda8390] + LsqFit v0.12.1
-  [1914dd2f] + MacroTools v0.5.9
-  [e1d29d7a] + Missings v1.0.2
-  [d41bc354] + NLSolversBase v7.8.2
-  [77ba4419] + NaNMath v1.0.1
-  [6fe1bfb0] + OffsetArrays v1.12.7
+  [1914dd2f] + MacroTools v0.5.11
+  [e1d29d7a] + Missings v1.1.0
+  [d41bc354] + NLSolversBase v7.8.3
+  [77ba4419] + NaNMath v1.0.2
+  [6fe1bfb0] + OffsetArrays v1.12.10
   [87e2bd06] + OptimBase v2.0.2
-  [90014a1f] + PDMats v0.11.16
+  [90014a1f] + PDMats v0.11.17
   [3a141323] + PolynomialRoots v1.0.0
-  [f27b6e38] + Polynomials v3.2.0
-  [21216c6a] + Preferences v1.3.0
-  [1fd47b50] + QuadGK v2.5.0
+⌅ [f27b6e38] + Polynomials v3.2.13
+  [1fd47b50] + QuadGK v2.8.2
   [ad1dadc2] + QuasiHarmonicApprox v0.1.0 `https://github.com/MineralsCloud/QuasiHarmonicApprox.jl#main`
-  [c84ed2f1] + Ratios v0.4.3
-  [3cdcf5f2] + RecipesBase v1.2.1
+  [c84ed2f1] + Ratios v0.4.5
+  [3cdcf5f2] + RecipesBase v1.3.4
   [189a3867] + Reexport v1.2.2
   [ae029012] + Requires v1.3.0
-  [79098fc4] + Rmath v0.7.0
+  [79098fc4] + Rmath v0.7.1
 ⌅ [f2b01f46] + Roots v1.4.1
 ⌅ [efcf1570] + Setfield v0.8.2
-  [a2af1166] + SortingAlgorithms v1.0.1
-  [276daf66] + SpecialFunctions v2.1.7
-  [90137ffa] + StaticArrays v1.5.6
-  [1e83bf80] + StaticArraysCore v1.3.0
-  [82ae8749] + StatsAPI v1.5.0
-  [2913bbd2] + StatsBase v0.33.21
-  [4c63d2b9] + StatsFuns v1.0.1
-  [4093c41a] + StructHelpers v0.1.4
+  [66db9d55] + SnoopPrecompile v1.0.3
+  [a2af1166] + SortingAlgorithms v1.1.1
+  [276daf66] + SpecialFunctions v2.3.1
+  [90137ffa] + StaticArrays v1.6.2
+  [1e83bf80] + StaticArraysCore v1.4.2
+  [82ae8749] + StatsAPI v1.6.0
+⌅ [2913bbd2] + StatsBase v0.33.21
+  [4c63d2b9] + StatsFuns v1.3.0
+⌅ [4093c41a] + StructHelpers v0.1.5
   [3a884ed6] + UnPack v1.0.2
-  [1986cc42] + Unitful v1.11.0
+  [1986cc42] + Unitful v1.17.0
   [efce3f68] + WoodburyMatrices v0.5.5
   [efe28fd5] + OpenSpecFun_jll v0.5.5+0
-  [f50d1b31] + Rmath_jll v0.3.0+0
+  [f50d1b31] + Rmath_jll v0.4.0+0
   [8ba89e20] + Distributed
   [9fa8497b] + Future
+  [37e2e46d] + LinearAlgebra
   [1a1011a3] + SharedArrays
   [2f01184e] + SparseArrays
-  [10745b16] + Statistics
+  [10745b16] + Statistics v1.9.0
   [4607b0f0] + SuiteSparse
   [8dfed614] + Test
+  [e66e0078] + CompilerSupportLibraries_jll v1.0.5+0
+  [4536629a] + OpenBLAS_jll v0.3.21+4
   [05823500] + OpenLibm_jll v0.8.1+0
-        Info Packages marked with ⌅ have new versions available but cannot be upgraded. To see why use `status --outdated -m`
+  [bea87d4a] + SuiteSparse_jll v5.10.1+6
+  [8e850b90] + libblastrampoline_jll v5.8.0+0
+        Info Packages marked with ⌃ and ⌅ have new versions available, but those with ⌅ are restricted by compatibility constraints from upgrading. To see why use `status --outdated -m`
 Precompiling project...
 <span class="sgr33">  ✓ </span>QuasiHarmonicApprox
-  1 dependency successfully precompiled in 5 seconds. 78 already precompiled.
-  <span class="sgr33">1</span> dependency precompiled but a different version is currently loaded. Restart julia to access the new version</code></pre><p>in the second step above.</p><h2 id="Update-QuasiHarmonicApprox"><a class="docs-heading-anchor" href="#Update-QuasiHarmonicApprox">Update <code>QuasiHarmonicApprox</code></a><a id="Update-QuasiHarmonicApprox-1"></a><a class="docs-heading-anchor-permalink" href="#Update-QuasiHarmonicApprox" title="Permalink"></a></h2><p>Please <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">watch</a> our <a href="https://github.com/MineralsCloud/QuasiHarmonicApprox.jl">GitHub repository</a> for new releases. Once we release a new version, you can update <code>QuasiHarmonicApprox</code> by typing</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update(&quot;QuasiHarmonicApprox&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General`
-    Updating git-repo `https://github.com/JuliaRegistries/General.git`
+  1 dependency successfully precompiled in 3 seconds. 92 already precompiled.
+  <span class="sgr33">1</span> dependency precompiled but a different version is currently loaded. Restart julia to access the new version</code></pre><p>in the second step above.</p><h2 id="Update-QuasiHarmonicApprox"><a class="docs-heading-anchor" href="#Update-QuasiHarmonicApprox">Update <code>QuasiHarmonicApprox</code></a><a id="Update-QuasiHarmonicApprox-1"></a><a class="docs-heading-anchor-permalink" href="#Update-QuasiHarmonicApprox" title="Permalink"></a></h2><p>Please <a href="https://docs.github.com/en/account-and-profile/managing-subscriptions-and-notifications-on-github/setting-up-notifications/configuring-notifications#configuring-your-watch-settings-for-an-individual-repository">watch</a> our <a href="https://github.com/MineralsCloud/QuasiHarmonicApprox.jl">GitHub repository</a> for new releases. Once we release a new version, you can update <code>QuasiHarmonicApprox</code> by typing</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using Pkg</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.update(&quot;QuasiHarmonicApprox&quot;)</code><code class="nohighlight hljs ansi" style="display:block;">    Updating registry at `~/.julia/registries/General.toml`
     Updating git-repo `https://github.com/MineralsCloud/QuasiHarmonicApprox.jl`
   No Changes to `~/work/QuasiHarmonicApprox.jl/QuasiHarmonicApprox.jl/docs/build/developers/Project.toml`
   No Changes to `~/work/QuasiHarmonicApprox.jl/QuasiHarmonicApprox.jl/docs/build/developers/Manifest.toml`</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; Pkg.gc()</code><code class="nohighlight hljs ansi" style="display:block;">      Active manifest files: 4 found
@@ -99,4 +99,4 @@ Precompiling project...
 
 julia&gt; Pkg.rm(&quot;QuasiHarmonicApprox&quot;)
 
-julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall <code>QuasiHarmonicApprox</code>.</p></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../developers/contributing/">Contributing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.23 on <span class="colophon-date" title="Monday 5 September 2022 03:58">Monday 5 September 2022</span>. Using Julia version 1.8.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+julia&gt; Pkg.gc()</code></pre></li><li><p>Press <code>ctrl+d</code> to quit the current session. Start a new Julia session and reinstall <code>QuasiHarmonicApprox</code>.</p></li></ol></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../developers/contributing/">Contributing »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Monday 4 September 2023 22:09">Monday 4 September 2023</span>. Using Julia version 1.9.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
